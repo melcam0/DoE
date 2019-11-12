@@ -1,0 +1,6 @@
+Installazione del programma DoE ed R-Portable (necessario per il funzionamento di DoE).
+Vengono installate tutte le librerie necessarie.
+Il programma viene installato in C:/DoE (opzione fortemente consigliata!).
+
+Per disinstallare il programma cliccare su "Disinstalla DoE" nel menu DoE o eseguire unis000.exe direttamente dalla cartelletta C:/DoE (cancellare manualmente eventuali file residui e la cartelleta DoE)
+

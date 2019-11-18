@@ -3339,7 +3339,7 @@ server <- function (input , output, session ){
   d_opt_cp<-reactive({
     if(input$d_opt_pti_cand==1)df<-d_opt_cp1()
     if(input$d_opt_pti_cand==2)df<-d_opt_cp2()
-    if(df[,1]==c(1:nrow(df)))df<-df[,-1]
+    if(sum(df[,1]==c(1:nrow(df)))==nrow(df))df<-df[,-1]
     df
   })
   output$d_opt_cp<-renderTable({
@@ -3581,7 +3581,7 @@ server <- function (input , output, session ){
   d_opt_ag_dis_xls<-reactive({
     req(input$d_opt_ag_file_xlsx$datapath)
     df=read_excel(path = input$d_opt_ag_file_xlsx$datapath,sheet = 1,col_names = TRUE)
-    if(df[,1]==c(1:nrow(df)))df<-df[,-1]
+    if(sum(df[,1]==c(1:nrow(df)))==nrow(df))df<-df[,-1]
     df
   })
   d_opt_ag_dis<-reactive({
@@ -3861,7 +3861,7 @@ server <- function (input , output, session ){
   pp_dis<-reactive({
     if(input$pp_importa==1)df<-pp_dis_paste()
     if(input$pp_importa==2)df<-pp_dis_xls()
-    if(df[,1]==c(1:nrow(df)))df<-df[,-1]
+    if(sum(df[,1]==c(1:nrow(df)))==nrow(df))df<-df[,-1]
     df
   })
   output$pp_dis<-renderTable({

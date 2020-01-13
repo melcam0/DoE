@@ -6,12 +6,14 @@ header<-dashboardHeader(title = "DoE",
 
 sidebar<- dashboardSidebar(
     sidebarMenu(
-                menuItem(text = "Fattoriale completo",tabName = "fatt_compl",icon = shiny::icon("file-text")),
-                menuItem(text = "Frazionario",tabName = "frazion",icon = shiny::icon("file-text")),
-                menuItem(text = "Plackett-Burman",tabName = "pb",icon = shiny::icon("file-text")),
-                menuItem(text = "CCD",tabName = "ccd",icon = shiny::icon("file-text")),
-                menuItem(text = "D-ottimale",tabName = "d_opt",icon = shiny::icon("file-text")),
-                menuItem(text = "Piano personalizzato",tabName = "pp",icon = shiny::icon("file-text")),
+                menuItem(text = "Variabili indipendenti",icon = shiny::icon("codepen"),
+                menuSubItem(text = "Fattoriale completo",tabName = "fatt_compl"),
+                menuSubItem(text = "Frazionario",tabName = "frazion"),
+                menuSubItem(text = "Plackett-Burman",tabName = "pb"),
+                menuSubItem(text = "CCD",tabName = "ccd"),
+                menuSubItem(text = "D-ottimale",tabName = "d_opt"),
+                menuSubItem(text = "Piano personalizzato",tabName = "pp")),
+                menuItem(text = "Miscele",icon = shiny::icon("fill-drip")),
                 menuItem(text = "File",icon = icon("briefcase", lib = "font-awesome"),
                     actionButton("quit", "Quit",onclick = "setTimeout(function(){window.close();},200);",
                                       style='padding:4px; font-size:80%'))

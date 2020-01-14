@@ -11,6 +11,7 @@ library(rsm)
 library(openxlsx)
 library(AlgDesign)
 library(stringr)
+library(mixexp)
 options(warn = -1)
 options(shiny.maxRequestSize = 30 * 1024 ^ 2)
 

@@ -7,13 +7,15 @@ header<-dashboardHeader(title = "DoE",
 sidebar<- dashboardSidebar(
     sidebarMenu(
                 menuItem(text = "Variabili indipendenti",icon = shiny::icon("codepen"),
-                menuSubItem(text = "Fattoriale completo",tabName = "fatt_compl"),
-                menuSubItem(text = "Frazionario",tabName = "frazion"),
-                menuSubItem(text = "Plackett-Burman",tabName = "pb"),
-                menuSubItem(text = "CCD",tabName = "ccd"),
-                menuSubItem(text = "D-ottimale",tabName = "d_opt"),
-                menuSubItem(text = "Piano personalizzato",tabName = "pp")),
-                menuItem(text = "Miscele",icon = shiny::icon("fill-drip")),
+                         menuSubItem(text = "Fattoriale completo",tabName = "fatt_compl"),
+                         menuSubItem(text = "Frazionario",tabName = "frazion"),
+                         menuSubItem(text = "Plackett-Burman",tabName = "pb"),
+                         menuSubItem(text = "CCD",tabName = "ccd"),
+                         menuSubItem(text = "D-ottimale",tabName = "d_opt"),
+                         menuSubItem(text = "Piano personalizzato",tabName = "pp")),
+                menuItem(text = "Miscele",icon = shiny::icon("fill-drip"),
+                         menuSubItem(text = "Simplex Design",tabName = "m_simplex"),
+                         menuSubItem(text = "D-ottimale Design",tabName = "m_d_opt")),
                 menuItem(text = "File",icon = icon("briefcase", lib = "font-awesome"),
                     actionButton("quit", "Quit",onclick = "setTimeout(function(){window.close();},200);",
                                       style='padding:4px; font-size:80%'))
@@ -678,8 +680,164 @@ body<-dashboardBody(
                                                   textInput(inputId = "pp_misind",label = "Misure indipendenti",value = ""),
                                                   verbatimTextOutput('pp_misind_media'),
                                                   verbatimTextOutput('pp_misind_sd'),
-                                                  verbatimTextOutput('pp_misind_gdl')))
-                                  )))))
+                                                  verbatimTextOutput('pp_misind_gdl')))))),
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    tabItem(tabName = "m_simplex",
+            fluidPage(titlePanel(uiOutput("m_simplex_titolo")),
+                      tabsetPanel(type = "tabs",
+                                  tabPanel("Disegno",
+                                           column(12,
+                                                  br()),
+                                           column(4,
+                                                  selectInput("m_simplex_mod",label="modello",width = "45%",
+                                                              choices = list('lineare'=1,'quadratico'=2,'cubico'=3)),
+                                                  h4('Disegno'),
+                                                  tableOutput("m_simplex_dis"),
+                                                  checkboxInput("m_simplex_axial", label = "punti assiali", value = FALSE),
+                                                  downloadButton("m_simplex_download")),
+                                           column(8,
+                                                  plotOutput('m_simplex_figura_dis')),
+                                           column(12,
+                                                  hr(),
+                                                  hr(),
+                                                  hr(),
+                                                  hr(),
+                                                  hr(),
+                                                  h4('Modello'),
+                                                  textOutput("m_simplex_modello")),
+                                           column(3,
+                                                  hr(),
+                                                  h4('Matrice di dispersione'),
+                                                  div(style = 'overflow-x: scroll;',tableOutput("m_simplex_matrdisp"))
+                                           ),
+                                           column(1),
+                                          #◘ column(4,
+                                           #       hr()),
+                                           column(8,br(),
+                                                  h3('Grafico Leverage'),
+                                                  plotOutput('m_simplex_livellolev', width = "100%", height = "500px"))),
+                                  
+                                  tabPanel("Modello",
+                                           column(4,
+                                                  br(),
+                                                  uiOutput('m_simplex_risptext'),
+                                                  textInput(inputId = "m_simplex_risp",label = "",value = "")),
+                                           column(8,
+                                                  plotOutput('m_simplex_figura_risp')),
+                                           column(8,
+                                                  h3("Parametri regressione"),
+                                                  h4("Stima puntuale"),
+                                                  verbatimTextOutput('m_simplex_coeff'),
+                                                  uiOutput('m_simplex_stimint_txt'),
+                                                  verbatimTextOutput('m_simplex_stimint')),
+                                           column(12,
+                                                  hr(),
+                                                  plotOutput('m_simplex_grcoeff')),
+                                           column(12,
+                                                  plotOutput('m_simplex_grsigncoeff')),
+                                           column(12,
+                                                  hr(),
+                                                  h3("Grafico superficie risposta"),
+                                                  uiOutput('m_simplex_selvar_spazio')
+                                           ),
+                                           column(3,
+                                                  uiOutput('m_simplex_mod_selvar')),
+                                           column(6,
+                                                  uiOutput("m_simplex_mod_fixvar")),
+                                           column(12),
+                                           column(6,
+                                                  plotOutput('m_simplex_livellorisp', width = "100%", height = "500px"),
+                                                  uiOutput("m_simplex_livellorisp_col")),
+                                           column(6,
+                                                  plotOutput('m_simplex_suprisp', width = "100%", height = "500px")),
+                                           column(6),
+                                           column(3,
+                                                  br(),
+                                                  div(style='font-size: 80%; width: 90%;',
+                                                      uiOutput('m_simplex_rp_z'))),
+                                           column(3,
+                                                  br(),
+                                                  div(style='font-size: 80%; width: 90%;',
+                                                      uiOutput('m_simplex_rp_x'))),
+                                           column(12,hr()),
+                                           column(5,
+                                                  textInput(inputId = "m_simplex_prev",label = "Punto previsione (coord.separate da spazio)",value = ""),
+                                                  verbatimTextOutput('m_simplex_prev_df'),
+                                                  verbatimTextOutput('m_simplex_intprev')),
+                                           column(2),
+                                           column(3,
+                                                  textInput(inputId = "m_simplex_misind",label = "Misure indipendenti",value = ""),
+                                                  verbatimTextOutput('m_simplex_misind_media'),
+                                                  verbatimTextOutput('m_simplex_misind_sd'),
+                                                  verbatimTextOutput('m_simplex_misind_gdl'))))))
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+
+ 
+    
+    
+    
+    ))
 
 
 

@@ -37,6 +37,7 @@ server <- function (input , output, session ){
     })
   }
 
+## Varibili indipendenti -----------------------------------------------------------------
 # Fattoriale completo -----------------------------------------------------------------
 
   output$fatt_compl_titolo<-renderUI({
@@ -60,13 +61,13 @@ server <- function (input , output, session ){
     df<-cbind.data.frame('Exp#'=exp,df)
     df
   })
-
+  
   output$fatt_compl_download <- downloadHandler(
     filename = "fatt_compl.xlsx", 
     content = function(file) {
-    write.xlsx(dis_fatt_compl(),file,colNames=TRUE)
+      write.xlsx(dis_fatt_compl(),file,colNames=TRUE)
     })
-
+  
   output$fatt_compl_dis<-renderTable({
     validate(need(input$fatt_compl_k>0,'Inserire un numero di fattori > 0'))
     req(input$fatt_compl_k)
@@ -4489,11 +4490,252 @@ server <- function (input , output, session ){
     sliderInput('pp_rp_x',label = 'Rotazione verticale',min = 0,max = 90,value = 60,step = 10)
   })
 
+
+
+
+
+
+
+
+## Miscele -----------------------------------------------------------------
+# Simplex Design -----------------------------------------------------------------
+
+  output$m_simplex_titolo<-renderUI({
+    HTML("Simplex Design" )
+  })
+  
+  m_simplex_dis<-reactive({
+    req(input$m_simplex_mod)
+    if(input$m_simplex_mod=='1')df<-SLD(3,1)
+    if(input$m_simplex_mod=='2')df<-SLD(3,2)
+    if(input$m_simplex_mod=='3')df<-SCD(3)
+    colnames(df)<-c('x1','x2','x3')
+    if(input$m_simplex_axial==TRUE)df<-rbind(df,data.frame(x1=c(2/3,1/6,1/6),x2=c(1/6,2/3,1/6),x3=c(1/6,1/6,2/3)))
+    exp<-seq(1,nrow(df))
+    df<-cbind.data.frame('Exp#'=exp,df)
+    df
+  })
+  
+  output$m_simplex_download <- downloadHandler(
+    filename = "m_simplex.xlsx", 
+    content = function(file) {
+      write.xlsx(m_simplex_dis(),file,colNames=TRUE)
+    })
+  
+  output$m_simplex_dis<-renderTable({
+    m_simplex_dis()
+  })
+  
+  output$m_simplex_figura_dis<-renderPlot(width = 550,height = 500,{
+    P<-m_simplex_dis()[,2:4] ###disegno
+    
+    ## Design in coord (b,h)
+    b=1-P[,1]-P[,2]/2
+    h=(sqrt(3)/2)*P[,2]
+    
+    ## Generates triangle for the plot (on a plane, two coordinates)
+    trian <- expand.grid(base=seq(0,1,l=100), high=seq(0,sin(pi/3),l=87))
+    trian <- subset(trian, (base*sin(pi/3)*2)>high)
+    trian <- subset(trian, ((1-base)*sin(pi/3)*2)>high)
+    
+    ## Generates triangle in R^3 X1+X2+X3=1
+    new=data.frame(X1=1-trian$base-trian$high/sqrt(3))
+    new$X2=trian$high*2/sqrt(3)
+    new$X3=trian$base-trian$high/sqrt(3)
+    
+    ## Builds data.frame triangle in 2 (base,high), 3 (X1,X2,X3) variables e column condition (cond)
+    cond=new$X1>=0 & new$X2>=0 & new$X3>=0 & new$X1<=1 & new$X2<=1 & new$X3<=1
+    trian.new.cond=cbind(trian,new,cond)
+    
+    ## Builds triangle in 2 (base,high), 3 (X1,X2,X3) variables satisfying constraints
+    trian.cond=trian.new.cond[trian.new.cond$cond==TRUE,1:2]
+    new.cond=trian.new.cond[trian.new.cond$cond==TRUE,3:5]
+    
+    ## Creates function set grid e axis labels
+    grade.trellis <- function(from=0.2, to=0.8, step=0.2, col=1, lty=2, lwd=0.5){
+      x1 <- seq(from, to, step)
+      x2 <- x1/2
+      y2 <- x1*sqrt(3)/2
+      x3 <- (1-x1)*0.5+x1
+      y3 <- sqrt(3)/2-x1*sqrt(3)/2
+      lattice::panel.segments(x1, 0, x2, y2, col=col, lty=lty, lwd=lwd)
+      lattice::panel.text(x1, 0, label=x1, pos=1)
+      lattice::panel.segments(x1, 0, x3, y3, col=col, lty=lty, lwd=lwd)
+      lattice::panel.text(x2, y2, label=rev(x1), pos=2)
+      lattice::panel.segments(x2, y2, 1-x2, y2, col=col, lty=lty, lwd=lwd)
+      lattice::panel.text(x3, y3, label=rev(x1), pos=4)
+    }
+
+    q=lattice::xyplot(trian.cond$high~trian.cond$base,par.settings=list(axis.line=list(col=NA),
+                                                                        axis.text=list(col=NA)),
+                      xlab=NULL, ylab=NULL, pch=19,cex=0.0,col="gray47",
+                      xlim=c(-0.1,1.1), ylim=c(-0.1,0.96))
+
+    print(q)
+    
+    lattice::trellis.focus("panel", 1, 1, highlight=FALSE)
+    lattice::panel.segments(c(0,0,0.5), c(0,0,sqrt(3)/2), c(1,1/2,1), c(0,sqrt(3)/2,0))
+    lattice::panel.xyplot(x=b,y=h, col="red",pch=20,cex=1.75)
+    lattice::panel.text(x=b,y=h, col="red",label=c(1:nrow(P)),pos=1,font=2,cex=1.2)
+    grade.trellis()
+    lattice::panel.text(.55,0.92,label="X2",pos=2)
+    lattice::panel.text(0,-0.05,label="X1",pos=2)
+    lattice::panel.text(1,-0.05,label="X3",pos=4)
+    lattice::trellis.unfocus()
+  })
+  
+  output$m_simplex_modello<-renderText({
+    if(input$m_simplex_mod=='1')modello<-'y ~ x1 + x2 + x3'
+    if(input$m_simplex_mod=='2')modello<-'y ~ x1 + x2 + x3 + x1:x2 + x1:x3 + x2:x3'
+    if(input$m_simplex_mod=='3')modello<-'y ~ x1 + x2 + x3 + x1:x2 + x1:x3 + x2:x3 + x1:x2:x3'
+    modello
+  })
+  
+  output$m_simplex_matrdisp<-renderTable({
+    req(input$m_simplex_mod)
+    if(input$m_simplex_mod=='1')modello<-'~ x1 + x2 + x3 -1'
+    if(input$m_simplex_mod=='2')modello<-'~ x1 + x2 + x3 + x1:x2 + x1:x3 + x2:x3 -1'
+    if(input$m_simplex_mod=='3')modello<-'~ x1 + x2 + x3 + x1:x2 + x1:x3 + x2:x3 + x1:x2:x3 -1'
+    form<-formula(modello)
+    X<-model.matrix(form,m_simplex_dis()[,2:4])
+    D<-solve(t(X)%*%X)
+    D
+  })
+  
+  output$m_simplex_livellolev<-renderPlot(width = 550,height = 500,{
+    
+    ## Generates triangle
+    trian <- expand.grid(base=seq(0,1,l=100), high=seq(0,sin(pi/3),l=87))
+    trian <- subset(trian, (base*sin(pi/3)*2)>high)
+    trian <- subset(trian, ((1-base)*sin(pi/3)*2)>high)
+    
+    ## Generates triangle in R^3 X1+X2+X3=1
+    new=data.frame(x1=1-trian$base-trian$high/sqrt(3))
+    new$x2=trian$high*2/sqrt(3)
+    new$x3=trian$base-trian$high/sqrt(3)
+    
+    ## Creates model matrix on X1+X2*X3=1 (new)
+    
+    if(input$m_simplex_mod=='1')modello<-'~ x1 + x2 + x3 -1'
+    if(input$m_simplex_mod=='2')modello<-'~ x1 + x2 + x3 + x1:x2 + x1:x3 + x2:x3 -1'
+    if(input$m_simplex_mod=='3')modello<-'~ x1 + x2 + x3 + x1:x2 + x1:x3 + x2:x3 + x1:x2:x3 -1'
+    form<-formula(modello)
+    
+    P<-model.matrix(form,m_simplex_dis()[,2:4])
+    n=ncol(P)
+    
+    ## Design in coord (b,h)
+    b=1-P[,1]-P[,2]/2
+    h=(sqrt(3)/2)*P[,2]
+    
+    X=model.matrix(form,data = new)
+    
+    ## Leverage on triangle
+    Q=X%*%solve(t(P)%*%P)%*%t(X)
+    Lev=data.frame(trian,"L"=diag(Q))
+    
+    ## Creates function grid and labels on the axes
+    grade.trellis <- function(from=0.2, to=0.8, step=0.2, col=1, lty=2, lwd=0.5){
+      x1 <- seq(from, to, step)
+      x2 <- x1/2
+      y2 <- x1*sqrt(3)/2
+      x3 <- (1-x1)*0.5+x1
+      y3 <- sqrt(3)/2-x1*sqrt(3)/2
+      lattice::panel.segments(x1, 0, x2, y2, col=col, lty=lty, lwd=lwd)
+      # lattice::panel.text(x1, 0, label=x1, pos=1)
+      lattice::panel.segments(x1, 0, x3, y3, col=col, lty=lty, lwd=lwd)
+      # lattice::panel.text(x2, y2, label=rev(x1), pos=2)
+      lattice::panel.segments(x2, y2, 1-x2, y2, col=col, lty=lty, lwd=lwd)
+      # lattice::panel.text(x3, y3, label=rev(x1), pos=4)
+    }
+    
+    ## Generates isoleverage plot
+    
+    p=lattice::contourplot(L~base*high, Lev,col="red",cuts = 10,aspect = 1,label=list(col="black",cex=0.8),
+                           region = TRUE,col.regions = colorRampPalette(c("yellow","green","blue")),
+                           par.settings=list(axis.line=list(col=NA), axis.text=list(col="black")),xlab=NULL, ylab=NULL,
+                           scales=list(x=list(alternating=0),y=list(alternating=0)),
+                           xlim=c(-0.1,1.1), ylim=c(-0.1,0.96))
+  
+    print(p)
+    lattice::trellis.focus("panel", 1, 1, highlight=FALSE)
+    lattice::panel.segments(c(0,0,0.5), c(0,0,sqrt(3)/2), c(1,1/2,1), c(0,sqrt(3)/2,0))
+    lattice::panel.xyplot(x=b,y=h, col="red",pch=20,cex=1.75)
+    grade.trellis()
+    lattice::panel.text(.55,0.92,label="X2",pos=2)
+    lattice::panel.text(0,-0.05,label="X1",pos=2)
+    lattice::panel.text(1,-0.05,label="X3",pos=4)
+    lattice::trellis.unfocus()
+  })
+  
+  output$m_simplex_risptext<-renderUI({
+    n<-nrow(m_simplex_dis()[,2:4])
+    h4(paste('Risposte (',n,', separate da spazio)',sep=''))
+  })
+  
+  output$m_simplex_figura_risp<-renderPlot(width = 550,height = 500,{
+    validate(need(length(as.numeric(unlist(strsplit(input$m_simplex_risp," "))))==nrow(m_simplex_dis()[,2:4]),''))
+    P<-m_simplex_dis()[,2:4] ###disegno
+    
+    ## Design in coord (b,h)
+    b=1-P[,1]-P[,2]/2
+    h=(sqrt(3)/2)*P[,2]
+    
+    ## Generates triangle for the plot (on a plane, two coordinates)
+    trian <- expand.grid(base=seq(0,1,l=100), high=seq(0,sin(pi/3),l=87))
+    trian <- subset(trian, (base*sin(pi/3)*2)>high)
+    trian <- subset(trian, ((1-base)*sin(pi/3)*2)>high)
+    
+    ## Generates triangle in R^3 X1+X2+X3=1
+    new=data.frame(X1=1-trian$base-trian$high/sqrt(3))
+    new$X2=trian$high*2/sqrt(3)
+    new$X3=trian$base-trian$high/sqrt(3)
+    
+    ## Builds data.frame triangle in 2 (base,high), 3 (X1,X2,X3) variables e column condition (cond)
+    cond=new$X1>=0 & new$X2>=0 & new$X3>=0 & new$X1<=1 & new$X2<=1 & new$X3<=1
+    trian.new.cond=cbind(trian,new,cond)
+    
+    ## Builds triangle in 2 (base,high), 3 (X1,X2,X3) variables satisfying constraints
+    trian.cond=trian.new.cond[trian.new.cond$cond==TRUE,1:2]
+    new.cond=trian.new.cond[trian.new.cond$cond==TRUE,3:5]
+    
+    ## Creates function set grid e axis labels
+    grade.trellis <- function(from=0.2, to=0.8, step=0.2, col=1, lty=2, lwd=0.5){
+      x1 <- seq(from, to, step)
+      x2 <- x1/2
+      y2 <- x1*sqrt(3)/2
+      x3 <- (1-x1)*0.5+x1
+      y3 <- sqrt(3)/2-x1*sqrt(3)/2
+      lattice::panel.segments(x1, 0, x2, y2, col=col, lty=lty, lwd=lwd)
+      lattice::panel.text(x1, 0, label=x1, pos=1)
+      lattice::panel.segments(x1, 0, x3, y3, col=col, lty=lty, lwd=lwd)
+      lattice::panel.text(x2, y2, label=rev(x1), pos=2)
+      lattice::panel.segments(x2, y2, 1-x2, y2, col=col, lty=lty, lwd=lwd)
+      lattice::panel.text(x3, y3, label=rev(x1), pos=4)
+    }
+    
+    q=lattice::xyplot(trian.cond$high~trian.cond$base,par.settings=list(axis.line=list(col=NA),
+                                                                        axis.text=list(col=NA)),
+                      xlab=NULL, ylab=NULL, pch=19,cex=0.0,col="gray47",
+                      xlim=c(-0.1,1.1), ylim=c(-0.1,0.96))
+    
+    print(q)
+    
+    lattice::trellis.focus("panel", 1, 1, highlight=FALSE)
+    lattice::panel.segments(c(0,0,0.5), c(0,0,sqrt(3)/2), c(1,1/2,1), c(0,sqrt(3)/2,0))
+    lattice::panel.xyplot(x=b,y=h, col="red",pch=20,cex=1.75)
+    lattice::panel.text(x=b,y=h, col="red",label=as.numeric(unlist(strsplit(input$m_simplex_risp," "))),
+                        pos=1,font=2,cex=1.2)
+    grade.trellis()
+    lattice::panel.text(.55,0.92,label="X2",pos=2)
+    lattice::panel.text(0,-0.05,label="X1",pos=2)
+    lattice::panel.text(1,-0.05,label="X3",pos=4)
+    lattice::trellis.unfocus()
+  })
+  
+
+  
+  
+  
+  
 }
-
-
-
-
-
-
-

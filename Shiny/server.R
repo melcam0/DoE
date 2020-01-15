@@ -4188,8 +4188,6 @@ server <- function (input , output, session ){
     var<-attr(pp_mod()$model,"names")[-1]
     var<-var[substr(var,1,2)!='I(']
     validate(need(length(as.numeric(unlist(strsplit(input$pp_prev," "))))==length(var),''))
-    req(input$pp_mod_variaby)
-    req(input$pp_mod_variabx)
     if(input$pp_resind==1){
       mod<-pp_mod()
       smr<-summary(mod)
@@ -4208,7 +4206,7 @@ server <- function (input , output, session ){
         cat('Non ci sono gradi di libertà')
       }
     }else{
-      require(input$pp_misind)
+      req(input$pp_misind)
       x<-as.numeric(unlist(strsplit(input$pp_misind," ")))
       if(length(x)<=1){
         cat('Almeno 2 misure')
@@ -4266,11 +4264,6 @@ server <- function (input , output, session ){
     attr(df,'names')<-c( 'gdl')
     df
   })
-
-  output$pp_stimint_txt<-renderUI({
-    validate(need(length(as.numeric(unlist(strsplit(input$pp_misind," "))))>0,''))
-    h4('Stima per intervallo')
-  })
   
   output$pp_stimint_txt<-renderUI({
     #validate(need(length(as.numeric(unlist(strsplit(input$fatt_compl_misind," "))))>0 &
@@ -4305,7 +4298,7 @@ server <- function (input , output, session ){
       }
 
     }else{
-      require(input$pp_misind)
+      #req(input$pp_misind)
       x<-as.numeric(unlist(strsplit(input$pp_misind," ")))
       if(length(x)<=1){
         cat('Almeno 2 misure')
@@ -4490,13 +4483,6 @@ server <- function (input , output, session ){
     sliderInput('pp_rp_x',label = 'Rotazione verticale',min = 0,max = 90,value = 60,step = 10)
   })
 
-
-
-
-
-
-
-
 ## Miscele -----------------------------------------------------------------
 # Simplex Design -----------------------------------------------------------------
 
@@ -4662,9 +4648,9 @@ server <- function (input , output, session ){
     lattice::panel.segments(c(0,0,0.5), c(0,0,sqrt(3)/2), c(1,1/2,1), c(0,sqrt(3)/2,0))
     lattice::panel.xyplot(x=b,y=h, col="red",pch=20,cex=1.75)
     grade.trellis()
-    lattice::panel.text(.55,0.92,label="X2",pos=2)
-    lattice::panel.text(0,-0.05,label="X1",pos=2)
-    lattice::panel.text(1,-0.05,label="X3",pos=4)
+    lattice::panel.text(.55,0.92,label="x2",pos=2)
+    lattice::panel.text(0,-0.05,label="x1",pos=2)
+    lattice::panel.text(1,-0.05,label="x3",pos=4)
     lattice::trellis.unfocus()
   })
   
@@ -4727,13 +4713,354 @@ server <- function (input , output, session ){
     lattice::panel.text(x=b,y=h, col="red",label=as.numeric(unlist(strsplit(input$m_simplex_risp," "))),
                         pos=1,font=2,cex=1.2)
     grade.trellis()
-    lattice::panel.text(.55,0.92,label="X2",pos=2)
-    lattice::panel.text(0,-0.05,label="X1",pos=2)
-    lattice::panel.text(1,-0.05,label="X3",pos=4)
+    lattice::panel.text(.55,0.92,label="x2",pos=2)
+    lattice::panel.text(0,-0.05,label="x1",pos=2)
+    lattice::panel.text(1,-0.05,label="x3",pos=4)
     lattice::trellis.unfocus()
   })
   
+  output$m_simplex_coeff<-renderPrint({
+    validate(need(length(as.numeric(unlist(strsplit(input$m_simplex_risp," "))))==nrow(m_simplex_dis()[,2:4]),''))
+    if(input$m_simplex_mod=='1')modello<-'y ~ x1 + x2 + x3 -1'
+    if(input$m_simplex_mod=='2')modello<-'y ~ x1 + x2 + x3 + x1:x2 + x1:x3 + x2:x3 -1'
+    if(input$m_simplex_mod=='3')modello<-'y ~ x1 + x2 + x3 + x1:x2 + x1:x3 + x2:x3 + x1:x2:x3 -1'
+    frm<-formula(modello)
+    y<- as.numeric(unlist(strsplit(input$m_simplex_risp," ")))
+    df<-cbind.data.frame(m_simplex_dis()[,2:4],y=y)
+    mod<-lm(frm,df)
+    round(mod$coefficients,2)
+  })
 
+  output$m_simplex_grcoeff<-renderPlot({
+    validate(need(length(as.numeric(unlist(strsplit(input$m_simplex_risp," "))))==nrow(m_simplex_dis()[,2:4]),''))
+    if(input$m_simplex_mod=='1')modello<-'y ~ x1 + x2 + x3 -1'
+    if(input$m_simplex_mod=='2')modello<-'y ~ x1 + x2 + x3 + x1:x2 + x1:x3 + x2:x3 -1'
+    if(input$m_simplex_mod=='3')modello<-'y ~ x1 + x2 + x3 + x1:x2 + x1:x3 + x2:x3 + x1:x2:x3 -1'
+    frm<-formula(modello)
+    y<- as.numeric(unlist(strsplit(input$m_simplex_risp," ")))
+    df<-cbind.data.frame(m_simplex_dis()[,2:4],y=y)
+    mod<-lm(frm,df)
+    
+    require(ggplot2)
+    df_coeff<-data.frame(nome=names(mod$coefficients),
+                         valore=mod$coefficients)
+    if(input$m_simplex_resind==2){
+      if(length(as.numeric(unlist(strsplit(input$m_simplex_misind," "))))<2){
+        ggplot(data = df_coeff,aes(x =nome,y=valore))+
+          xlab("")+ylab("")+theme_light()+
+          geom_bar(fill="red",stat="identity")+
+          scale_x_discrete(limits=names(mod$coefficients))
+      }else{
+        x<-as.numeric(unlist(strsplit(input$m_simplex_misind," ")))
+        gdl<-length(x)-1
+        q<-qt(p = 0.975,df = gdl)
+        s<-sd(x)
+        X<-model.matrix(mod)
+        D<-solve(t(X)%*%X)
+        d<-diag(D)
+        df_coeff<-cbind.data.frame(df_coeff,inf=mod$coefficients-q*s*sqrt(d),sup=mod$coefficients+q*s*sqrt(d))
+        ggplot(data = df_coeff,aes(x =nome,y=valore))+
+          xlab("")+ylab("")+theme_light()+
+          geom_bar(fill="red",stat="identity")+
+          scale_x_discrete(limits=names(mod$coefficients))+
+          geom_errorbar(aes(ymin=inf, ymax=sup),
+                        width=0.2, colour="green3")
+      }}else{
+        sm<-summary(mod)
+        if(is.na(sm$sigma)){
+          ggplot(data = df_coeff,aes(x =nome,y=valore))+
+            xlab("")+ylab("")+theme_light()+
+            geom_bar(fill="red",stat="identity")+
+            scale_x_discrete(limits=names(mod$coefficients))
+        }else{
+          df_coeff<-cbind.data.frame(df_coeff,inf=mod$coefficients-sm$coefficients[1,2],sup=mod$coefficients+sm$coefficients[1,2])
+          ggplot(data = df_coeff,aes(x =nome,y=valore))+
+            xlab("")+ylab("")+theme_light()+
+            geom_bar(fill="red",stat="identity")+
+            scale_x_discrete(limits=names(mod$coefficients))+
+            geom_errorbar(aes(ymin=inf, ymax=sup),
+                          width=0.2, colour="green3")
+        }
+      }
+  })
+  
+  output$m_simplex_prev_df<-renderPrint({
+    if(length(as.numeric(unlist(strsplit(input$m_simplex_prev," "))))==3){
+      if(input$m_simplex_mod=='1')modello<-'y ~ x1 + x2 + x3 -1'
+      if(input$m_simplex_mod=='2')modello<-'y ~ x1 + x2 + x3 + x1:x2 + x1:x3 + x2:x3 -1'
+      if(input$m_simplex_mod=='3')modello<-'y ~ x1 + x2 + x3 + x1:x2 + x1:x3 + x2:x3 + x1:x2:x3 -1'
+      frm<-formula(modello)
+      y<- as.numeric(unlist(strsplit(input$m_simplex_risp," ")))
+      df<-cbind.data.frame(m_simplex_dis()[,2:4],y=y)
+      mod<-lm(frm,df)
+      x<- as.numeric(unlist(strsplit(input$m_simplex_prev," ")))
+      nd<-rbind.data.frame(x)
+      colnames(nd)<-c('x1','x2','x3')
+      prev<-predict(object = mod,newdata=nd)
+      attr(prev,'names')<-c('previsione')
+      prev
+    }else{
+      cat(paste('inserire le',3,'coord. del punto'))
+    }
+  })
+  
+  output$m_simplex_intprev<-renderPrint({
+    validate(need(length(as.numeric(unlist(strsplit(input$m_simplex_prev," "))))==3,''))
+    if(input$m_simplex_mod=='1')modello<-'y ~ x1 + x2 + x3 -1'
+    if(input$m_simplex_mod=='2')modello<-'y ~ x1 + x2 + x3 + x1:x2 + x1:x3 + x2:x3 -1'
+    if(input$m_simplex_mod=='3')modello<-'y ~ x1 + x2 + x3 + x1:x2 + x1:x3 + x2:x3 + x1:x2:x3 -1'
+    frm<-formula(modello)
+    y<- as.numeric(unlist(strsplit(input$m_simplex_risp," ")))
+    df<-cbind.data.frame(m_simplex_dis()[,2:4],y=y)
+    mod<-lm(frm,df)
+    if(input$m_simplex_resind==1){
+      smr<-summary(mod)
+      if(!is.na(smr$sigma)){
+        x<- as.numeric(unlist(strsplit(input$m_simplex_prev," ")))
+        nd<-rbind.data.frame(x)
+        colnames(nd)<-c('x1','x2','x3')
+        prev<-predict(object = mod,newdata=nd,interval='confidence')
+        prev1<-predict(object = mod,newdata=nd,interval='confidence',level = 0.99)
+        prev2<-predict(object = mod,newdata=nd,interval='confidence',level = 0.999)
+        df<-cbind.data.frame(prev,prev1,prev2)
+        df<-cbind.data.frame(round(df[,-c(1,4,7)],3))
+        colnames(df)<-c('2.5%','97.5%','0.5%','99.5%','0.05%','99.95%')
+        df
+      }else{
+        cat('Non ci sono gradi di libertà')
+      }
+    }else{
+      req(input$m_simplex_misind)
+      x<-as.numeric(unlist(strsplit(input$m_simplex_misind," ")))
+      if(length(x)<=1){
+        cat('Almeno 2 misure')
+      }else{
+        gdl<-length(x)-1
+        q<-qt(p = 0.975,df = gdl)
+        q1<-qt(p = 0.995,df = gdl)
+        q2<-qt(p = 0.9995,df = gdl)
+        s<-sd(x)
+        X<-model.matrix(mod)
+        p<-as.numeric(unlist(strsplit(input$m_simplex_prev," ")))
+        data<-as.data.frame(matrix(p,1,3))
+        colnames(data)<-c('x1','x2','x3')
+        if(input$m_simplex_mod=='1')frml<-' ~ x1 + x2 + x3 -1'
+        if(input$m_simplex_mod=='2')frml<-' ~ x1 + x2 + x3 + x1:x2 + x1:x3 + x2:x3 -1'
+        if(input$m_simplex_mod=='3')frml<-' ~ x1 + x2 + x3 + x1:x2 + x1:x3 + x2:x3 + x1:x2:x3 -1'
+        frml<-as.formula(frml)
+        P<-model.matrix(frml,data=data)
+        d<-P%*%solve(t(X)%*%X)%*%t(P)
+        prev<-predict(mod,newdata = data)
+        df<-data.frame(prev-q*s*sqrt(d),prev+q*s*sqrt(d),
+                       prev-q1*s*sqrt(d),prev+q1*s*sqrt(d),
+                       prev-q2*s*sqrt(d),prev+q2*s*sqrt(d))
+        df<-cbind.data.frame(round(df,3))
+        colnames(df)<-c('2.5%','97.5%','0.5%','99.5%','0.05%','99.95%')
+        df
+      }
+    }
+  })
+
+  output$m_simplex_misind_media<-renderPrint({
+    validate(need(length(as.numeric(unlist(strsplit(input$m_simplex_misind," "))))>1,''))
+    x<-as.numeric(unlist(strsplit(input$m_simplex_misind," ")))
+    mod<-lm(x~1,as.data.frame(x))
+    sm<-summary(mod)
+    media<-predict(mod,interval = 'confidence')[1,]
+    attr(media,'names')<-c('media','2.5%','97.5%')
+    round(media,3)
+  })
+  
+  output$m_simplex_misind_sd<-renderPrint({
+    validate(need(length(as.numeric(unlist(strsplit(input$m_simplex_misind," "))))>1,''))
+    x<-as.numeric(unlist(strsplit(input$m_simplex_misind," ")))
+    mod<-lm(x~1,as.data.frame(x))
+    sm<-summary(mod)
+    df<-c(round(sm$sigma,3))
+    attr(df,'names')<-c('dev.st.')
+    df
+  })
+  
+  output$m_simplex_misind_gdl<-renderPrint({
+    validate(need(length(as.numeric(unlist(strsplit(input$m_simplex_misind," "))))>1,''))
+    x<-as.numeric(unlist(strsplit(input$m_simplex_misind," ")))
+    gdf<-(length(as.numeric(unlist(strsplit(input$m_simplex_misind," "))))-1)
+    df<-c(gdf)
+    attr(df,'names')<-c( 'gdl')
+    df
+  })
+
+  output$m_simplex_stimint_txt<-renderUI({
+    A<-length(as.numeric(unlist(strsplit(input$m_simplex_prev," "))))==3
+    
+    if(input$m_simplex_resind==1){
+      
+      if(input$m_simplex_mod=='1')modello<-' ~ x1 + x2 + x3 -1'
+      if(input$m_simplex_mod=='2')modello<-' ~ x1 + x2 + x3 + x1:x2 + x1:x3 + x2:x3 -1'
+      if(input$m_simplex_mod=='3')modello<-' ~ x1 + x2 + x3 + x1:x2 + x1:x3 + x2:x3 + x1:x2:x3 -1'
+      frm<-formula(modello)
+      X<-model.matrix(frm,m_simplex_dis()[,2:4])
+      B<- qr(X)$rank==ncol(X) & nrow(X)>ncol(X)
+
+      }
+    
+    if(input$m_simplex_resind==1){
+      x<-as.numeric(unlist(strsplit(input$m_simplex_misind," ")))
+      B<- length(x)>1
+    }
+    validate(need(A&B,''))
+    h4('Stima per intervallo')
+  })
+  
+  output$m_simplex_stimint_txt<-renderUI({
+    h4('Stima per intervallo')
+  })
+
+  output$m_simplex_stimint<-renderPrint({
+    validate(need(length(as.numeric(unlist(strsplit(input$m_simplex_risp," "))))==nrow(m_simplex_dis()[,2:4]),''))
+    if(input$m_simplex_mod=='1')modello<-'y ~ x1 + x2 + x3 -1'
+    if(input$m_simplex_mod=='2')modello<-'y ~ x1 + x2 + x3 + x1:x2 + x1:x3 + x2:x3 -1'
+    if(input$m_simplex_mod=='3')modello<-'y ~ x1 + x2 + x3 + x1:x2 + x1:x3 + x2:x3 + x1:x2:x3 -1'
+    frm<-formula(modello)
+    y<- as.numeric(unlist(strsplit(input$m_simplex_risp," ")))
+    df<-cbind.data.frame(m_simplex_dis()[,2:4],y=y)
+    mod<-lm(frm,df)
+    X<-model.matrix(mod)
+    if(qr(X)$rank<ncol(X))stop()
+    if(input$m_simplex_resind==1){
+      smr<-summary(mod)
+      pval<- smr$coefficients[,4,drop=FALSE]
+      if(!is.na(smr$sigma)){
+        df<-data.frame(confint(mod)[,1],confint(mod)[,2],
+                       confint(mod,level = 0.99)[,1],confint(mod,level = 0.99)[,2],
+                       confint(mod,level = 0.999)[,1],confint(mod,level = 0.999)[,2],pval)
+        lab<-rep('',nrow(df))
+        for (i in 1:nrow(df)){
+          if(pval[i]<0.1)lab[i]<-'.'
+          if(pval[i]<0.05)lab[i]<-'*'
+          if(pval[i]<0.01)lab[i]<-'**'
+          if(pval[i]<0.001)lab[i]<-'***'
+        }
+        df<-cbind.data.frame(round(df[,1:6],3),round(df[,7],4),lab)
+        colnames(df)<-c('2.5%','97.5%','0.5%','99.5%','0.05%','99.95%','p-value','')
+        df
+      }else{
+        cat('Non ci sono gradi di libertà')
+      }
+    }else{
+      x<-as.numeric(unlist(strsplit(input$m_simplex_misind," ")))
+      if(length(x)<=1){
+        cat('Almeno 2 misure')
+      }else{
+        gdl<-length(x)-1
+        q<-qt(p = 0.975,df = gdl)
+        q1<-qt(p = 0.995,df = gdl)
+        q2<-qt(p = 0.9995,df = gdl)
+        s<-sd(x)
+        D<-solve(t(X)%*%X)
+        d<-diag(D)
+        pval<-pt(abs(mod$coefficients/(s*sqrt(d))),df = gdl,lower.tail = FALSE)*2
+        df<-data.frame(mod$coefficients,mod$coefficients-q*s*sqrt(d),mod$coefficients+q*s*sqrt(d),
+                       mod$coefficients-q1*s*sqrt(d),mod$coefficients+q1*s*sqrt(d),
+                       mod$coefficients-q2*s*sqrt(d),mod$coefficients+q2*s*sqrt(d),
+                       pval)
+        lab<-rep('',nrow(df))
+        for (i in 1:nrow(df)){
+          if(pval[i]<0.1)lab[i]<-'.'
+          if(pval[i]<0.05)lab[i]<-'*'
+          if(pval[i]<0.01)lab[i]<-'**'
+          if(pval[i]<0.001)lab[i]<-'***'
+        }
+        df<-cbind.data.frame(round(df[,1:7],3),round(df[,8],4),lab)
+        colnames(df)<-c('val','2.5%','97.5%','0.5%','99.5%','0.05%','99.95%','p-value','')
+        df[,-1]
+      }
+    }
+  })
+  
+  output$m_simplex_livellorisp<-renderPlot({
+    validate(need(length(as.numeric(unlist(strsplit(input$m_simplex_risp," "))))==nrow(m_simplex_dis()[,2:4]),''))
+    ## Generates triangle
+    trian <- expand.grid(base=seq(0,1,l=100), high=seq(0,sin(pi/3),l=87))
+    trian <- subset(trian, (base*sin(pi/3)*2)>high)
+    trian <- subset(trian, ((1-base)*sin(pi/3)*2)>high)
+    
+    ## Generates triangle in R^3 X1+X2+X3=1
+    new=data.frame(x1=1-trian$base-trian$high/sqrt(3))
+    new$x2=trian$high*2/sqrt(3)
+    new$x3=trian$base-trian$high/sqrt(3)
+    
+    ## Creates model matrix on X1+X2+X3=1 (new)
+    
+    if(input$m_simplex_mod=='1')modello<-'y ~ x1 + x2 + x3 -1'
+    if(input$m_simplex_mod=='2')modello<-'y ~ x1 + x2 + x3 + x1:x2 + x1:x3 + x2:x3 -1'
+    if(input$m_simplex_mod=='3')modello<-'y ~ x1 + x2 + x3 + x1:x2 + x1:x3 + x2:x3 + x1:x2:x3 -1'
+    form<-formula(modello)
+    
+    ## Design in coord (b,h)
+    P<-m_simplex_dis()[,2:4]
+    colnames(P)<-c('x1','x2','x3')
+    b=1-P[,1]-P[,2]/2
+    h=(sqrt(3)/2)*P[,2]
+    
+    DF=cbind.data.frame(y=as.numeric(unlist(strsplit(input$m_simplex_risp," "))),P)
+    
+    mdl=lm(form,DF)
+    trian$yhat <- predict(mdl, newdata=new)
+    
+    ## Creates function grid and labels on the axes
+    if(input$m_simplex_livellorisp_reg)col_grid=1
+    if(!input$m_simplex_livellorisp_reg)col_grid='grey70'
+    
+    grade.trellis <- function(from=0.2, to=0.8, step=0.2, col=col_grid, lty=2, lwd=0.5){
+      x1 <- seq(from, to, step)
+      x2 <- x1/2
+      y2 <- x1*sqrt(3)/2
+      x3 <- (1-x1)*0.5+x1
+      y3 <- sqrt(3)/2-x1*sqrt(3)/2
+      lattice::panel.segments(x1, 0, x2, y2, col=col, lty=lty, lwd=lwd)
+      lattice::panel.segments(x1, 0, x3, y3, col=col, lty=lty, lwd=lwd)
+      lattice::panel.segments(x2, y2, 1-x2, y2, col=col, lty=lty, lwd=lwd)
+      if(input$m_simplex_livellorisp_perc){
+        lattice::panel.text(x1, 0, label=x1, pos=1,col='grey60')
+        lattice::panel.text(x2, y2, label=rev(x1), pos=2,col='grey60')
+        lattice::panel.text(x3, y3, label=rev(x1), pos=4,col='grey60')
+        
+      }
+    }
+    
+    ## Generates isoleverage plot
+    
+    colore<-c("blue","green3","red","black","purple1")
+    cl<-as.integer(input$m_simplex_livellorisp_col)
+    
+    p=lattice::contourplot(yhat~base*high,cuts = 10, trian,col=colore[cl],aspect = 1,
+                           region = input$m_simplex_livellorisp_reg,
+                           col.regions = colorRampPalette(c("yellow","green","blue")),
+                           labels=list(cex=0.9),
+                           par.settings=list(axis.line=list(col=NA), axis.text=list(col="black")),xlab=NULL, ylab=NULL,
+                           scales=list(x=list(alternating=0),y=list(alternating=0)),
+                           xlim=c(-0.1,1.1), ylim=c(-0.1,0.96))
+    print(p)
+    lattice::trellis.focus("panel", 1, 1, highlight=FALSE)
+    lattice::panel.segments(c(0,0,0.5), c(0,0,sqrt(3)/2), c(1,1/2,1), c(0,sqrt(3)/2,0))
+    lattice::panel.xyplot(x=b,y=h, col="red",pch=20,cex=1.75)
+    grade.trellis()
+    lattice::panel.text(.55,0.92,label="x2",pos=2)
+    lattice::panel.text(0,-0.05,label="x1",pos=2)
+    lattice::panel.text(1,-0.05,label="x3",pos=4)
+    lattice::trellis.unfocus()
+    
+  })
+  
+  output$m_simplex_livellorisp_col<-renderUI({
+    selectInput("m_simplex_livellorisp_col", label = h3(""), 
+                choices = list("blu" = 1, "verde" = 2, "rosso" = 3,"nero" = 4,"viola" = 5), 
+                selected = 3,width="130px")
+  })
+  
+  
+  
   
   
   

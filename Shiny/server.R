@@ -4137,7 +4137,6 @@ server <- function (input , output, session ){
   
   output$pp_vincoli_txt<-renderUI({
     validate(need(input$pp_vincoli==TRUE,' '))
-    #validate(need(length(as.numeric(unlist(strsplit(input$pp_risp," "))))==nrow(pp_dis()),''))
     textInput(inputId = "pp_vincoli_txt",label = h5("Inserire i vincoli separati da '&'"))
   })
   
@@ -4458,6 +4457,23 @@ server <- function (input , output, session ){
     data[,col[2]]<-dt_exp[,2]
     data<-as.data.frame(data)
     colnames(data)<-var
+    
+    
+    txt<-input$pp_vincolirisp_txt
+    for ( i in 1:length(var)){
+      txt<-gsub(var[i],paste0('data$',var[i]),txt)
+    }
+    cond<-tryCatch(eval(parse(text = txt)),
+                   error = function(e) "Scrivere correttamente le condizioni!")
+    if(is.character(cond)){
+      plot(c(0, 1), c(0, 1), ann = F, bty = 'n', type = 'n', xaxt = 'n', yaxt = 'n')
+      text(0.5,0.5,cond,cex = 1.6, col = "red")
+    }else{
+    
+    
+    
+    
+    
     mod<-pp_mod()
     
     Pred=data.frame(data,P=predict(mod,newdata=data))
@@ -4470,10 +4486,14 @@ server <- function (input , output, session ){
       plot(c(0, 1), c(0, 1), ann = F, bty = 'n', type = 'n', xaxt = 'n', yaxt = 'n')
       text(0.5,0.5,'inserire il valore delle variabili costanti',cex = 1.6, col = "red")
     }else{
+      
+      if(input$pp_vincolirisp & !is.null(cond) & is.logical(cond))Pred<-Pred[cond==TRUE,]
+      
       lattice::contourplot(P~x*y,data=Pred,cuts=15,main='Response Surface: Contour Plot',cex.main=0.8,
                            xlab=var[col[1]],ylab=var[col[2]],col=colore[cl],
                            labels=list(col=colore[cl],cex=0.9),
                            aspect=1)
+    }
     }
   })
   
@@ -4510,6 +4530,22 @@ server <- function (input , output, session ){
     data[,col[2]]<-dt_exp[,2]
     data<-as.data.frame(data)
     colnames(data)<-var
+    
+    
+    txt<-input$pp_vincolirisp_txt
+    for ( i in 1:length(var)){
+      txt<-gsub(var[i],paste0('data$',var[i]),txt)
+    }
+    cond<-tryCatch(eval(parse(text = txt)),
+                   error = function(e) "Scrivere correttamente le condizioni!")
+    if(is.character(cond)){
+      plot(c(0, 1), c(0, 1), ann = F, bty = 'n', type = 'n', xaxt = 'n', yaxt = 'n')
+      text(0.5,0.5,cond,cex = 1.6, col = "red")
+    }else{
+    
+    
+    
+    
     mod<-pp_mod()
     
     Pred=data.frame(data,P=predict(mod,newdata=data))
@@ -4522,12 +4558,21 @@ server <- function (input , output, session ){
     }else{
       req(input$pp_rp_z)
       req(input$pp_rp_x)
+      
+      if(input$pp_vincolirisp & !is.null(cond) & is.logical(cond))Pred<-Pred[cond==TRUE,]
+      
       lattice::wireframe(P~x*y,data=Pred,drape=TRUE,col.regions = colorRampPalette(c("yellow","green","blue"))(256),
                          at=seq(min(Pred$P),max(Pred$P),(max(Pred$P)-min(Pred$P))/256),
                          screen=list(z=input$pp_rp_z,x=-input$pp_rp_x),
                          main='Response Surface',cex.main=0.8,xlab=var[col[1]],
                          ylab=var[col[2]],zlab=paste('Response')) 
     }
+    }
+  })
+  
+  output$pp_vincolirisp_txt<-renderUI({
+    validate(need(input$pp_vincolirisp==TRUE,' '))
+    textInput(inputId = "pp_vincolirisp_txt",label = h5("Inserire i vincoli separati da '&'"))
   })
   
   output$pp_rp_z<-renderUI({

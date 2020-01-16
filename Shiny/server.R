@@ -4022,6 +4022,25 @@ server <- function (input , output, session ){
     data[,col[2]]<-dt_exp[,2]
     data<-as.data.frame(data)
     colnames(data)<-var
+    
+    
+    
+    
+    txt<-input$pp_vincoli_txt
+    for ( i in 1:length(var)){
+      txt<-gsub(var[i],paste0('data$',var[i]),txt)
+    }
+    cond<-tryCatch(eval(parse(text = txt)),
+                   error = function(e) "Scrivere correttamente le condizioni!")
+    if(is.character(cond)){
+      plot(c(0, 1), c(0, 1), ann = F, bty = 'n', type = 'n', xaxt = 'n', yaxt = 'n')
+      text(0.5,0.5,cond,cex = 1.6, col = "red")
+    }else{
+    
+    
+    
+    
+    
     #frm<-formula(paste(" ~ ", paste(input$pp_mod_variabx[!input$pp_mod_variabx%in%input$pp_selinteraz], collapse= "+")))
     frm<-as.formula(pp_formula())
     P=model.matrix(frm,data = dsg)
@@ -4032,12 +4051,17 @@ server <- function (input , output, session ){
       text(0.5,0.5,'inserire il valore delle variabili costanti',cex = 1.6, col = "red")
     }else{
       Lev=data.frame(data,"L"=diag(Q))
+      
+      if(input$pp_vincoli & !is.null(cond) & is.logical(cond))Lev<-Lev[cond==TRUE,]
+      
       colnames(Lev)[col[1]]<-'x'
       colnames(Lev)[col[2]]<-'y'
       lattice::contourplot(L~x*y,data=Lev,cuts=15,main='Plot of Leverage: Contour Plot',cex.main=0.8,
                            xlab=var[col[1]],ylab=var[col[2]],col='blue',labels=list(col="blue",cex=0.9),
                            aspect=1)}
+    }
   })
+  
   output$pp_suplev<-renderPlot({
     req(input$pp_mod_variabx)
     var<-colnames(pp_dis())
@@ -4065,6 +4089,27 @@ server <- function (input , output, session ){
     data[,col[2]]<-dt_exp[,2]
     data<-as.data.frame(data)
     colnames(data)<-var
+    
+    
+    
+    
+    
+    
+    
+    txt<-input$pp_vincoli_txt
+    for ( i in 1:length(var)){
+      txt<-gsub(var[i],paste0('data$',var[i]),txt)
+    }
+    cond<-tryCatch(eval(parse(text = txt)),
+                   error = function(e) "Scrivere correttamente le condizioni!")
+    if(is.character(cond)){
+      plot(c(0, 1), c(0, 1), ann = F, bty = 'n', type = 'n', xaxt = 'n', yaxt = 'n')
+      text(0.5,0.5,cond,cex = 1.6, col = "red")
+      #print(cond)
+    }else{
+    
+    
+    
     #frm<-formula(paste(" ~ ", paste(input$pp_mod_variabx[!input$pp_mod_variabx%in%input$pp_selinteraz], collapse= "+")))
     frm<-formula(paste(" ~ ", paste(input$pp_mod_variabx, collapse= "+")))
     P=model.matrix(frm,data = dsg)
@@ -4075,6 +4120,9 @@ server <- function (input , output, session ){
       text(0.5,0.5,'inserire il valore delle variabili costanti',cex = 1.6, col = "red")
     }else{
       Lev=data.frame(data,"L"=diag(Q))
+      
+      if(input$pp_vincoli & !is.null(cond) & is.logical(cond))Lev<-Lev[cond==TRUE,]
+      
       colnames(Lev)[col[1]]<-'x'
       colnames(Lev)[col[2]]<-'y'
       req(input$pp_lv_z)
@@ -4084,6 +4132,13 @@ server <- function (input , output, session ){
                          screen=list(z=input$pp_lv_z,x=-input$pp_lv_x),
                          main='Plot of Leverage',cex.main=0.8,xlab=var[col[1]],
                          ylab=var[col[2]],zlab=paste('Response'))}
+    }
+  })
+  
+  output$pp_vincoli_txt<-renderUI({
+    validate(need(input$pp_vincoli==TRUE,' '))
+    #validate(need(length(as.numeric(unlist(strsplit(input$pp_risp," "))))==nrow(pp_dis()),''))
+    textInput(inputId = "pp_vincoli_txt",label = h5("Inserire i vincoli separati da '&'"))
   })
   
   output$pp_lv_z<-renderUI({

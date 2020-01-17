@@ -5137,7 +5137,7 @@ server <- function (input , output, session ){
     p=lattice::contourplot(yhat~base*high,cuts = 10, trian,col=colore[cl],aspect = 1,
                            region = input$m_simplex_livellorisp_reg,
                            col.regions = colorRampPalette(c("yellow","green","blue")),
-                           labels=list(cex=0.9),
+                           labels=list(col=colore[cl],cex=0.9),
                            par.settings=list(axis.line=list(col=NA), axis.text=list(col="black")),xlab=NULL, ylab=NULL,
                            scales=list(x=list(alternating=0),y=list(alternating=0)),
                            xlim=c(-0.1,1.1), ylim=c(-0.1,0.96))
@@ -5161,6 +5161,773 @@ server <- function (input , output, session ){
   
   
   
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  # D-ottimale -----------------------------------------------------------------  
+  output$m_d_opt_titolo<-renderUI({
+    HTML("D-ottimale" )
+  })
+  output$m_d_opt_importa<-renderUI({
+    validate(need(input$m_d_opt_pti_cand==2, ' '))
+    radioButtons("m_d_opt_importa", label = "Importa matrice punti candidati:",
+                 choices = list("Incolla" = 1, "Excel" = 2), selected = 1,inline = TRUE)
+  })
+  output$m_d_opt_importa_incolla_spazio<-renderUI({
+    validate(need(input$m_d_opt_pti_cand==2, ' '))
+    req(input$m_d_opt_importa==1)
+    br()
+  })
+  output$m_d_opt_importa_incolla<-renderUI({
+    validate(need(input$m_d_opt_pti_cand==2, ' '))
+    req(input$m_d_opt_importa==1)
+    actionButton("m_d_opt_incolla", label = "Incolla")
+  })
+  output$m_d_opt_importa_incolla_spazio1<-renderUI({
+    validate(need(input$m_d_opt_pti_cand==2, ' '))
+    req(input$m_d_opt_importa==1)
+    hr()
+  })
+  output$m_d_opt_importa_excel_brws<-renderUI({
+    validate(need(input$m_d_opt_pti_cand==2, ' '))
+    req(input$m_d_opt_importa==2)
+    fileInput("m_d_opt_file_xlsx",label='',
+              multiple = FALSE,
+              accept = c(".xlx",".xlsx"))
+  })
+  output$m_d_opt_vincoli_tle<-renderUI({
+    validate(need(input$m_d_opt_pti_cand==1,' '))
+    HTML("<h5><b>Costruisci matrice assegnando:<b><h5>")
+  })
+  output$m_d_opt_vincoli<-renderUI({
+    validate(need(input$m_d_opt_pti_cand==1,' '))
+    checkboxInput("m_d_opt_vincoli", label = "Vincoli", value = FALSE)
+  })
+  output$m_d_opt_vincoliinf_txt<-renderUI({
+    validate(need(input$m_d_opt_vincoli==TRUE,' '))
+    textInput(inputId = "m_d_opt_vincoliinf_txt",label = h5("Inserire i vincoli inferiori separati da '&'"))
+  })
+  
+  output$m_d_opt_vincolisup_txt<-renderUI({
+    validate(need(input$m_d_opt_vincoli==TRUE,' '))
+    textInput(inputId = "m_d_opt_vincolisup_txt",label = h5("Inserire i vincoli superiori separati da '&'"))
+  })
+
+  output$m_d_opt_passo<-renderUI({
+    validate(need(input$m_d_opt_pti_cand==1,' '))
+    textInput(inputId = "m_d_opt_passo",label = h5("passo griglia"),value = "0.05 0.05 0.05",width = "50%")
+  })
+  m_d_opt_cp_paste<-eventReactive(input$m_d_opt_incolla,{
+    df<-tryCatch(read.DIF(file = "clipboard",header = TRUE,transpose = TRUE),
+                 error = function(e) "Selezionare un dataset!")
+    df
+  })
+  m_d_opt_cp_xls<-reactive({
+    validate(need(input$m_d_opt_importa,''))
+    req(input$m_d_opt_file_xlsx$datapath)
+    df=read_excel(path = input$m_d_opt_file_xlsx$datapath,sheet = 1,col_names = TRUE)
+    df<-as.data.frame(df)
+    df
+  })
+  m_d_opt_cp_griglia<-reactive({
+   req(input$m_d_opt_passo)
+    delta=as.numeric(unlist(strsplit(input$m_d_opt_passo," ")))
+    p=list(NULL)
+    y=list(NULL)
+    for (i in 1:3){
+      p[[i]]=seq(0,1,delta[i])
+    }
+    Dom=expand.grid(p)
+    colnames(Dom)<-c('x1','x2','x3')
+    q=c(NULL)
+    for(i in 1:length(delta)){
+      for(j in 1:10){
+        if (delta[i]*10^j>=1 & !delta[i]*10^(j-1)>=1) q[i]=j
+      }
+    }
+    q=max(q)
+    cond=round(apply(Dom,1,sum),q)
+    cp=Dom[cond==1,]
+    if(input$m_d_opt_vincoli==TRUE){
+      var<-c('x1','x2','x3')
+      if(!is.null(input$m_d_opt_vincoliinf_txt)){
+        if(input$m_d_opt_vincoliinf_txt!=""){
+          txt_inf<-input$m_d_opt_vincoliinf_txt
+          for ( i in 1:3){
+            txt_inf<-gsub(var[i],paste0('cp$',var[i]),txt_inf)
+          }
+          cond_i<-tryCatch(eval(parse(text = txt_inf)),
+                           error = function(e) "Scrivere correttamente le condizioni!")
+          if(is.character(cond_i)|is.function(cond_i)){
+            cp<-matrix(c('','',''),nrow = 1,ncol = 3)
+            #colnames(cp)<-c('x1','x2','x3')
+          }else{
+            cp<-cp[cond_i==TRUE,]
+          }
+        }
+      }
+
+      if(!is.null(input$m_d_opt_vincolisup_txt)){
+        if(input$m_d_opt_vincolisup_txt!=""){
+          txt_sup<-input$m_d_opt_vincolisup_txt
+          for ( i in 1:3){
+            txt_sup<-gsub(var[i],paste0('cp$',var[i]),txt_sup)
+          }
+          cond_s<-tryCatch(eval(parse(text = txt_sup)),
+                           error = function(e) "Scrivere correttamente le condizioni!")
+          
+          if(is.character(cond_s)|is.function(cond_s)){
+            cp<-matrix(c('','',''),nrow = 1,ncol = 3)
+          }else{
+            cp<-cp[cond_s==TRUE,]
+          }
+        }
+        
+      }
+
+    }
+    cp
+  })
+  m_d_opt_cp1<-reactive({
+    validate(need(input$m_d_opt_pti_cand==1,''))
+    df<-m_d_opt_cp_griglia()
+    df
+  })
+  m_d_opt_cp2<-reactive({
+    validate(need(input$m_d_opt_importa,''))
+    if(input$m_d_opt_pti_cand==2 & input$m_d_opt_importa==1)df<-m_d_opt_cp_paste()
+    if(input$m_d_opt_pti_cand==2 & input$m_d_opt_importa==2)df<-m_d_opt_cp_xls()
+    
+    df
+  })
+  m_d_opt_cp<-reactive({
+    if(input$m_d_opt_pti_cand==1)df<-m_d_opt_cp1()
+    if(input$m_d_opt_pti_cand==2)df<-m_d_opt_cp2()
+    if(sum(df[,1]==c(1:nrow(df)))==nrow(df))df<-df[,-1]
+    df
+  })
+  output$m_d_opt_cp<-renderTable({
+    validate(need(is.data.frame(m_d_opt_cp()),""),
+             errorClass = "myClass") 
+    if(input$m_d_opt_cp_ha==1)df<-head(m_d_opt_cp())
+    if(input$m_d_opt_cp_ha==2)df<-m_d_opt_cp()
+    df
+  })
+  output$m_d_opt_download <- downloadHandler(
+    filename = "m_cp.xlsx", 
+    content = function(file) {
+      dis<-m_d_opt_cp()
+      exp<-seq(1,nrow(dis))
+      dis<-cbind.data.frame('Exp#'=exp,dis)
+      write.xlsx(dis, file,colNames=TRUE)
+    })
+  output$m_d_opt_figura_cp<-renderPlot(width = 550,height = 500,{
+    validate(need(is.data.frame(m_d_opt_cp()),""),
+             errorClass = "myClass")
+    P<-m_d_opt_cp() ###disegno
+    
+    ## Design in coord (b,h)
+    b=1-P[,1]-P[,2]/2
+    h=(sqrt(3)/2)*P[,2]
+    
+    ## Generates triangle for the plot (on a plane, two coordinates)
+    trian <- expand.grid(base=seq(0,1,l=100), high=seq(0,sin(pi/3),l=87))
+    trian <- subset(trian, (base*sin(pi/3)*2)>high)
+    trian <- subset(trian, ((1-base)*sin(pi/3)*2)>high)
+    
+    ## Generates triangle in R^3 X1+X2+X3=1
+    new=data.frame(X1=1-trian$base-trian$high/sqrt(3))
+    new$X2=trian$high*2/sqrt(3)
+    new$X3=trian$base-trian$high/sqrt(3)
+    
+    ## Builds data.frame triangle in 2 (base,high), 3 (X1,X2,X3) variables e column condition (cond)
+    cond=new$X1>=0 & new$X2>=0 & new$X3>=0 & new$X1<=1 & new$X2<=1 & new$X3<=1
+    trian.new.cond=cbind(trian,new,cond)
+    
+    ## Builds triangle in 2 (base,high), 3 (X1,X2,X3) variables satisfying constraints
+    trian.cond=trian.new.cond[trian.new.cond$cond==TRUE,1:2]
+    new.cond=trian.new.cond[trian.new.cond$cond==TRUE,3:5]
+    
+    ## Creates function set grid e axis labels
+    grade.trellis <- function(from=0.2, to=0.8, step=0.2, col=1, lty=2, lwd=0.5){
+      x1 <- seq(from, to, step)
+      x2 <- x1/2
+      y2 <- x1*sqrt(3)/2
+      x3 <- (1-x1)*0.5+x1
+      y3 <- sqrt(3)/2-x1*sqrt(3)/2
+      lattice::panel.segments(x1, 0, x2, y2, col=col, lty=lty, lwd=lwd)
+      lattice::panel.text(x1, 0, label=x1, pos=1)
+      lattice::panel.segments(x1, 0, x3, y3, col=col, lty=lty, lwd=lwd)
+      lattice::panel.text(x2, y2, label=rev(x1), pos=2)
+      lattice::panel.segments(x2, y2, 1-x2, y2, col=col, lty=lty, lwd=lwd)
+      lattice::panel.text(x3, y3, label=rev(x1), pos=4)
+    }
+    
+    q=lattice::xyplot(trian.cond$high~trian.cond$base,par.settings=list(axis.line=list(col=NA),
+                                                                        axis.text=list(col=NA)),
+                      xlab=NULL, ylab=NULL, pch=19,cex=0.0,col="gray47",
+                      xlim=c(-0.1,1.1), ylim=c(-0.1,0.96))
+    
+    print(q)
+    
+    lattice::trellis.focus("panel", 1, 1, highlight=FALSE)
+    lattice::panel.segments(c(0,0,0.5), c(0,0,sqrt(3)/2), c(1,1/2,1), c(0,sqrt(3)/2,0))
+    lattice::panel.xyplot(x=b,y=h, pch=19,cex=0.5,col="red")
+    #lattice::panel.text(x=b,y=h, col="red",label=c(1:nrow(P)),pos=1,font=2,cex=1.2)
+    grade.trellis()
+    lattice::panel.text(.55,0.92,label=colnames(P)[2],pos=2)
+    lattice::panel.text(0,-0.05,label=colnames(P)[1],pos=2)
+    lattice::panel.text(1,-0.05,label=colnames(P)[3],pos=4)
+    lattice::trellis.unfocus()
+  })
+  
+
+  
+  
+  ###modello
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  m_d_opt_var_sel<-reactive({
+    validate(need(is.data.frame(m_d_opt_cp()),""))
+    var<-colnames(m_d_opt_cp())
+    frm_lin<-paste0(var,collapse = '+')
+    frm_lin<-paste0('-1+',frm_lin)
+    quad<-paste0('I(',var,'^2)')
+    frm_quad<-paste0(quad,collapse = '+')
+    #frm_inter<-paste0(var,collapse = '*')
+    frm_inter<-paste0('(',frm_lin,')^2')
+    if(!'2'%in%input$m_d_opt_mod_tipo)frm<-frm_lin
+    if('2'%in%input$m_d_opt_mod_tipo)frm<-paste0(frm_lin,'+',frm_quad,'+',frm_inter)
+    frm<-paste0('~',frm)
+    X<-model.matrix(as.formula(frm),m_d_opt_cp())
+    n<-ncol(m_d_opt_cp())
+    var<-colnames(X[,1:n])
+    if('2'%in%input$m_d_opt_mod_tipo){
+      sel_q<-rep(1,n)
+      for(i in 1:n){
+        if(length(unique(X[,i]))==2 | length(unique(X[,i]))==1)sel_q[i]=0
+      }
+      D<-as.data.frame(matrix(sel_q,ncol=n))
+      colnames(D)<-colnames(X[,1:n])
+      Y<-model.matrix(as.formula(paste0('~',frm_lin,'+',frm_quad,'-1')),D)
+      m<-ncol(Y)
+      var_quad<-colnames(Y)[(n+1):m][Y[1,(n+1):m]==1]
+      sel_i<-rep(1,n)
+      for(i in 1:n){
+        if(length(unique(X[,i]))==2&min(unique(X[,i]))==0&max(unique(X[,i]))==1)sel_i[i]=0
+      }
+      D<-as.data.frame(matrix(sel_i,ncol=n))
+      colnames(D)<-colnames(X[,1:n])
+      Z<-model.matrix(as.formula(paste0('~',frm_lin,'+',frm_inter)),D)
+      m<-ncol(Z)
+      var_inter<-colnames(Z)[(n+1):m][Z[1,(n+1):m]==1]
+      var<-c(var,var_quad,var_inter)
+    }
+    var
+  })
+  output$m_d_opt_mod_variabx<-renderUI({
+    validate(need(is.data.frame(m_d_opt_cp()),""))
+    selectizeInput(inputId = "m_d_opt_mod_variabx",label="Termini modello (x)",
+                   #div("Termini modello (x)",style="font-weight: 400"),
+                   choices = m_d_opt_var_sel(),
+                   selected=m_d_opt_var_sel(),
+                   multiple=TRUE)
+  })
+  m_d_opt_formula<-reactive({
+    req(input$m_d_opt_mod_variabx)
+    var<-input$m_d_opt_mod_variabx
+    if('1'%in%input$m_d_opt_mod_tipo){
+      frm<-paste0(var,collapse = '+')
+    }
+    if(!'1'%in%input$m_d_opt_mod_tipo){
+      frm<-paste0(var,collapse = '+')
+      frm<-paste0('-1+',frm)
+    }
+    frm<-paste0('~',frm)
+    frm
+  })
+  output$m_d_opt_modello<-renderText({
+    validate(need(is.data.frame(m_d_opt_cp()),""))
+    req(input$m_d_opt_mod_variabx)
+    var<-input$m_d_opt_mod_variabx
+    var<-str_remove(var,"\\(")
+    var<-str_remove(var,"I")
+    var<-str_remove(var,"\\)")
+    if('1'%in%input$m_d_opt_mod_tipo){
+      frm<-paste0(var,collapse = '+')
+      frm<-paste0('1+',frm)
+    }
+    if(!'1'%in%input$m_d_opt_mod_tipo){
+      frm<-paste0(var,collapse = '+')
+    }
+    frm<-paste0('y ~ ',frm)
+    frm
+  })
+  output$m_d_opt_Lnumexp<-renderUI({
+    x<-model.matrix(formula(m_d_opt_formula()),m_d_opt_cp())
+    r<-nrow(x)
+    co<-ncol(x)
+    numericInput(inputId = 'm_d_opt_Lnumexp',label = 'Numero minimo di esperimenti',value = co,min = co,width = "30%")
+  })
+  output$m_d_opt_Unumexp<-renderUI({
+    req(input$m_d_opt_Lnumexp)
+    req(m_d_opt_cp())
+    x<-model.matrix(formula(m_d_opt_formula()),m_d_opt_cp())
+    r<-nrow(x)
+    co<-input$m_d_opt_Lnumexp
+    
+    numericInput(inputId = 'm_d_opt_Unumexp',label = 'Numero massimo di esperimenti',value = co,max=r,min=co,width = "30%")
+  })
+  m_d_opt_federov<-eventReactive(input$m_d_opt_calc,{
+    req(input$m_d_opt_Unumexp)
+    req(input$m_d_opt_Lnumexp)
+    fmrl<-formula(m_d_opt_formula())
+    data<-m_d_opt_cp()
+    nTrials<-input$m_d_opt_Unumexp
+    p <- input$m_d_opt_Lnumexp
+    nRepeats<-10
+    vif<-TRUE
+    logD<-FALSE
+    validate(need(input$m_d_opt_Unumexp>=input$m_d_opt_Lnumexp,""),
+             errorClass = "myClass") 
+    s = as.vector(NULL)
+    t = as.vector(NULL)
+    dis<-as.list(NULL)
+    if (vif) 
+      v = as.vector(NULL)
+    n<-nTrials-p+1
+    withProgress(message = 'D-ottimale:',value = 0, {
+      for (i in p:nTrials) {
+        incProgress(detail = paste("NumExp", i),amount = 1/n)
+        Dis.opt<-tryCatch(AlgDesign::optFederov(fmrl, nRepeats = nRepeats, 
+                                                data = data, nTrials = i, criterion = "D"),
+                          error = function(e) "errore")
+        
+        if(Dis.opt=="errore")next()
+        s[i - (p - 1)] = i
+        t[i - (p - 1)] = Dis.opt$D
+        if (logD) 
+          t[i - (p - 1)] = log10(Dis.opt$D)
+        if (vif) 
+          v[i - (p - 1)] = max(vif(model.matrix(fmrl, Dis.opt$design)))
+        dis[[i - (p - 1)]]<-Dis.opt$design
+      }
+    })
+    X = data.frame(NumExp = s, D = t, Vif.max=v)
+    list(X=X,dis=dis)
+  })
+  output$m_d_opt_table<-renderTable(digits = 4,{
+    validate(need(ncol(m_d_opt_federov()$X)>0 & sum(is.na(m_d_opt_federov()$X))==0 ,
+                  'Trovata matrice con rango insufficiente \nRiprovare!'))
+    m_d_opt_federov()$X
+  })
+  
+  msg1<-eventReactive(input$m_d_opt_calc,{
+    df<-tryCatch(m_d_opt_cp() ,
+                 error = function(e) "1")
+    validate(need(df!='1','Costruire la matrice dei punti candidati!'),errorClass = "myClass")
+  })
+  output$m_d_opt_msg1<-renderTable({
+    msg1()
+  })
+  output$m_d_opt_graf_D<-renderPlot({
+    validate(need(ncol(m_d_opt_federov()$X)>0 & sum(is.na(m_d_opt_federov()$X))==0,''))
+    plot(m_d_opt_federov()$X[,1],m_d_opt_federov()$X[,2],col='red',type='b',xlab='Numero di esperimenti',
+         ylab='D');grid()
+  })
+  output$m_d_opt_graf_Vif<-renderPlot({
+    validate(need(ncol(m_d_opt_federov()$X)>0 & sum(is.na(m_d_opt_federov()$X))==0,''))
+    maxinfl<-max(m_d_opt_federov()$X[,3])
+    plot(m_d_opt_federov()$X[,1],m_d_opt_federov()$X[,3],col='red',type='b',xlab='Numero di esperimenti',
+         ylim=c(1,max(maxinfl,8)),
+         ylab='Vif.max');grid()
+    abline(h = 4, lty = 2, col = "green4")
+    abline(h = 8, lty = 2, col = "red")
+  })
+  output$m_d_opt_numexp<-renderUI({
+    #exp<-m_d_opt_federov()$X[,1]
+    #m<-min(exp)
+    #M<-max(exp)
+    req(input$m_d_opt_Unumexp)
+    req(input$m_d_opt_Lnumexp)
+    m<-input$m_d_opt_Lnumexp
+    M<-input$m_d_opt_Unumexp
+    numericInput(inputId = 'm_d_opt_numexp',label = 'Numero di esperimenti',value = m,min = m,max=M,width = "30%")
+  })
+  output$m_d_opt_dis_opt<-renderTable({
+    req(input$m_d_opt_numexp)
+    req(input$m_d_opt_Lnumexp)
+    validate(need(ncol(m_d_opt_federov()$X)>0 & sum(is.na(m_d_opt_federov()$X))==0,''))
+    dis<-m_d_opt_federov()$dis[[input$m_d_opt_numexp-(input$m_d_opt_Lnumexp-1)]]
+    exp<-seq(1,nrow(dis))
+    dis<-cbind.data.frame('Exp#'=exp,dis)
+    dis
+  })
+  output$m_d_opt_dis_download <- downloadHandler(
+    filename = "m_d_opt.xlsx", 
+    content = function(file) {
+      dis<-m_d_opt_federov()$dis[[input$m_d_opt_numexp-(input$m_d_opt_Lnumexp-1)]]
+      exp<-seq(1,nrow(dis))
+      dis<-cbind.data.frame('Exp#'=exp,dis)
+      write.xlsx(dis, file,colNames=TRUE)
+    })
+  output$m_d_opt_vf<-renderTable({
+    req(input$m_d_opt_numexp)
+    req(input$m_d_opt_Lnumexp)
+    validate(need(ncol(m_d_opt_federov()$X)>0 & sum(is.na(m_d_opt_federov()$X))==0,''))
+    frml<-formula(m_d_opt_formula())
+    dis<-m_d_opt_federov()$dis[[input$m_d_opt_numexp-(input$m_d_opt_Lnumexp-1)]]
+    vf<-vif(model.matrix(frml, dis))
+    cn<-attr(vf,'names')
+    cn<-str_remove(cn,"\\(")
+    cn<-str_remove(cn,"I")
+    cn<-str_remove(cn,"\\)")
+    attr(vf,'names')<-cn
+    t(vf)
+  })
+  output$m_d_opt_ag_importa_incolla_spazio<-renderUI({
+    req(input$m_d_opt_ag_importa==1)
+    br()
+  })
+  output$m_d_opt_ag_importa_incolla<-renderUI({
+    req(input$m_d_opt_ag_importa==1)
+    actionButton("m_d_opt_ag_incolla", label = "Incolla")
+  })
+  output$m_d_opt_ag_importa_incolla_spazio1<-renderUI({
+    req(input$m_d_opt_ag_importa==1)
+    hr()
+  })
+  output$m_d_opt_ag_importa_excel_brws<-renderUI({
+    req(input$m_d_opt_ag_importa==2)
+    fileInput("m_d_opt_ag_file_xlsx",label='',
+              multiple = FALSE,
+              accept = c(".xlx",".xlsx"))
+  })
+  m_d_opt_ag_dis_paste<-eventReactive(input$m_d_opt_ag_incolla,{
+    df<-tryCatch(read.DIF(file = "clipboard",header = TRUE,transpose = TRUE),
+                 error = function(e) "Selezionare un dataset!")
+    df
+  })
+  m_d_opt_ag_dis_xls<-reactive({
+    req(input$m_d_opt_ag_file_xlsx$datapath)
+    df=read_excel(path = input$m_d_opt_ag_file_xlsx$datapath,sheet = 1,col_names = TRUE)
+    if(sum(df[,1]==c(1:nrow(df)))==nrow(df))df<-df[,-1]
+    df
+  })
+  m_d_opt_ag_dis<-reactive({
+    if(input$m_d_opt_ag_importa==1)df<-m_d_opt_ag_dis_paste()
+    if(input$m_d_opt_ag_importa==2)df<-m_d_opt_ag_dis_xls()
+    df
+  })
+  output$m_d_opt_dis_tbl<-renderTable({
+    validate(need(is.data.frame(m_d_opt_ag_dis()),"Selezionare un dataset!\n "),
+             errorClass = "myClass") 
+    m_d_opt_ag_dis()
+  })
+  m_d_opt_ag_var_sel<-reactive({
+    validate(need(is.data.frame(m_d_opt_ag_dis()) & is.data.frame(m_d_opt_cp()),""))
+    df1<-m_d_opt_ag_dis()
+    df2<-m_d_opt_cp()
+    var<-colnames(df1)
+    colnames(df2)=var 
+    data<-rbind.data.frame(df1,df2) 
+    var<-colnames(data)
+    frm_lin<-paste0(var,collapse = '+')
+    frm_lin<-paste0('-1+',frm_lin)
+    quad<-paste0('I(',var,'^2)')
+    frm_quad<-paste0(quad,collapse = '+')
+    #frm_inter<-paste0(var,collapse = '*')
+    frm_inter<-paste0('(',frm_lin,')^2')
+    if(!'2'%in%input$m_d_opt_ag_mod_tipo)frm<-frm_lin
+    if('2'%in%input$m_d_opt_ag_mod_tipo)frm<-paste0(frm_lin,'+',frm_quad,'+',frm_inter)
+    frm<-paste0('~',frm)
+    X<-model.matrix(as.formula(frm),data)
+    n<-ncol(m_d_opt_ag_dis())
+    var<-colnames(X[,1:n])
+    if('2'%in%input$m_d_opt_ag_mod_tipo){
+      sel_q<-rep(1,n)
+      for(i in 1:n){
+        if(length(unique(X[,i]))==2 | length(unique(X[,i]))==1)sel_q[i]=0
+      }
+      D<-as.data.frame(matrix(sel_q,ncol=n))
+      colnames(D)<-colnames(X[,1:n])
+      Y<-model.matrix(as.formula(paste0('~',frm_lin,'+',frm_quad,'-1')),D)
+      m<-ncol(Y)
+      var_quad<-colnames(Y)[(n+1):m][Y[1,(n+1):m]==1]
+      sel_i<-rep(1,n)
+      for(i in 1:n){
+        if(length(unique(X[,i]))==2&min(unique(X[,i]))==0&max(unique(X[,i]))==1)sel_i[i]=0
+      }
+      D<-as.data.frame(matrix(sel_i,ncol=n))
+      colnames(D)<-colnames(X[,1:n])
+      Z<-model.matrix(as.formula(paste0('~',frm_lin,'+',frm_inter)),D)
+      m<-ncol(Z)
+      var_inter<-colnames(Z)[(n+1):m][Z[1,(n+1):m]==1]
+      var<-c(var,var_quad,var_inter)
+    }
+    var
+  })
+  output$m_d_opt_ag_mod_variabx<-renderUI({
+    validate(need(is.data.frame(m_d_opt_ag_dis()) & is.data.frame(m_d_opt_cp()),""))
+    selectizeInput(inputId = "m_d_opt_ag_mod_variabx",label="Termini modello (x)",
+                   #div("Termini modello (x)",style="font-weight: 400"),
+                   choices = m_d_opt_ag_var_sel(),
+                   selected=m_d_opt_ag_var_sel(),
+                   multiple=TRUE)
+  })
+  m_d_opt_ag_formula<-reactive({
+    req(input$m_d_opt_ag_mod_variabx)
+    var<-input$m_d_opt_ag_mod_variabx
+    if('1'%in%input$m_d_opt_ag_mod_tipo){
+      frm<-paste0(var,collapse = '+')
+    }
+    if(!'1'%in%input$m_d_opt_ag_mod_tipo){
+      frm<-paste0(var,collapse = '+')
+      frm<-paste0('-1+',frm)
+    }
+    frm<-paste0('~',frm)
+    frm
+  })
+  output$m_d_opt_ag_modello<-renderText({
+    validate(need(is.data.frame(m_d_opt_ag_dis()) & is.data.frame(m_d_opt_cp()),""))
+    req(input$m_d_opt_ag_mod_variabx)
+    var<-input$m_d_opt_ag_mod_variabx
+    var<-str_remove(var,"\\(")
+    var<-str_remove(var,"I")
+    var<-str_remove(var,"\\)")
+    if('1'%in%input$m_d_opt_ag_mod_tipo){
+      frm<-paste0(var,collapse = '+')
+      frm<-paste0('1+',frm)
+    }
+    if(!'1'%in%input$m_d_opt_ag_mod_tipo){
+      frm<-paste0(var,collapse = '+')
+    }
+    frm<-paste0('y ~ ',frm)
+    frm
+  })
+  output$m_d_opt_ag_Lnumexp<-renderUI({
+    x<-model.matrix(formula(m_d_opt_ag_formula()),m_d_opt_ag_dis())
+    r<-nrow(x)
+    co<-max(ncol(x),r)+1
+    numericInput(inputId = 'm_d_opt_ag_Lnumexp',label = 'Numero minimo di esperimenti',value = co,min = co,width = "30%")
+  })
+  output$m_d_opt_ag_Unumexp<-renderUI({
+    req(input$m_d_opt_ag_Lnumexp)
+    x<-model.matrix(formula(m_d_opt_ag_formula()),m_d_opt_ag_dis())
+    r<-nrow(x)+nrow(m_d_opt_cp())
+    co<-input$m_d_opt_ag_Lnumexp
+    numericInput(inputId = 'm_d_opt_ag_Unumexp',label = 'Numero massimo di esperimenti',value = co,max=r,min=co,width = "30%")
+  })
+  m_d_opt_ag_federov<-eventReactive(input$m_d_opt_ag_calc,{
+    req(input$m_d_opt_ag_Unumexp)
+    req(input$m_d_opt_ag_Lnumexp)
+    fmrl<-formula(m_d_opt_ag_formula())
+    df1<-m_d_opt_ag_dis()
+    nr<-nrow(df1)
+    df2<-m_d_opt_cp()
+    var<-colnames(df1)
+    colnames(df2)=var 
+    data<-rbind.data.frame(df1,df2) 
+    X<-model.matrix(fmrl,data)
+    nTrials<-input$m_d_opt_ag_Unumexp
+    p <- input$m_d_opt_ag_Lnumexp
+    nRepeats<-10
+    vif<-TRUE
+    logD<-FALSE
+    s = as.vector(NULL)
+    t = as.vector(NULL)
+    dis<-as.list(NULL)
+    if (vif) 
+      v = as.vector(NULL)
+    n<-nTrials-p+1
+    withProgress(message = 'D-ottimale:',value = 0, {
+      for (i in p:nTrials) {
+        incProgress(detail = paste("NumExp", i),amount = 1/n)
+        Dis.opt<-tryCatch(AlgDesign::optFederov(fmrl, nRepeats = nRepeats,augment = TRUE,rows = 1:nr,
+                                                data = data, nTrials = i, criterion = "D"),
+                          error = function(e) "errore")
+        if(Dis.opt=="errore")next()
+        s[i - (p - 1)] = i
+        t[i - (p - 1)] = Dis.opt$D
+        if (logD) 
+          t[i - (p - 1)] = log10(Dis.opt$D)
+        if (vif) 
+          v[i - (p - 1)] = max(vif(model.matrix(fmrl, Dis.opt$design)))
+        dis[[i - (p - 1)]]<-Dis.opt$design
+      }
+    })
+    X = data.frame(NumExp = s, D = t, Vif.max=v)
+    list(X=X,dis=dis)
+  })
+  m_d_opt_ag_msg1<-eventReactive(input$m_d_opt_ag_calc,{
+    df<-tryCatch(m_d_opt_ag_dis() ,
+                 error = function(e) "errore")
+    validate(need(df!='errore','Importare il disegno degli esperimenti eseguiti!'),errorClass = "myClass")
+  })
+  output$m_d_opt_ag_msg1_tb<-renderTable({
+    m_d_opt_ag_msg1()
+  })
+  m_d_opt_ag_msg2<-eventReactive(input$m_d_opt_ag_calc,{
+    df<-tryCatch(m_d_opt_cp() ,
+                 error = function(e) "aiuto!")
+    validate(need(df!='aiuto!','Importa matrice punti candidati!'),errorClass = "myClass")
+  })
+  output$m_d_opt_ag_msg2_tb<-renderTable({
+    m_d_opt_ag_msg2()
+  })
+  m_d_opt_ag_msg3<-eventReactive(input$m_d_opt_ag_calc,{
+    df<-tryCatch(m_d_opt_ag_dis() ,
+                 error = function(e) "aiuto!")
+    validate(need(is.data.frame(df)&df!='aiuto!','Selezionare un dataset!'),errorClass = "myClass")
+  })
+  output$m_d_opt_ag_msg3_tb<-renderTable({
+    m_d_opt_ag_msg3()
+  })
+  output$m_d_opt_ag_table<-renderTable(digits = 4,{
+    validate(need(ncol(m_d_opt_ag_federov()$X)>0 & sum(is.na(m_d_opt_ag_federov()$X))==0 ,
+                  'Trovata matrice con rango insufficiente \n Riprovare!'))
+    m_d_opt_ag_federov()$X
+  })
+  output$m_d_opt_ag_graf_D<-renderPlot({
+    #validate(need(input$m_d_opt_ag_Unumexp>=input$m_d_opt_ag_Lnumexp," "),
+    #errorClass = "myClass")
+    validate(need(ncol(m_d_opt_ag_federov()$X)>0 & sum(is.na(m_d_opt_ag_federov()$X))==0,''))
+    plot(m_d_opt_ag_federov()$X[,1],m_d_opt_ag_federov()$X[,2],col='red',type='b',xlab='Numero di esperimenti',
+         ylab='D');grid()
+  })
+  output$m_d_opt_ag_graf_Vif<-renderPlot({
+    #validate(need(input$m_d_opt_ag_Unumexp>=input$m_d_opt_ag_Lnumexp," "),
+    #errorClass = "myClass")
+    validate(need(ncol(m_d_opt_ag_federov()$X)>2 & sum(is.na(m_d_opt_ag_federov()$X))==0,''))
+    maxinfl<-max(m_d_opt_ag_federov()$X[,3])
+    plot(m_d_opt_ag_federov()$X[,1],m_d_opt_ag_federov()$X[,3],col='red',type='b',xlab='Numero di esperimenti',
+         ylim=c(1,max(maxinfl,8)),
+         ylab='Vif.max');grid()
+    abline(h = 4, lty = 2, col = "green4")
+    abline(h = 8, lty = 2, col = "red")
+  })
+  output$m_d_opt_ag_numexp<-renderUI({
+    #exp<-m_d_opt_ag_federov()$X[,1]
+    #m<-min(exp)
+    #M<-max(exp)
+    validate(need(ncol(m_d_opt_ag_federov()$X)>0 & sum(is.na(m_d_opt_ag_federov()$X))==0,''))
+    req(input$m_d_opt_ag_Unumexp)
+    req(input$m_d_opt_ag_Lnumexp)
+    m<-input$m_d_opt_ag_Lnumexp
+    M<-input$m_d_opt_ag_Unumexp
+    numericInput(inputId = 'm_d_opt_ag_numexp',label = paste('Numero di esperimenti (di cui',nrow(m_d_opt_ag_dis()),
+                                                           'già eseguiti)'),value = m,min = m,max=M,width = "30%")
+  })
+  output$m_d_opt_ag_expes<-renderUI({
+    validate(need(ncol(m_d_opt_ag_federov()$X)>0 & sum(is.na(m_d_opt_ag_federov()$X))==0,''))
+    paste('di cui',nrow(m_d_opt_ag_dis()),'exp. già eseguiti')
+  })
+  output$m_d_opt_ag_dis_opt<-renderTable({
+    validate(need(ncol(m_d_opt_ag_federov()$X)>0 & sum(is.na(m_d_opt_ag_federov()$X))==0,''))
+    req(input$m_d_opt_ag_numexp)
+    req(input$m_d_opt_ag_Lnumexp)
+    validate(need(input$m_d_opt_ag_numexp-(input$m_d_opt_ag_Lnumexp-1)>0,''))
+    dis<-m_d_opt_ag_federov()$dis[[input$m_d_opt_ag_numexp-(input$m_d_opt_ag_Lnumexp-1)]]
+    exp<-seq(1,nrow(dis))
+    dis<-cbind.data.frame('Exp#'=exp,dis)
+    dis
+  })
+  output$m_d_opt_ag_dis_download <- downloadHandler(
+    filename = "m_d_opt_ag.xlsx", 
+    content = function(file) {
+      dis<-m_d_opt_ag_federov()$dis[[input$m_d_opt_ag_numexp-(input$m_d_opt_ag_Lnumexp-1)]]
+      exp<-seq(1,nrow(dis))
+      dis<-cbind.data.frame('Exp#'=exp,dis)
+      write.xlsx(dis, file,colNames=TRUE)
+    })
+  output$m_d_opt_ag_vf<-renderTable({
+    req(input$m_d_opt_ag_numexp)
+    req(input$m_d_opt_ag_Lnumexp)
+    validate(need(ncol(m_d_opt_ag_federov()$X)>2 & sum(is.na(m_d_opt_ag_federov()$X))==0,''))
+    frml<-formula(m_d_opt_ag_formula())
+    dis<-m_d_opt_ag_federov()$dis[[input$m_d_opt_ag_numexp-(input$m_d_opt_ag_Lnumexp-1)]]
+    vf<-vif(model.matrix(frml, dis))
+    cn<-attr(vf,'names')
+    cn<-str_remove(cn,"\\(")
+    cn<-str_remove(cn,"I")
+    cn<-str_remove(cn,"\\)")
+    attr(vf,'names')<-cn
+    t(vf)
+  })
   
   
   

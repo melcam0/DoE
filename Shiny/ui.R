@@ -814,8 +814,6 @@ body<-dashboardBody(
                                                   verbatimTextOutput('m_simplex_misind_media'),
                                                   verbatimTextOutput('m_simplex_misind_sd'),
                                                   verbatimTextOutput('m_simplex_misind_gdl')))))),
-
-    
     
     tabItem(tabName = "m_d_opt",
             fluidPage(titlePanel(uiOutput("m_d_opt_titolo")),
@@ -860,24 +858,13 @@ body<-dashboardBody(
                                                   br(),
                                                   br(),
                                                   br())),
-                              
-                                  
-                                
-                                  
-                                  
-                                  
-
-                                  
-                                  
-                                  
-                                  
                                   
                                   tabPanel('D-ottimale',
                                            column(12,
                                                   br()),
                                            column(6,
                                                   checkboxGroupInput("m_d_opt_mod_tipo", label = 'Modello con:',inline = TRUE,
-                                                                     choices = list("Intercetta" = 1,'Termini di ordine superiore'=2),selected = c(1,2))),
+                                                                     choices = list("Termini quadratici" = 1,'Termine cubico'=2),selected = c(1,2))),
                                            column(6,
                                                   uiOutput("m_d_opt_mod_variabx")),
                                            column(12,
@@ -892,14 +879,13 @@ body<-dashboardBody(
                                                   hr()),
                                            column(6,
                                                   htmlOutput('m_d_opt_Unumexp')),
-                                           column(12,
+                                           column(12),
+                                           column(6,
                                                   tableOutput('m_d_opt_table'),
                                                   tableOutput('m_d_opt_msg1'),
                                                   br()),
                                            column(6,
                                                   plotOutput('m_d_opt_graf_D')),
-                                           column(6,
-                                                  plotOutput('m_d_opt_graf_Vif')),
                                            column(12,
                                                   br()),
                                            column(8,
@@ -908,11 +894,8 @@ body<-dashboardBody(
                                                   #uiOutput('m_d_opt_numexp'),
                                                   h4('Disegno D-ottimale'),
                                                   div(style = 'overflow-x: scroll',tableOutput("m_d_opt_dis_opt")),
-                                                  downloadButton("m_d_opt_dis_download"),
-                                                  hr(),
-                                                  h5('VIF'),
-                                                  div(style = 'overflow-x: scroll',tableOutput("m_d_opt_vf")))
-                                  ),
+                                                  downloadButton("m_d_opt_dis_download"))),
+      
                                   tabPanel('D-ottimale per aggiunta',
                                            column(12,
                                                   br()),
@@ -932,7 +915,7 @@ body<-dashboardBody(
                                                   br()),
                                            column(6,
                                                   checkboxGroupInput("m_d_opt_ag_mod_tipo", label = 'Modello con:',inline = TRUE,
-                                                                     choices = list("Intercetta" = 1,'Termini di ordine superiore'=2),selected = c(1,2))),
+                                                                     choices = list("Termini quadratici" = 1,'Termine cubico'=2),selected = c(1,2))),
                                            column(6,
                                                   uiOutput("m_d_opt_ag_mod_variabx")),
                                            column(12,
@@ -947,7 +930,8 @@ body<-dashboardBody(
                                                   hr()),
                                            column(6,
                                                   htmlOutput('m_d_opt_ag_Unumexp')),
-                                           column(12,
+                                           column(12),
+                                           column(6,
                                                   tableOutput('m_d_opt_ag_table'),
                                                   tableOutput('m_d_opt_ag_msg1_tb'),
                                                   tableOutput('m_d_opt_ag_msg2_tb'),
@@ -955,8 +939,6 @@ body<-dashboardBody(
                                                   br()),
                                            column(6,
                                                   plotOutput('m_d_opt_ag_graf_D')),
-                                           column(6,
-                                                  plotOutput('m_d_opt_ag_graf_Vif')),
                                            column(12,
                                                   br()),
                                            column(8,
@@ -966,10 +948,7 @@ body<-dashboardBody(
                                                   h4('Disegno D-ottimale'),
                                                   h6(uiOutput('m_d_opt_ag_expes')),
                                                   div(style = 'overflow-x: scroll',tableOutput("m_d_opt_ag_dis_opt")),
-                                                  downloadButton("m_d_opt_ag_dis_download"),
-                                                  hr(),
-                                                  h5('VIF'),
-                                                  div(style = 'overflow-x: scroll',tableOutput("m_d_opt_ag_vf")))
+                                                  downloadButton("m_d_opt_ag_dis_download"))
                                   )
                       )))
     

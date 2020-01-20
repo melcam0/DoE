@@ -5158,60 +5158,6 @@ server <- function (input , output, session ){
                 choices = list("blu" = 1, "verde" = 2, "rosso" = 3,"nero" = 4,"viola" = 5), 
                 selected = 3,width="130px")
   })
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
   # D-ottimale -----------------------------------------------------------------  
   output$m_d_opt_titolo<-renderUI({
     HTML("D-ottimale" )
@@ -5428,75 +5374,18 @@ server <- function (input , output, session ){
     lattice::panel.text(1,-0.05,label=colnames(P)[3],pos=4)
     lattice::trellis.unfocus()
   })
-  
-
-  
-  
-  ###modello
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
   m_d_opt_var_sel<-reactive({
     validate(need(is.data.frame(m_d_opt_cp()),""))
     var<-colnames(m_d_opt_cp())
-    frm_lin<-paste0(var,collapse = '+')
-    frm_lin<-paste0('-1+',frm_lin)
-    quad<-paste0('I(',var,'^2)')
-    frm_quad<-paste0(quad,collapse = '+')
-    #frm_inter<-paste0(var,collapse = '*')
-    frm_inter<-paste0('(',frm_lin,')^2')
-    if(!'2'%in%input$m_d_opt_mod_tipo)frm<-frm_lin
-    if('2'%in%input$m_d_opt_mod_tipo)frm<-paste0(frm_lin,'+',frm_quad,'+',frm_inter)
+    frm<-paste0(var,collapse = '*')
+    frm<-paste0('-1+',frm)
     frm<-paste0('~',frm)
     X<-model.matrix(as.formula(frm),m_d_opt_cp())
-    n<-ncol(m_d_opt_cp())
-    var<-colnames(X[,1:n])
-    if('2'%in%input$m_d_opt_mod_tipo){
-      sel_q<-rep(1,n)
-      for(i in 1:n){
-        if(length(unique(X[,i]))==2 | length(unique(X[,i]))==1)sel_q[i]=0
-      }
-      D<-as.data.frame(matrix(sel_q,ncol=n))
-      colnames(D)<-colnames(X[,1:n])
-      Y<-model.matrix(as.formula(paste0('~',frm_lin,'+',frm_quad,'-1')),D)
-      m<-ncol(Y)
-      var_quad<-colnames(Y)[(n+1):m][Y[1,(n+1):m]==1]
-      sel_i<-rep(1,n)
-      for(i in 1:n){
-        if(length(unique(X[,i]))==2&min(unique(X[,i]))==0&max(unique(X[,i]))==1)sel_i[i]=0
-      }
-      D<-as.data.frame(matrix(sel_i,ncol=n))
-      colnames(D)<-colnames(X[,1:n])
-      Z<-model.matrix(as.formula(paste0('~',frm_lin,'+',frm_inter)),D)
-      m<-ncol(Z)
-      var_inter<-colnames(Z)[(n+1):m][Z[1,(n+1):m]==1]
-      var<-c(var,var_quad,var_inter)
-    }
+    var<-colnames(X)
+    if((!'1'%in%input$m_d_opt_mod_tipo) & (!'2'%in%input$m_d_opt_mod_tipo))var<-var[1:3]
+    if(('1'%in%input$m_d_opt_mod_tipo) & (!'2'%in%input$m_d_opt_mod_tipo))var<-var[1:6]
+    if(('1'%in%input$m_d_opt_mod_tipo) & ('2'%in%input$m_d_opt_mod_tipo))var<-var[1:7]
+    if((!'1'%in%input$m_d_opt_mod_tipo) & ('2'%in%input$m_d_opt_mod_tipo))var<-var[c(1:3,7)]
     var
   })
   output$m_d_opt_mod_variabx<-renderUI({
@@ -5510,13 +5399,8 @@ server <- function (input , output, session ){
   m_d_opt_formula<-reactive({
     req(input$m_d_opt_mod_variabx)
     var<-input$m_d_opt_mod_variabx
-    if('1'%in%input$m_d_opt_mod_tipo){
-      frm<-paste0(var,collapse = '+')
-    }
-    if(!'1'%in%input$m_d_opt_mod_tipo){
-      frm<-paste0(var,collapse = '+')
-      frm<-paste0('-1+',frm)
-    }
+    frm<-paste0(var,collapse = '+')
+    frm<-paste0('-1 +',frm)
     frm<-paste0('~',frm)
     frm
   })
@@ -5524,16 +5408,7 @@ server <- function (input , output, session ){
     validate(need(is.data.frame(m_d_opt_cp()),""))
     req(input$m_d_opt_mod_variabx)
     var<-input$m_d_opt_mod_variabx
-    var<-str_remove(var,"\\(")
-    var<-str_remove(var,"I")
-    var<-str_remove(var,"\\)")
-    if('1'%in%input$m_d_opt_mod_tipo){
-      frm<-paste0(var,collapse = '+')
-      frm<-paste0('1+',frm)
-    }
-    if(!'1'%in%input$m_d_opt_mod_tipo){
-      frm<-paste0(var,collapse = '+')
-    }
+    frm<-paste0(var,collapse = '+')
     frm<-paste0('y ~ ',frm)
     frm
   })
@@ -5549,7 +5424,6 @@ server <- function (input , output, session ){
     x<-model.matrix(formula(m_d_opt_formula()),m_d_opt_cp())
     r<-nrow(x)
     co<-input$m_d_opt_Lnumexp
-    
     numericInput(inputId = 'm_d_opt_Unumexp',label = 'Numero massimo di esperimenti',value = co,max=r,min=co,width = "30%")
   })
   m_d_opt_federov<-eventReactive(input$m_d_opt_calc,{
@@ -5560,15 +5434,15 @@ server <- function (input , output, session ){
     nTrials<-input$m_d_opt_Unumexp
     p <- input$m_d_opt_Lnumexp
     nRepeats<-10
-    vif<-TRUE
+    #vif<-TRUE
     logD<-FALSE
     validate(need(input$m_d_opt_Unumexp>=input$m_d_opt_Lnumexp,""),
              errorClass = "myClass") 
     s = as.vector(NULL)
     t = as.vector(NULL)
     dis<-as.list(NULL)
-    if (vif) 
-      v = as.vector(NULL)
+    #if (vif) 
+      #v = as.vector(NULL)
     n<-nTrials-p+1
     withProgress(message = 'D-ottimale:',value = 0, {
       for (i in p:nTrials) {
@@ -5582,12 +5456,13 @@ server <- function (input , output, session ){
         t[i - (p - 1)] = Dis.opt$D
         if (logD) 
           t[i - (p - 1)] = log10(Dis.opt$D)
-        if (vif) 
-          v[i - (p - 1)] = max(vif(model.matrix(fmrl, Dis.opt$design)))
+        #if (vif) 
+          #v[i - (p - 1)] = max(vif(model.matrix(fmrl, Dis.opt$design)))
         dis[[i - (p - 1)]]<-Dis.opt$design
       }
     })
-    X = data.frame(NumExp = s, D = t, Vif.max=v)
+    #X = data.frame(NumExp = s, D = t, Vif.max=v)
+    X = data.frame(NumExp = s, D = t)
     list(X=X,dis=dis)
   })
   output$m_d_opt_table<-renderTable(digits = 4,{
@@ -5595,7 +5470,6 @@ server <- function (input , output, session ){
                   'Trovata matrice con rango insufficiente \nRiprovare!'))
     m_d_opt_federov()$X
   })
-  
   msg1<-eventReactive(input$m_d_opt_calc,{
     df<-tryCatch(m_d_opt_cp() ,
                  error = function(e) "1")
@@ -5608,15 +5482,6 @@ server <- function (input , output, session ){
     validate(need(ncol(m_d_opt_federov()$X)>0 & sum(is.na(m_d_opt_federov()$X))==0,''))
     plot(m_d_opt_federov()$X[,1],m_d_opt_federov()$X[,2],col='red',type='b',xlab='Numero di esperimenti',
          ylab='D');grid()
-  })
-  output$m_d_opt_graf_Vif<-renderPlot({
-    validate(need(ncol(m_d_opt_federov()$X)>0 & sum(is.na(m_d_opt_federov()$X))==0,''))
-    maxinfl<-max(m_d_opt_federov()$X[,3])
-    plot(m_d_opt_federov()$X[,1],m_d_opt_federov()$X[,3],col='red',type='b',xlab='Numero di esperimenti',
-         ylim=c(1,max(maxinfl,8)),
-         ylab='Vif.max');grid()
-    abline(h = 4, lty = 2, col = "green4")
-    abline(h = 8, lty = 2, col = "red")
   })
   output$m_d_opt_numexp<-renderUI({
     #exp<-m_d_opt_federov()$X[,1]
@@ -5645,20 +5510,7 @@ server <- function (input , output, session ){
       dis<-cbind.data.frame('Exp#'=exp,dis)
       write.xlsx(dis, file,colNames=TRUE)
     })
-  output$m_d_opt_vf<-renderTable({
-    req(input$m_d_opt_numexp)
-    req(input$m_d_opt_Lnumexp)
-    validate(need(ncol(m_d_opt_federov()$X)>0 & sum(is.na(m_d_opt_federov()$X))==0,''))
-    frml<-formula(m_d_opt_formula())
-    dis<-m_d_opt_federov()$dis[[input$m_d_opt_numexp-(input$m_d_opt_Lnumexp-1)]]
-    vf<-vif(model.matrix(frml, dis))
-    cn<-attr(vf,'names')
-    cn<-str_remove(cn,"\\(")
-    cn<-str_remove(cn,"I")
-    cn<-str_remove(cn,"\\)")
-    attr(vf,'names')<-cn
-    t(vf)
-  })
+
   output$m_d_opt_ag_importa_incolla_spazio<-renderUI({
     req(input$m_d_opt_ag_importa==1)
     br()
@@ -5706,39 +5558,15 @@ server <- function (input , output, session ){
     colnames(df2)=var 
     data<-rbind.data.frame(df1,df2) 
     var<-colnames(data)
-    frm_lin<-paste0(var,collapse = '+')
-    frm_lin<-paste0('-1+',frm_lin)
-    quad<-paste0('I(',var,'^2)')
-    frm_quad<-paste0(quad,collapse = '+')
-    #frm_inter<-paste0(var,collapse = '*')
-    frm_inter<-paste0('(',frm_lin,')^2')
-    if(!'2'%in%input$m_d_opt_ag_mod_tipo)frm<-frm_lin
-    if('2'%in%input$m_d_opt_ag_mod_tipo)frm<-paste0(frm_lin,'+',frm_quad,'+',frm_inter)
+    frm<-paste0(var,collapse = '*')
+    frm<-paste0('-1+',frm)
     frm<-paste0('~',frm)
-    X<-model.matrix(as.formula(frm),data)
-    n<-ncol(m_d_opt_ag_dis())
-    var<-colnames(X[,1:n])
-    if('2'%in%input$m_d_opt_ag_mod_tipo){
-      sel_q<-rep(1,n)
-      for(i in 1:n){
-        if(length(unique(X[,i]))==2 | length(unique(X[,i]))==1)sel_q[i]=0
-      }
-      D<-as.data.frame(matrix(sel_q,ncol=n))
-      colnames(D)<-colnames(X[,1:n])
-      Y<-model.matrix(as.formula(paste0('~',frm_lin,'+',frm_quad,'-1')),D)
-      m<-ncol(Y)
-      var_quad<-colnames(Y)[(n+1):m][Y[1,(n+1):m]==1]
-      sel_i<-rep(1,n)
-      for(i in 1:n){
-        if(length(unique(X[,i]))==2&min(unique(X[,i]))==0&max(unique(X[,i]))==1)sel_i[i]=0
-      }
-      D<-as.data.frame(matrix(sel_i,ncol=n))
-      colnames(D)<-colnames(X[,1:n])
-      Z<-model.matrix(as.formula(paste0('~',frm_lin,'+',frm_inter)),D)
-      m<-ncol(Z)
-      var_inter<-colnames(Z)[(n+1):m][Z[1,(n+1):m]==1]
-      var<-c(var,var_quad,var_inter)
-    }
+    X<-model.matrix(as.formula(frm),m_d_opt_cp())
+    var<-colnames(X)
+    if((!'1'%in%input$m_d_opt_ag_mod_tipo) & (!'2'%in%input$m_d_opt_ag_mod_tipo))var<-var[1:3]
+    if(('1'%in%input$m_d_opt_ag_mod_tipo) & (!'2'%in%input$m_d_opt_ag_mod_tipo))var<-var[1:6]
+    if(('1'%in%input$m_d_opt_ag_mod_tipo) & ('2'%in%input$m_d_opt_ag_mod_tipo))var<-var[1:7]
+    if((!'1'%in%input$m_d_opt_ag_mod_tipo) & ('2'%in%input$m_d_opt_mod_tipo))var<-var[c(1:3,7)]
     var
   })
   output$m_d_opt_ag_mod_variabx<-renderUI({
@@ -5752,13 +5580,8 @@ server <- function (input , output, session ){
   m_d_opt_ag_formula<-reactive({
     req(input$m_d_opt_ag_mod_variabx)
     var<-input$m_d_opt_ag_mod_variabx
-    if('1'%in%input$m_d_opt_ag_mod_tipo){
-      frm<-paste0(var,collapse = '+')
-    }
-    if(!'1'%in%input$m_d_opt_ag_mod_tipo){
-      frm<-paste0(var,collapse = '+')
-      frm<-paste0('-1+',frm)
-    }
+    frm<-paste0(var,collapse = '+')
+    frm<-paste0('-1 +',frm)
     frm<-paste0('~',frm)
     frm
   })
@@ -5766,16 +5589,7 @@ server <- function (input , output, session ){
     validate(need(is.data.frame(m_d_opt_ag_dis()) & is.data.frame(m_d_opt_cp()),""))
     req(input$m_d_opt_ag_mod_variabx)
     var<-input$m_d_opt_ag_mod_variabx
-    var<-str_remove(var,"\\(")
-    var<-str_remove(var,"I")
-    var<-str_remove(var,"\\)")
-    if('1'%in%input$m_d_opt_ag_mod_tipo){
-      frm<-paste0(var,collapse = '+')
-      frm<-paste0('1+',frm)
-    }
-    if(!'1'%in%input$m_d_opt_ag_mod_tipo){
-      frm<-paste0(var,collapse = '+')
-    }
+    frm<-paste0(var,collapse = '+')
     frm<-paste0('y ~ ',frm)
     frm
   })
@@ -5811,8 +5625,6 @@ server <- function (input , output, session ){
     s = as.vector(NULL)
     t = as.vector(NULL)
     dis<-as.list(NULL)
-    if (vif) 
-      v = as.vector(NULL)
     n<-nTrials-p+1
     withProgress(message = 'D-ottimale:',value = 0, {
       for (i in p:nTrials) {
@@ -5825,12 +5637,10 @@ server <- function (input , output, session ){
         t[i - (p - 1)] = Dis.opt$D
         if (logD) 
           t[i - (p - 1)] = log10(Dis.opt$D)
-        if (vif) 
-          v[i - (p - 1)] = max(vif(model.matrix(fmrl, Dis.opt$design)))
         dis[[i - (p - 1)]]<-Dis.opt$design
       }
     })
-    X = data.frame(NumExp = s, D = t, Vif.max=v)
+    X = data.frame(NumExp = s, D = t)
     list(X=X,dis=dis)
   })
   m_d_opt_ag_msg1<-eventReactive(input$m_d_opt_ag_calc,{
@@ -5869,17 +5679,6 @@ server <- function (input , output, session ){
     plot(m_d_opt_ag_federov()$X[,1],m_d_opt_ag_federov()$X[,2],col='red',type='b',xlab='Numero di esperimenti',
          ylab='D');grid()
   })
-  output$m_d_opt_ag_graf_Vif<-renderPlot({
-    #validate(need(input$m_d_opt_ag_Unumexp>=input$m_d_opt_ag_Lnumexp," "),
-    #errorClass = "myClass")
-    validate(need(ncol(m_d_opt_ag_federov()$X)>2 & sum(is.na(m_d_opt_ag_federov()$X))==0,''))
-    maxinfl<-max(m_d_opt_ag_federov()$X[,3])
-    plot(m_d_opt_ag_federov()$X[,1],m_d_opt_ag_federov()$X[,3],col='red',type='b',xlab='Numero di esperimenti',
-         ylim=c(1,max(maxinfl,8)),
-         ylab='Vif.max');grid()
-    abline(h = 4, lty = 2, col = "green4")
-    abline(h = 8, lty = 2, col = "red")
-  })
   output$m_d_opt_ag_numexp<-renderUI({
     #exp<-m_d_opt_ag_federov()$X[,1]
     #m<-min(exp)
@@ -5914,22 +5713,12 @@ server <- function (input , output, session ){
       dis<-cbind.data.frame('Exp#'=exp,dis)
       write.xlsx(dis, file,colNames=TRUE)
     })
-  output$m_d_opt_ag_vf<-renderTable({
-    req(input$m_d_opt_ag_numexp)
-    req(input$m_d_opt_ag_Lnumexp)
-    validate(need(ncol(m_d_opt_ag_federov()$X)>2 & sum(is.na(m_d_opt_ag_federov()$X))==0,''))
-    frml<-formula(m_d_opt_ag_formula())
-    dis<-m_d_opt_ag_federov()$dis[[input$m_d_opt_ag_numexp-(input$m_d_opt_ag_Lnumexp-1)]]
-    vf<-vif(model.matrix(frml, dis))
-    cn<-attr(vf,'names')
-    cn<-str_remove(cn,"\\(")
-    cn<-str_remove(cn,"I")
-    cn<-str_remove(cn,"\\)")
-    attr(vf,'names')<-cn
-    t(vf)
-  })
+ 
   
   
+  
+  
+  # Piano personalizzato -----------------------------------------------------------------  
   
   
 }

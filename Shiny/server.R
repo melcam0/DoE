@@ -5719,6 +5719,319 @@ server <- function (input , output, session ){
   
   
   # Piano personalizzato -----------------------------------------------------------------  
+  output$m_pp_titolo<-renderUI({
+    HTML("Piano personalizzato" )
+  })
+  output$m_pp_importa_incolla_spazio<-renderUI({
+    req(input$m_pp_importa==1)
+    br()
+  })
+  output$m_pp_importa_incolla<-renderUI({
+    req(input$m_pp_importa==1)
+    actionButton("m_pp_incolla", label = "Incolla")
+  })
+  output$m_pp_importa_incolla_spazio1<-renderUI({
+    req(input$m_pp_importa==1)
+    hr()
+  })
+  output$m_pp_importa_excel_brws<-renderUI({
+    req(input$m_pp_importa==2)
+    fileInput("m_pp_file_xlsx",label='',
+              multiple = FALSE,
+              accept = c(".xlx",".xlsx"))
+  })
+  m_pp_dis_paste<-eventReactive(input$m_pp_incolla,{
+    df<-tryCatch(read.DIF(file = "clipboard",header = TRUE,transpose = TRUE),
+                 #warning = function(w) {print('warning')},
+                 error = function(e) "Selezionare un dataset!")
+    df
+  })
+  m_pp_dis_xls<-reactive({
+    req(input$m_pp_file_xlsx$datapath)
+    df=read_excel(path = input$m_pp_file_xlsx$datapath,sheet = 1,col_names = TRUE)
+    df
+  })
+  m_pp_dis<-reactive({
+    if(input$m_pp_importa==1)df<-m_pp_dis_paste()
+    if(input$m_pp_importa==2)df<-m_pp_dis_xls()
+    if(sum(df[,1]==c(1:nrow(df)))==nrow(df))df<-df[,-1]
+    df
+  })
+  output$m_pp_dis<-renderTable({
+    validate(need(is.data.frame(m_pp_dis()),"Selezionare un dataset!\n "),
+             errorClass = "myClass") 
+    m_pp_dis()
+  })
+  m_pp_var_sel<-reactive({
+    validate(need(is.data.frame(m_pp_dis()),""))
+    var<-colnames(m_pp_dis())
+    frm<-paste0(var,collapse = '*')
+    frm<-paste0('-1+',frm)
+    frm<-paste0('~',frm)
+    X<-model.matrix(as.formula(frm),m_pp_dis())
+    var<-colnames(X)
+    if((!'1'%in%input$m_pp_mod_tipo) & (!'2'%in%input$m_pp_mod_tipo))var<-var[1:3]
+    if(('1'%in%input$m_pp_mod_tipo) & (!'2'%in%input$m_pp_mod_tipo))var<-var[1:6]
+    if(('1'%in%input$m_pp_mod_tipo) & ('2'%in%input$m_pp_mod_tipo))var<-var[1:7]
+    if((!'1'%in%input$m_pp_mod_tipo) & ('2'%in%input$m_pp_mod_tipo))var<-var[c(1:3,7)]
+    var
+  })
+  output$m_pp_mod_variabx<-renderUI({
+    validate(need(is.data.frame(m_pp_dis()),""))
+    selectizeInput(inputId = "m_pp_mod_variabx",label="Termini modello (x)",
+                   #div("Termini modello (x)",style="font-weight: 400"),
+                   choices = m_pp_var_sel(),
+                   selected=m_pp_var_sel(),
+                   multiple=TRUE)
+  })
+  m_pp_formula<-reactive({
+    req(input$m_pp_mod_variabx)
+    var<-input$m_pp_mod_variabx
+    frm<-paste0(var,collapse = '+')
+    frm<-paste0('-1 +',frm)
+    frm<-paste0('~',frm)
+    frm
+  })
+  output$m_pp_modello<-renderText({
+    validate(need(is.data.frame(m_pp_dis()),""))
+    req(input$m_pp_mod_variabx)
+    var<-input$m_pp_mod_variabx
+    frm<-paste0(var,collapse = '+')
+    frm<-paste0('y ~ ',frm)
+    frm
+  })
+  output$m_pp_matrdisp<-renderTable({
+    validate(need(is.data.frame(m_pp_dis()),""))
+    X<-model.matrix(as.formula(m_pp_formula()),m_pp_dis())
+    validate(need(qr(X)$rank==ncol(X),"Il programma è stato interrotto perché la matrice del modello ha rango insufficiente"))
+    D<-solve(t(X)%*%X)
+    D
+  })
+  output$m_pp_vincoliinf_txt<-renderUI({
+    validate(need(input$m_pp_vincoli==TRUE,' '))
+    textInput(inputId = "m_pp_vincoliinf_txt",label = h5("Inserire i vincoli inferiori separati da '&'"))
+  })
+  output$m_pp_vincolisup_txt<-renderUI({
+    validate(need(input$m_pp_vincoli==TRUE,' '))
+    textInput(inputId = "m_pp_vincolisup_txt",label = h5("Inserire i vincoli superiori separati da '&'"))
+  })
+  output$m_pp_livellolev<-renderPlot(width = 550,height = 500,{
+
+    ## Generates triangle
+    trian <- expand.grid(base=seq(0,1,l=100), high=seq(0,sin(pi/3),l=87))
+    trian <- subset(trian, (base*sin(pi/3)*2)>high)
+    trian <- subset(trian, ((1-base)*sin(pi/3)*2)>high)
+    
+    ## Generates triangle in R^3 X1+X2+X3=1
+    new=data.frame(x1=1-trian$base-trian$high/sqrt(3))
+    new$x2=trian$high*2/sqrt(3)
+    new$x3=trian$base-trian$high/sqrt(3)
+    var<-colnames(m_pp_dis())
+    colnames(new)<-var
+    
+    ## Crea le condizioni
+    cond<-rep(TRUE,4306)
+    txt_i<-'';txt_s<-'';txt<-''
+
+    if(input$m_pp_vincoli){
+      if(!is.null(input$m_pp_vincoliinf_txt)){
+        txt_i<-input$m_pp_vincoliinf_txt
+        for ( i in 1:length(var)){
+          txt_i<-gsub(var[i],paste0('new$',var[i]),txt_i)
+        }}
+      if(!is.null(input$m_pp_vincolisup_txt)){
+        txt_s<-input$m_pp_vincolisup_txt
+        for ( i in 1:length(var)){
+          txt_s<-gsub(var[i],paste0('new$',var[i]),txt_s)
+        }}
+      txt<-paste(txt_i,'&',txt_s)
+      if(txt_s=='')txt<-txt_i
+      if(txt_i=='')txt<-txt_s
+      cond<-tryCatch(eval(parse(text = txt)),
+                   error = function(e) "Scrivere correttamente le condizioni!")
+    }
+
+    if(!is.logical(cond)){
+      plot(c(0, 1), c(0, 1), ann = F, bty = 'n', type = 'n', xaxt = 'n', yaxt = 'n')
+      text(0.5,0.5,"Scrivere correttamente le condizioni!",cex = 1.6, col = "red")
+    }else{
+      trian.new.cond=cbind(trian,new,cond)
+      
+      ## Generates triangle in 2 (base,high), 3 (X1,X2,X3) variables satisfying contraints
+      trian.cond=trian.new.cond[trian.new.cond$cond==TRUE,1:2]
+      new.cond=trian.new.cond[trian.new.cond$cond==TRUE,3:5]
+
+      ## Creates model matrix on X1+X2*X3=1 (new)
+      P<-model.matrix(as.formula(m_pp_formula()),m_pp_dis())
+      n=ncol(P)
+      
+      ## Design in coord (b,h)
+      b=1-P[,1]-P[,2]/2
+      h=(sqrt(3)/2)*P[,2]
+      
+      X=model.matrix(as.formula(m_pp_formula()),data = new.cond)
+      
+      ## Leverage on triangle
+      Q=X%*%solve(t(P)%*%P)%*%t(X)
+      Lev=data.frame(trian.cond,"L"=diag(Q))
+      
+      ## Creates function grid and labels on the axes
+      grade.trellis <- function(from=0.2, to=0.8, step=0.2, col=1, lty=2, lwd=0.5){
+        x1 <- seq(from, to, step)
+        x2 <- x1/2
+        y2 <- x1*sqrt(3)/2
+        x3 <- (1-x1)*0.5+x1
+        y3 <- sqrt(3)/2-x1*sqrt(3)/2
+        lattice::panel.segments(x1, 0, x2, y2, col=col, lty=lty, lwd=lwd)
+        # lattice::panel.text(x1, 0, label=x1, pos=1)
+        lattice::panel.segments(x1, 0, x3, y3, col=col, lty=lty, lwd=lwd)
+        # lattice::panel.text(x2, y2, label=rev(x1), pos=2)
+        lattice::panel.segments(x2, y2, 1-x2, y2, col=col, lty=lty, lwd=lwd)
+        # lattice::panel.text(x3, y3, label=rev(x1), pos=4)
+      }
+      
+      ## Generates isoleverage plot
+      
+      p=lattice::contourplot(L~base*high, Lev,col="red",cuts = 10,aspect = 1,label=list(col="black",cex=0.8),
+                             region = TRUE,col.regions = colorRampPalette(c("yellow","green","blue")),
+                             par.settings=list(axis.line=list(col=NA), axis.text=list(col="black")),xlab=NULL, ylab=NULL,
+                             scales=list(x=list(alternating=0),y=list(alternating=0)),
+                             xlim=c(-0.1,1.1), ylim=c(-0.1,0.96))
+      
+      print(p)
+      lattice::trellis.focus("panel", 1, 1, highlight=FALSE)
+      lattice::panel.segments(c(0,0,0.5), c(0,0,sqrt(3)/2), c(1,1/2,1), c(0,sqrt(3)/2,0))
+      lattice::panel.xyplot(x=b,y=h, col="red",pch=20,cex=1.75)
+      grade.trellis()
+      lattice::panel.text(.55,0.92,label=var[2],pos=2)
+      lattice::panel.text(0,-0.05,label=var[1],pos=2)
+      lattice::panel.text(1,-0.05,label=var[3],pos=4)
+      lattice::trellis.unfocus()
+    }
+  })
+
+  output$m_pp_livellolev_zoom<-renderPlot(width = 550,height = 500,{
+    validate(need(input$m_pp_vincoli==TRUE,' '))
+    
+    ## Generates triangle
+    trian <- expand.grid(base=seq(0,1,l=100), high=seq(0,sin(pi/3),l=87))
+    trian <- subset(trian, (base*sin(pi/3)*2)>high)
+    trian <- subset(trian, ((1-base)*sin(pi/3)*2)>high)
+    
+    ## Generates triangle in R^3 X1+X2+X3=1
+    new=data.frame(x1=1-trian$base-trian$high/sqrt(3))
+    new$x2=trian$high*2/sqrt(3)
+    new$x3=trian$base-trian$high/sqrt(3)
+    var<-colnames(m_pp_dis())
+    colnames(new)<-var
+    
+    
+    ## Genera condizioni
+    cond<-rep(TRUE,4306)
+    txt_i<-'';txt_s<-'';txt<-''
+
+    if(input$m_pp_vincoli){
+      if(!is.null(input$m_pp_vincoliinf_txt)){
+        txt_i<-input$m_pp_vincoliinf_txt
+        for ( i in 1:length(var)){
+          txt_i<-gsub(var[i],paste0('new$',var[i]),txt_i)
+        }}
+      if(!is.null(input$m_pp_vincolisup_txt)){
+        txt_s<-input$m_pp_vincolisup_txt
+        for ( i in 1:length(var)){
+          txt_s<-gsub(var[i],paste0('new$',var[i]),txt_s)
+        }}
+      txt<-paste(txt_i,'&',txt_s)
+      if(txt_s=='')txt<-txt_i
+      if(txt_i=='')txt<-txt_s
+      cond<-tryCatch(eval(parse(text = txt)),
+                     error = function(e) "Scrivere correttamente le condizioni!")
+      
+    }
+
+    if(!is.logical(cond)){
+      plot(c(0, 1), c(0, 1), ann = F, bty = 'n', type = 'n', xaxt = 'n', yaxt = 'n')
+      text(0.5,0.5,"Scrivere correttamente le condizioni!",cex = 1.6, col = "red")
+    }else{
+      
+      #if(!is.logical(cond))cond<-rep(TRUE,4306)
+      ## Generates data.frame triangle in 2 (base,high), 3 (X1,X2,X3) variables and column conditions (cond)
+      trian.new.cond=cbind(trian,new,cond)
+      
+      ## Generates triangle in 2 (base,high), 3 (X1,X2,X3) variables satisfying contraints
+      trian.cond=trian.new.cond[trian.new.cond$cond==TRUE,1:2]
+      new.cond=trian.new.cond[trian.new.cond$cond==TRUE,3:5]
+
+      ## Creates model matrix on X1+X2*X3=1 (new)
+      P<-model.matrix(as.formula(m_pp_formula()),m_pp_dis())
+      n=ncol(P)
+      
+      ## Design in coord (b,h)
+      b=1-P[,1]-P[,2]/2
+      h=(sqrt(3)/2)*P[,2]
+      
+      X=model.matrix(as.formula(m_pp_formula()),data = new.cond)
+      
+      ## Leverage on triangle
+      Q=X%*%solve(t(P)%*%P)%*%t(X)
+      Lev=data.frame(trian.cond,"L"=diag(Q))
+      #if(input$pp_vincoli & !is.null(cond) & is.logical(cond))Lev<-Lev[cond==TRUE,]
+      
+      ## Creates function grid and labels on the axes
+      grade.trellis <- function(from=0.2, to=0.8, step=0.2, col=1, lty=2, lwd=0.5){
+        x1 <- seq(from, to, step)
+        x2 <- x1/2
+        y2 <- x1*sqrt(3)/2
+        x3 <- (1-x1)*0.5+x1
+        y3 <- sqrt(3)/2-x1*sqrt(3)/2
+        lattice::panel.segments(x1, 0, x2, y2, col=col, lty=lty, lwd=lwd)
+        # lattice::panel.text(x1, 0, label=x1, pos=1)
+        lattice::panel.segments(x1, 0, x3, y3, col=col, lty=lty, lwd=lwd)
+        # lattice::panel.text(x2, y2, label=rev(x1), pos=2)
+        lattice::panel.segments(x2, y2, 1-x2, y2, col=col, lty=lty, lwd=lwd)
+        # lattice::panel.text(x3, y3, label=rev(x1), pos=4)
+      }
+
+      ## Values to define graph limits
+      b1=min(trian.cond$base)
+      b2=max(trian.cond$base)
+      h1=min(trian.cond$high)
+      h2=max(trian.cond$high)
+      
+      ## Generates isoleverage plot
+      
+      p=lattice::contourplot(L~base*high, Lev,col="red",cuts = 10,aspect = 1,label=list(col="black",cex=0.8),
+                             region = TRUE,col.regions = colorRampPalette(c("yellow","green","blue")),
+                             par.settings=list(axis.line=list(col=NA), axis.text=list(col="black")),xlab=NULL, ylab=NULL,
+                             scales=list(x=list(alternating=0),y=list(alternating=0)),
+                             xlim=c(b1-0.05,b2+0.05), ylim=c(h1-0.05,h2+0.05))
+      
+      print(p)
+      lattice::trellis.focus("panel", 1, 1, highlight=FALSE)
+      lattice::panel.segments(c(0,0,0.5), c(0,0,sqrt(3)/2), c(1,1/2,1), c(0,sqrt(3)/2,0))
+      lattice::panel.xyplot(x=b,y=h, col="red",pch=20,cex=1.75)
+      grade.trellis()
+      lattice::panel.text(.55,0.92,label=var[2],pos=2)
+      lattice::panel.text(0,-0.05,label=var[1],pos=2)
+      lattice::panel.text(1,-0.05,label=var[3],pos=4)
+      lattice::trellis.unfocus()
+    }
+  }) 
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
   
   
 }

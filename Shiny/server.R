@@ -4022,10 +4022,7 @@ server <- function (input , output, session ){
     data[,col[2]]<-dt_exp[,2]
     data<-as.data.frame(data)
     colnames(data)<-var
-    
-    
-    
-    
+
     txt<-input$pp_vincoli_txt
     for ( i in 1:length(var)){
       txt<-gsub(var[i],paste0('data$',var[i]),txt)
@@ -4036,12 +4033,6 @@ server <- function (input , output, session ){
       plot(c(0, 1), c(0, 1), ann = F, bty = 'n', type = 'n', xaxt = 'n', yaxt = 'n')
       text(0.5,0.5,cond,cex = 1.6, col = "red")
     }else{
-    
-    
-    
-    
-    
-    #frm<-formula(paste(" ~ ", paste(input$pp_mod_variabx[!input$pp_mod_variabx%in%input$pp_selinteraz], collapse= "+")))
     frm<-as.formula(pp_formula())
     P=model.matrix(frm,data = dsg)
     X=model.matrix(frm,data = data)
@@ -4051,9 +4042,7 @@ server <- function (input , output, session ){
       text(0.5,0.5,'inserire il valore delle variabili costanti',cex = 1.6, col = "red")
     }else{
       Lev=data.frame(data,"L"=diag(Q))
-      
       if(input$pp_vincoli & !is.null(cond) & is.logical(cond))Lev<-Lev[cond==TRUE,]
-      
       colnames(Lev)[col[1]]<-'x'
       colnames(Lev)[col[2]]<-'y'
       lattice::contourplot(L~x*y,data=Lev,cuts=15,main='Plot of Leverage: Contour Plot',cex.main=0.8,
@@ -4061,7 +4050,6 @@ server <- function (input , output, session ){
                            aspect=1)}
     }
   })
-  
   output$pp_suplev<-renderPlot({
     req(input$pp_mod_variabx)
     var<-colnames(pp_dis())
@@ -4089,13 +4077,7 @@ server <- function (input , output, session ){
     data[,col[2]]<-dt_exp[,2]
     data<-as.data.frame(data)
     colnames(data)<-var
-    
-    
-    
-    
-    
-    
-    
+
     txt<-input$pp_vincoli_txt
     for ( i in 1:length(var)){
       txt<-gsub(var[i],paste0('data$',var[i]),txt)
@@ -4107,10 +4089,6 @@ server <- function (input , output, session ){
       text(0.5,0.5,cond,cex = 1.6, col = "red")
       #print(cond)
     }else{
-    
-    
-    
-    #frm<-formula(paste(" ~ ", paste(input$pp_mod_variabx[!input$pp_mod_variabx%in%input$pp_selinteraz], collapse= "+")))
     frm<-formula(paste(" ~ ", paste(input$pp_mod_variabx, collapse= "+")))
     P=model.matrix(frm,data = dsg)
     X=model.matrix(frm,data = data)
@@ -4120,9 +4098,7 @@ server <- function (input , output, session ){
       text(0.5,0.5,'inserire il valore delle variabili costanti',cex = 1.6, col = "red")
     }else{
       Lev=data.frame(data,"L"=diag(Q))
-      
       if(input$pp_vincoli & !is.null(cond) & is.logical(cond))Lev<-Lev[cond==TRUE,]
-      
       colnames(Lev)[col[1]]<-'x'
       colnames(Lev)[col[2]]<-'y'
       req(input$pp_lv_z)
@@ -4134,20 +4110,16 @@ server <- function (input , output, session ){
                          ylab=var[col[2]],zlab=paste('Response'))}
     }
   })
-  
   output$pp_vincoli_txt<-renderUI({
     validate(need(input$pp_vincoli==TRUE,' '))
     textInput(inputId = "pp_vincoli_txt",label = h5("Inserire i vincoli separati da '&'"))
   })
-  
   output$pp_lv_z<-renderUI({
     sliderInput('pp_lv_z',label = 'Rotazione orizzontale',min = 0,max = 360,value = 30,step = 10)
   })
-  
   output$pp_lv_x<-renderUI({
     sliderInput('pp_lv_x',label = 'Rotazione verticale',min = 0,max = 90,value = 60,step = 10)
   })
-  
   output$pp_risptext<-renderUI({
     X<-model.matrix(as.formula(pp_formula()),pp_dis())
     if(qr(X)$rank<ncol(X))stop()
@@ -4166,7 +4138,6 @@ server <- function (input , output, session ){
     if(qr(X)$rank<ncol(X))stop()
     round(pp_mod()$coefficients,2)
   })
-
   output$pp_grcoeff<-renderPlot({
     X<-model.matrix(as.formula(pp_formula()),pp_dis())
     if(qr(X)$rank<ncol(X))stop()
@@ -4213,7 +4184,6 @@ server <- function (input , output, session ){
         }
          }
   })
-
   output$pp_grsigncoeff<-renderPlot({
     var<-attr(pp_mod()$model,"names")[-1]
     validate(need(length(var)==sum(substr(var,1,2)!='I('),''))
@@ -4221,7 +4191,6 @@ server <- function (input , output, session ){
     FrF2::DanielPlot(mod,alpha = 0.05,main='',pch=19,cex.fac=1,col="blue",datax = FALSE)
     qqline(y = coef(mod)[-1],datax = FALSE,col="blue",lty=2)
   })
-  
   output$pp_prev_df<-renderPrint({
     var<-attr(pp_mod()$model,"names")[-1]
     var<-var[substr(var,1,2)!='I(']
@@ -4237,7 +4206,6 @@ server <- function (input , output, session ){
       cat(paste('inserire le',length(var),'coord. del punto'))
     }
   })
-
   output$pp_intprev<-renderPrint({
     var<-attr(pp_mod()$model,"names")[-1]
     var<-var[substr(var,1,2)!='I(']
@@ -4289,7 +4257,6 @@ server <- function (input , output, session ){
       }
     }
   })
-  
   output$pp_misind_media<-renderPrint({
     validate(need(length(as.numeric(unlist(strsplit(input$pp_misind," "))))>1,''))
     x<-as.numeric(unlist(strsplit(input$pp_misind," ")))
@@ -4299,7 +4266,6 @@ server <- function (input , output, session ){
     attr(media,'names')<-c('media','2.5%','97.5%')
     round(media,3)
   })
-  
   output$pp_misind_sd<-renderPrint({
     validate(need(length(as.numeric(unlist(strsplit(input$pp_misind," "))))>1,''))
     x<-as.numeric(unlist(strsplit(input$pp_misind," ")))
@@ -4309,7 +4275,6 @@ server <- function (input , output, session ){
     attr(df,'names')<-c('dev.st.')
     df
   })
-  
   output$pp_misind_gdl<-renderPrint({
     validate(need(length(as.numeric(unlist(strsplit(input$pp_misind," "))))>1,''))
     x<-as.numeric(unlist(strsplit(input$pp_misind," ")))
@@ -4318,13 +4283,11 @@ server <- function (input , output, session ){
     attr(df,'names')<-c( 'gdl')
     df
   })
-  
   output$pp_stimint_txt<-renderUI({
     #validate(need(length(as.numeric(unlist(strsplit(input$fatt_compl_misind," "))))>0 &
      #               length(as.numeric(unlist(strsplit(input$fatt_compl_risp," "))))==2^input$fatt_compl_k,''))
     h4('Stima per intervallo')
   })
-  
   output$pp_stimint<-renderPrint({
     X<-model.matrix(as.formula(pp_formula()),pp_dis())
     if(qr(X)$rank<ncol(X))stop()
@@ -4384,7 +4347,6 @@ server <- function (input , output, session ){
       }
     }
   })
-  
   output$pp_mod_selvar<-renderUI({
     req(input$pp_mod_variabx)
     var<-colnames(pp_dis())
@@ -4396,7 +4358,6 @@ server <- function (input , output, session ){
                 choices = var, 
                 multiple = TRUE,selected = var[1:2])
   })
-  
   output$pp_mod_fixvar<-renderUI({
     req(input$pp_mod_variabx)
     req(input$pp_mod_selvar)
@@ -6026,8 +5987,251 @@ server <- function (input , output, session ){
   
   
   
+  output$m_pp_risptext<-renderUI({
+    X<-model.matrix(as.formula(m_pp_formula()),m_pp_dis())
+    if(qr(X)$rank<ncol(X))stop()
+    h4(paste('Risposte (',nrow(m_pp_dis()),', separate da spazio)',sep=''))
+  })
+  m_pp_mod<-reactive({
+    validate(need(length(as.numeric(unlist(strsplit(input$m_pp_risp," "))))==nrow(m_pp_dis()),''))
+    y<-as.numeric(unlist(strsplit(input$m_pp_risp," ")))
+    D<-cbind.data.frame(y=y,m_pp_dis())
+    frm<-formula(paste0('y',m_pp_formula()))
+    mod<-lm(frm,D)
+    mod
+  })
+  output$m_pp_coeff<-renderPrint({
+    X<-model.matrix(as.formula(m_pp_formula()),m_pp_dis())
+    if(qr(X)$rank<ncol(X))stop()
+    round(m_pp_mod()$coefficients,2)
+  })
   
   
+  
+  
+  
+  
+  output$m_pp_grcoeff<-renderPlot({
+    X<-model.matrix(as.formula(m_pp_formula()),m_pp_dis())
+    if(qr(X)$rank<ncol(X))stop()
+    mod<-m_pp_mod()
+    require(ggplot2)
+    df_coeff<-data.frame(nome=names(mod$coefficients),
+                         valore=mod$coefficients)
+    if(input$m_pp_resind==2){
+      if(length(as.numeric(unlist(strsplit(input$m_pp_misind," "))))<2){
+        ggplot(data = df_coeff,aes(x =nome,y=valore))+
+          xlab("")+ylab("")+theme_light()+
+          geom_bar(fill="red",stat="identity")+
+          scale_x_discrete(limits=names(mod$coefficients))
+      }else{
+        x<-as.numeric(unlist(strsplit(input$m_pp_misind," ")))
+        gdl<-length(x)-1
+        q<-qt(p = 0.975,df = gdl)
+        s<-sd(x)
+        X<-model.matrix(mod)
+        D<-solve(t(X)%*%X)
+        d<-diag(D)
+        df_coeff<-cbind.data.frame(df_coeff,inf=mod$coefficients-q*s*sqrt(d),sup=mod$coefficients+q*s*sqrt(d))
+        ggplot(data = df_coeff,aes(x =nome,y=valore))+
+          xlab("")+ylab("")+theme_light()+
+          geom_bar(fill="red",stat="identity")+
+          scale_x_discrete(limits=names(mod$coefficients))+
+          geom_errorbar(aes(ymin=inf, ymax=sup),
+                        width=0.2, colour="green3")
+      }}else{
+        sm<-summary(mod)
+        if(is.na(sm$sigma)){
+          ggplot(data = df_coeff,aes(x =nome,y=valore))+
+            xlab("")+ylab("")+theme_light()+
+            geom_bar(fill="red",stat="identity")+
+            scale_x_discrete(limits=names(mod$coefficients))
+        }else{
+          df_coeff<-cbind.data.frame(df_coeff,inf=mod$coefficients-sm$coefficients[1,2],sup=mod$coefficients+sm$coefficients[1,2])
+          ggplot(data = df_coeff,aes(x =nome,y=valore))+
+            xlab("")+ylab("")+theme_light()+
+            geom_bar(fill="red",stat="identity")+
+            scale_x_discrete(limits=names(mod$coefficients))+
+            geom_errorbar(aes(ymin=inf, ymax=sup),
+                          width=0.2, colour="green3")
+        }
+      }
+  })
+  
+  
+  
+  
+  
+  
+  output$m_pp_prev_df<-renderPrint({
+    var<-colnames(m_pp_dis())
+    if(length(as.numeric(unlist(strsplit(input$m_pp_prev," "))))==length(var)){
+      mod<-m_pp_mod()
+      x<- as.numeric(unlist(strsplit(input$m_pp_prev," ")))
+      nd<-rbind.data.frame(x)
+      colnames(nd)<-var
+      prev<-predict(object = mod,newdata=nd)
+      attr(prev,'names')<-c('previsione')
+      prev
+    }else{
+      cat(paste('inserire le',length(var),'coord. del punto'))
+    }
+  })
+  
+  
+  
+  
+  
+  
+  
+  output$m_pp_intprev<-renderPrint({
+    var<-colnames(m_pp_dis())
+    validate(need(length(as.numeric(unlist(strsplit(input$m_pp_prev," "))))==length(var),''))
+    if(input$m_pp_resind==1){
+      mod<-m_pp_mod()
+      smr<-summary(mod)
+      if(!is.na(smr$sigma)){
+        x<- as.numeric(unlist(strsplit(input$m_pp_prev," ")))
+        nd<-rbind.data.frame(x)
+        colnames(nd)<-var
+        prev<-predict(object = mod,newdata=nd,interval='confidence')
+        prev1<-predict(object = mod,newdata=nd,interval='confidence',level = 0.99)
+        prev2<-predict(object = mod,newdata=nd,interval='confidence',level = 0.999)
+        df<-cbind.data.frame(prev,prev1,prev2)
+        df<-cbind.data.frame(round(df[,-c(1,4,7)],3))
+        colnames(df)<-c('2.5%','97.5%','0.5%','99.5%','0.05%','99.95%')
+        df
+      }else{
+        cat('Non ci sono gradi di libertà')
+      }
+    }else{
+      req(input$m_pp_misind)
+      x<-as.numeric(unlist(strsplit(input$m_pp_misind," ")))
+      if(length(x)<=1){
+        cat('Almeno 2 misure')
+      }else{
+        gdl<-length(x)-1
+        q<-qt(p = 0.975,df = gdl)
+        q1<-qt(p = 0.995,df = gdl)
+        q2<-qt(p = 0.9995,df = gdl)
+        s<-sd(x)
+        mod<-m_pp_mod()
+        X<-model.matrix(mod)
+        p<-as.numeric(unlist(strsplit(input$m_pp_prev," ")))
+        data<-as.data.frame(matrix(p,1,length(input$m_pp_mod_variabx)))
+        colnames(data)<-var
+        frml<-paste("~ -1 +", paste(input$m_pp_mod_variabx, collapse= " + "))
+        frml<-as.formula(frml)
+        P<-model.matrix(frml,data=data)
+        d<-P%*%solve(t(X)%*%X)%*%t(P)
+        prev<-predict(mod,newdata = data)
+        df<-data.frame(prev-q*s*sqrt(d),prev+q*s*sqrt(d),
+                       prev-q1*s*sqrt(d),prev+q1*s*sqrt(d),
+                       prev-q2*s*sqrt(d),prev+q2*s*sqrt(d))
+        df<-cbind.data.frame(round(df,3))
+        colnames(df)<-c('2.5%','97.5%','0.5%','99.5%','0.05%','99.95%')
+        df
+      }
+    }
+  })
+  
+  
+ 
+  
+  
+  
+  output$m_pp_misind_media<-renderPrint({
+    validate(need(length(as.numeric(unlist(strsplit(input$m_pp_misind," "))))>1,''))
+    x<-as.numeric(unlist(strsplit(input$m_pp_misind," ")))
+    mod<-lm(x~1,as.data.frame(x))
+    sm<-summary(mod)
+    media<-predict(mod,interval = 'confidence')[1,]
+    attr(media,'names')<-c('media','2.5%','97.5%')
+    round(media,3)
+  })
+  
+  output$m_pp_misind_sd<-renderPrint({
+    validate(need(length(as.numeric(unlist(strsplit(input$m_pp_misind," "))))>1,''))
+    x<-as.numeric(unlist(strsplit(input$m_pp_misind," ")))
+    mod<-lm(x~1,as.data.frame(x))
+    sm<-summary(mod)
+    df<-c(round(sm$sigma,3))
+    attr(df,'names')<-c('dev.st.')
+    df
+  })
+  
+  output$m_pp_misind_gdl<-renderPrint({
+    validate(need(length(as.numeric(unlist(strsplit(input$m_pp_misind," "))))>1,''))
+    x<-as.numeric(unlist(strsplit(input$m_pp_misind," ")))
+    gdf<-(length(as.numeric(unlist(strsplit(input$m_pp_misind," "))))-1)
+    df<-c(gdf)
+    attr(df,'names')<-c( 'gdl')
+    df
+  })
+  
+  output$m_pp_stimint_txt<-renderUI({
+    h4('Stima per intervallo')
+  })
+  
+  output$m_pp_stimint<-renderPrint({
+    X<-model.matrix(as.formula(m_pp_formula()),m_pp_dis())
+    if(qr(X)$rank<ncol(X))stop()
+    if(input$m_pp_resind==1){
+      mod<-m_pp_mod()
+      smr<-summary(mod)
+      pval<- smr$coefficients[,4,drop=FALSE]
+      if(!is.na(smr$sigma)){
+        df<-data.frame(confint(mod)[,1],confint(mod)[,2],
+                       confint(mod,level = 0.99)[,1],confint(mod,level = 0.99)[,2],
+                       confint(mod,level = 0.999)[,1],confint(mod,level = 0.999)[,2],pval)
+        lab<-rep('',nrow(df))
+        for (i in 1:nrow(df)){
+          if(pval[i]<0.1)lab[i]<-'.'
+          if(pval[i]<0.05)lab[i]<-'*'
+          if(pval[i]<0.01)lab[i]<-'**'
+          if(pval[i]<0.001)lab[i]<-'***'
+        }
+        df<-cbind.data.frame(round(df[,1:6],3),round(df[,7],4),lab)
+        colnames(df)<-c('2.5%','97.5%','0.5%','99.5%','0.05%','99.95%','p-value','')
+        df
+        
+      }else{
+        cat('Non ci sono gradi di libertà')
+      }
+      
+    }else{
+      #req(input$m_pp_misind)
+      x<-as.numeric(unlist(strsplit(input$m_pp_misind," ")))
+      if(length(x)<=1){
+        cat('Almeno 2 misure')
+      }else{
+        gdl<-length(x)-1
+        q<-qt(p = 0.975,df = gdl)
+        q1<-qt(p = 0.995,df = gdl)
+        q2<-qt(p = 0.9995,df = gdl)
+        s<-sd(x)
+        mod<-m_pp_mod()
+        X<-model.matrix(mod)
+        D<-solve(t(X)%*%X)
+        d<-diag(D)
+        pval<-pt(abs(mod$coefficients/(s*sqrt(d))),df = gdl,lower.tail = FALSE)*2
+        df<-data.frame(mod$coefficients,mod$coefficients-q*s*sqrt(d),mod$coefficients+q*s*sqrt(d),
+                       mod$coefficients-q1*s*sqrt(d),mod$coefficients+q1*s*sqrt(d),
+                       mod$coefficients-q2*s*sqrt(d),mod$coefficients+q2*s*sqrt(d),
+                       pval)
+        lab<-rep('',nrow(df))
+        for (i in 1:nrow(df)){
+          if(pval[i]<0.1)lab[i]<-'.'
+          if(pval[i]<0.05)lab[i]<-'*'
+          if(pval[i]<0.01)lab[i]<-'**'
+          if(pval[i]<0.001)lab[i]<-'***'
+        }
+        df<-cbind.data.frame(round(df[,1:7],3),round(df[,8],4),lab)
+        colnames(df)<-c('val','2.5%','97.5%','0.5%','99.5%','0.05%','99.95%','p-value','')
+        df[,-1]
+      }
+    }
+  })
   
   
   

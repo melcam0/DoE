@@ -4550,7 +4550,6 @@ server <- function (input , output, session ){
   output$m_simplex_titolo<-renderUI({
     HTML("Simplex Design" )
   })
-  
   m_simplex_dis<-reactive({
     req(input$m_simplex_mod)
     if(input$m_simplex_mod=='1')df<-SLD(3,1)
@@ -4562,17 +4561,14 @@ server <- function (input , output, session ){
     df<-cbind.data.frame('Exp#'=exp,df)
     df
   })
-  
   output$m_simplex_download <- downloadHandler(
     filename = "m_simplex.xlsx", 
     content = function(file) {
       write.xlsx(m_simplex_dis(),file,colNames=TRUE)
     })
-  
   output$m_simplex_dis<-renderTable({
     m_simplex_dis()
   })
-  
   output$m_simplex_figura_dis<-renderPlot(width = 550,height = 500,{
     P<-m_simplex_dis()[,2:4] ###disegno
     
@@ -5674,11 +5670,6 @@ server <- function (input , output, session ){
       dis<-cbind.data.frame('Exp#'=exp,dis)
       write.xlsx(dis, file,colNames=TRUE)
     })
- 
-  
-  
-  
-  
   # Piano personalizzato -----------------------------------------------------------------  
   output$m_pp_titolo<-renderUI({
     HTML("Piano personalizzato" )
@@ -5723,6 +5714,72 @@ server <- function (input , output, session ){
              errorClass = "myClass") 
     m_pp_dis()
   })
+  
+  
+  
+  output$m_pp_figura_dis<-renderPlot(width = 550,height = 500,{
+    P<-m_pp_dis() ###disegno
+    var<-colnames(P)
+    
+    ## Design in coord (b,h)
+    b=1-P[,1]-P[,2]/2
+    h=(sqrt(3)/2)*P[,2]
+    
+    ## Generates triangle for the plot (on a plane, two coordinates)
+    trian <- expand.grid(base=seq(0,1,l=100), high=seq(0,sin(pi/3),l=87))
+    trian <- subset(trian, (base*sin(pi/3)*2)>high)
+    trian <- subset(trian, ((1-base)*sin(pi/3)*2)>high)
+    
+    ## Generates triangle in R^3 X1+X2+X3=1
+    new=data.frame(X1=1-trian$base-trian$high/sqrt(3))
+    new$X2=trian$high*2/sqrt(3)
+    new$X3=trian$base-trian$high/sqrt(3)
+    
+    ## Builds data.frame triangle in 2 (base,high), 3 (X1,X2,X3) variables e column condition (cond)
+    cond=new$X1>=0 & new$X2>=0 & new$X3>=0 & new$X1<=1 & new$X2<=1 & new$X3<=1
+    trian.new.cond=cbind(trian,new,cond)
+    
+    ## Builds triangle in 2 (base,high), 3 (X1,X2,X3) variables satisfying constraints
+    trian.cond=trian.new.cond[trian.new.cond$cond==TRUE,1:2]
+    new.cond=trian.new.cond[trian.new.cond$cond==TRUE,3:5]
+    
+    ## Creates function set grid e axis labels
+    grade.trellis <- function(from=0.2, to=0.8, step=0.2, col=1, lty=2, lwd=0.5){
+      x1 <- seq(from, to, step)
+      x2 <- x1/2
+      y2 <- x1*sqrt(3)/2
+      x3 <- (1-x1)*0.5+x1
+      y3 <- sqrt(3)/2-x1*sqrt(3)/2
+      lattice::panel.segments(x1, 0, x2, y2, col=col, lty=lty, lwd=lwd)
+      lattice::panel.text(x1, 0, label=x1, pos=1)
+      lattice::panel.segments(x1, 0, x3, y3, col=col, lty=lty, lwd=lwd)
+      lattice::panel.text(x2, y2, label=rev(x1), pos=2)
+      lattice::panel.segments(x2, y2, 1-x2, y2, col=col, lty=lty, lwd=lwd)
+      lattice::panel.text(x3, y3, label=rev(x1), pos=4)
+    }
+    
+    q=lattice::xyplot(trian.cond$high~trian.cond$base,par.settings=list(axis.line=list(col=NA),
+                                                                        axis.text=list(col=NA)),
+                      xlab=NULL, ylab=NULL, pch=19,cex=0.0,col="gray47",
+                      xlim=c(-0.1,1.1), ylim=c(-0.1,0.96))
+    
+    print(q)
+    
+    lattice::trellis.focus("panel", 1, 1, highlight=FALSE)
+    lattice::panel.segments(c(0,0,0.5), c(0,0,sqrt(3)/2), c(1,1/2,1), c(0,sqrt(3)/2,0))
+    lattice::panel.xyplot(x=b,y=h, col="red",pch=20,cex=1.75)
+    lattice::panel.text(x=b,y=h, col="red",label=c(1:nrow(P)),pos=1,font=2,cex=1.2)
+    grade.trellis()
+    lattice::panel.text(.53+(nchar(var[2])-1)/100,0.92,label=var[2],pos=2)
+    lattice::panel.text((nchar(var[1])-1)/50,-0.05,label=var[1],pos=2)
+    lattice::panel.text(1.01-(nchar(var[3])-1)/50,-0.05,label=var[3],pos=4)
+    lattice::trellis.unfocus()
+  })
+  
+  
+  
+  
+  
   m_pp_var_sel<-reactive({
     validate(need(is.data.frame(m_pp_dis()),""))
     var<-colnames(m_pp_dis())
@@ -5864,13 +5921,12 @@ server <- function (input , output, session ){
       lattice::panel.segments(c(0,0,0.5), c(0,0,sqrt(3)/2), c(1,1/2,1), c(0,sqrt(3)/2,0))
       lattice::panel.xyplot(x=b,y=h, col="red",pch=20,cex=1.75)
       grade.trellis()
-      lattice::panel.text(.55,0.92,label=var[2],pos=2)
-      lattice::panel.text(0,-0.05,label=var[1],pos=2)
-      lattice::panel.text(1,-0.05,label=var[3],pos=4)
+      lattice::panel.text(.53+(nchar(var[2])-1)/100,0.92,label=var[2],pos=2)
+      lattice::panel.text((nchar(var[1])-1)/50,-0.05,label=var[1],pos=2)
+      lattice::panel.text(1.01-(nchar(var[3])-1)/50,-0.05,label=var[3],pos=4)
       lattice::trellis.unfocus()
     }
   })
-
   output$m_pp_livellolev_zoom<-renderPlot(width = 550,height = 500,{
     validate(need(input$m_pp_vincoli==TRUE,' '))
     
@@ -5972,25 +6028,76 @@ server <- function (input , output, session ){
       lattice::panel.segments(c(0,0,0.5), c(0,0,sqrt(3)/2), c(1,1/2,1), c(0,sqrt(3)/2,0))
       lattice::panel.xyplot(x=b,y=h, col="red",pch=20,cex=1.75)
       grade.trellis()
-      lattice::panel.text(.55,0.92,label=var[2],pos=2)
-      lattice::panel.text(0,-0.05,label=var[1],pos=2)
-      lattice::panel.text(1,-0.05,label=var[3],pos=4)
+      lattice::panel.text(.53+(nchar(var[2])-1)/100,0.92,label=var[2],pos=2)
+      lattice::panel.text((nchar(var[1])-1)/50,-0.05,label=var[1],pos=2)
+      lattice::panel.text(1.01-(nchar(var[3])-1)/50,-0.05,label=var[3],pos=4)
       lattice::trellis.unfocus()
     }
   }) 
-  
-  
-  
-  
-  
-  
-  
-  
-  
   output$m_pp_risptext<-renderUI({
     X<-model.matrix(as.formula(m_pp_formula()),m_pp_dis())
     if(qr(X)$rank<ncol(X))stop()
     h4(paste('Risposte (',nrow(m_pp_dis()),', separate da spazio)',sep=''))
+  })
+  output$m_pp_figura_risp<-renderPlot(width = 550,height = 500,{
+    validate(need(length(as.numeric(unlist(strsplit(input$m_pp_risp," "))))==nrow(m_pp_dis()),''))
+    P<-m_pp_dis()###disegno
+    var<-colnames(m_pp_dis())
+    
+    ## Design in coord (b,h)
+    b=1-P[,1]-P[,2]/2
+    h=(sqrt(3)/2)*P[,2]
+    
+    ## Generates triangle for the plot (on a plane, two coordinates)
+    trian <- expand.grid(base=seq(0,1,l=100), high=seq(0,sin(pi/3),l=87))
+    trian <- subset(trian, (base*sin(pi/3)*2)>high)
+    trian <- subset(trian, ((1-base)*sin(pi/3)*2)>high)
+    
+    ## Generates triangle in R^3 X1+X2+X3=1
+    new=data.frame(X1=1-trian$base-trian$high/sqrt(3))
+    new$X2=trian$high*2/sqrt(3)
+    new$X3=trian$base-trian$high/sqrt(3)
+    
+    ## Builds data.frame triangle in 2 (base,high), 3 (X1,X2,X3) variables e column condition (cond)
+    cond=new$X1>=0 & new$X2>=0 & new$X3>=0 & new$X1<=1 & new$X2<=1 & new$X3<=1
+    trian.new.cond=cbind(trian,new,cond)
+    
+    ## Builds triangle in 2 (base,high), 3 (X1,X2,X3) variables satisfying constraints
+    trian.cond=trian.new.cond[trian.new.cond$cond==TRUE,1:2]
+    new.cond=trian.new.cond[trian.new.cond$cond==TRUE,3:5]
+    
+    ## Creates function set grid e axis labels
+    grade.trellis <- function(from=0.2, to=0.8, step=0.2, col=1, lty=2, lwd=0.5){
+      x1 <- seq(from, to, step)
+      x2 <- x1/2
+      y2 <- x1*sqrt(3)/2
+      x3 <- (1-x1)*0.5+x1
+      y3 <- sqrt(3)/2-x1*sqrt(3)/2
+      lattice::panel.segments(x1, 0, x2, y2, col=col, lty=lty, lwd=lwd)
+      lattice::panel.text(x1, 0, label=x1, pos=1)
+      lattice::panel.segments(x1, 0, x3, y3, col=col, lty=lty, lwd=lwd)
+      lattice::panel.text(x2, y2, label=rev(x1), pos=2)
+      lattice::panel.segments(x2, y2, 1-x2, y2, col=col, lty=lty, lwd=lwd)
+      lattice::panel.text(x3, y3, label=rev(x1), pos=4)
+    }
+    
+    q=lattice::xyplot(trian.cond$high~trian.cond$base,par.settings=list(axis.line=list(col=NA),
+                                                                        axis.text=list(col=NA)),
+                      xlab=NULL, ylab=NULL, pch=19,cex=0.0,col="gray47",
+                      xlim=c(-0.1,1.1), ylim=c(-0.1,0.96))
+    
+    print(q)
+    
+    lattice::trellis.focus("panel", 1, 1, highlight=FALSE)
+    lattice::panel.segments(c(0,0,0.5), c(0,0,sqrt(3)/2), c(1,1/2,1), c(0,sqrt(3)/2,0))
+    lattice::panel.xyplot(x=b,y=h, col="red",pch=20,cex=1.75)
+    lattice::panel.text(x=b,y=h, col="red",label=as.numeric(unlist(strsplit(input$m_pp_risp," "))),
+                        pos=1,font=2,cex=1.2)
+    grade.trellis()
+    lattice::panel.text(.53+(nchar(var[2])-1)/100,0.92,label=var[2],pos=2)
+    lattice::panel.text((nchar(var[1])-1)/50,-0.05,label=var[1],pos=2)
+    lattice::panel.text(1.01-(nchar(var[3])-1)/50,-0.05,label=var[3],pos=4)
+    lattice::trellis.unfocus()
   })
   m_pp_mod<-reactive({
     validate(need(length(as.numeric(unlist(strsplit(input$m_pp_risp," "))))==nrow(m_pp_dis()),''))
@@ -6005,12 +6112,6 @@ server <- function (input , output, session ){
     if(qr(X)$rank<ncol(X))stop()
     round(m_pp_mod()$coefficients,2)
   })
-  
-  
-  
-  
-  
-  
   output$m_pp_grcoeff<-renderPlot({
     X<-model.matrix(as.formula(m_pp_formula()),m_pp_dis())
     if(qr(X)$rank<ncol(X))stop()
@@ -6057,12 +6158,6 @@ server <- function (input , output, session ){
         }
       }
   })
-  
-  
-  
-  
-  
-  
   output$m_pp_prev_df<-renderPrint({
     var<-colnames(m_pp_dis())
     if(length(as.numeric(unlist(strsplit(input$m_pp_prev," "))))==length(var)){
@@ -6077,13 +6172,6 @@ server <- function (input , output, session ){
       cat(paste('inserire le',length(var),'coord. del punto'))
     }
   })
-  
-  
-  
-  
-  
-  
-  
   output$m_pp_intprev<-renderPrint({
     var<-colnames(m_pp_dis())
     validate(need(length(as.numeric(unlist(strsplit(input$m_pp_prev," "))))==length(var),''))
@@ -6134,12 +6222,6 @@ server <- function (input , output, session ){
       }
     }
   })
-  
-  
- 
-  
-  
-  
   output$m_pp_misind_media<-renderPrint({
     validate(need(length(as.numeric(unlist(strsplit(input$m_pp_misind," "))))>1,''))
     x<-as.numeric(unlist(strsplit(input$m_pp_misind," ")))
@@ -6149,7 +6231,6 @@ server <- function (input , output, session ){
     attr(media,'names')<-c('media','2.5%','97.5%')
     round(media,3)
   })
-  
   output$m_pp_misind_sd<-renderPrint({
     validate(need(length(as.numeric(unlist(strsplit(input$m_pp_misind," "))))>1,''))
     x<-as.numeric(unlist(strsplit(input$m_pp_misind," ")))
@@ -6159,7 +6240,6 @@ server <- function (input , output, session ){
     attr(df,'names')<-c('dev.st.')
     df
   })
-  
   output$m_pp_misind_gdl<-renderPrint({
     validate(need(length(as.numeric(unlist(strsplit(input$m_pp_misind," "))))>1,''))
     x<-as.numeric(unlist(strsplit(input$m_pp_misind," ")))
@@ -6168,12 +6248,11 @@ server <- function (input , output, session ){
     attr(df,'names')<-c( 'gdl')
     df
   })
-  
   output$m_pp_stimint_txt<-renderUI({
     h4('Stima per intervallo')
   })
-  
   output$m_pp_stimint<-renderPrint({
+    validate(need(length(as.numeric(unlist(strsplit(input$m_pp_risp," "))))==nrow(m_pp_dis()),''))
     X<-model.matrix(as.formula(m_pp_formula()),m_pp_dis())
     if(qr(X)$rank<ncol(X))stop()
     if(input$m_pp_resind==1){
@@ -6232,10 +6311,221 @@ server <- function (input , output, session ){
       }
     }
   })
-  
-  
-  
-  
-  
-  
+  output$m_pp_livellorisp<-renderPlot({
+    validate(need(length(as.numeric(unlist(strsplit(input$m_pp_risp," "))))==nrow(m_pp_dis()),''))
+    ## Generates triangle
+    trian <- expand.grid(base=seq(0,1,l=100), high=seq(0,sin(pi/3),l=87))
+    trian <- subset(trian, (base*sin(pi/3)*2)>high)
+    trian <- subset(trian, ((1-base)*sin(pi/3)*2)>high)
+    
+    ## Generates triangle in R^3 X1+X2+X3=1
+    new=data.frame(x1=1-trian$base-trian$high/sqrt(3))
+    new$x2=trian$high*2/sqrt(3)
+    new$x3=trian$base-trian$high/sqrt(3)
+    var<-colnames(m_pp_dis())
+    colnames(new)<-var
+    
+    ## Crea le condizioni
+    cond<-rep(TRUE,4306)
+    txt_i<-'';txt_s<-'';txt<-''
+    
+    if(input$m_pp_vincoli){
+      if(!is.null(input$m_pp_vincoliinf_txt)){
+        txt_i<-input$m_pp_vincoliinf_txt
+        for ( i in 1:length(var)){
+          txt_i<-gsub(var[i],paste0('new$',var[i]),txt_i)
+        }}
+      if(!is.null(input$m_pp_vincolisup_txt)){
+        txt_s<-input$m_pp_vincolisup_txt
+        for ( i in 1:length(var)){
+          txt_s<-gsub(var[i],paste0('new$',var[i]),txt_s)
+        }}
+      txt<-paste(txt_i,'&',txt_s)
+      if(txt_s=='')txt<-txt_i
+      if(txt_i=='')txt<-txt_s
+      cond<-tryCatch(eval(parse(text = txt)),
+                     error = function(e) "Scrivere correttamente le condizioni!")
+    }
+    
+    if(!is.logical(cond)){
+      plot(c(0, 1), c(0, 1), ann = F, bty = 'n', type = 'n', xaxt = 'n', yaxt = 'n')
+      text(0.5,0.5,"Scrivere correttamente le condizioni!",cex = 1.6, col = "red")
+    }else{
+      trian.new.cond=cbind(trian,new,cond)
+      
+      ## Generates triangle in 2 (base,high), 3 (X1,X2,X3) variables satisfying contraints
+      trian.cond=trian.new.cond[trian.new.cond$cond==TRUE,1:2]
+      new.cond=trian.new.cond[trian.new.cond$cond==TRUE,3:5]
+      
+      ## Creates model matrix on X1+X2*X3=1 (new)
+      P<-model.matrix(as.formula(m_pp_formula()),m_pp_dis())   
+      n=ncol(P) 
+      
+      ## Design in coord (b,h)
+      b=1-P[,1]-P[,2]/2
+      h=(sqrt(3)/2)*P[,2]
+      
+      DF=cbind.data.frame(y=as.numeric(unlist(strsplit(input$m_pp_risp," "))),m_pp_dis())
+      
+      mdl=lm(frm<-formula(paste0('y',m_pp_formula())),DF)
+      trian.cond$yhat <- predict(mdl, newdata=new.cond)
+      
+      ## Creates function grid and labels on the axes
+      if(input$m_pp_livellorisp_reg)col_grid=1
+      if(!input$m_pp_livellorisp_reg)col_grid='grey70'
+      
+      grade.trellis <- function(from=0.2, to=0.8, step=0.2, col=col_grid, lty=2, lwd=0.5){
+        x1 <- seq(from, to, step)
+        x2 <- x1/2
+        y2 <- x1*sqrt(3)/2
+        x3 <- (1-x1)*0.5+x1
+        y3 <- sqrt(3)/2-x1*sqrt(3)/2
+        lattice::panel.segments(x1, 0, x2, y2, col=col, lty=lty, lwd=lwd)
+        lattice::panel.segments(x1, 0, x3, y3, col=col, lty=lty, lwd=lwd)
+        lattice::panel.segments(x2, y2, 1-x2, y2, col=col, lty=lty, lwd=lwd)
+        if(input$m_pp_livellorisp_perc){
+          lattice::panel.text(x1, 0, label=x1, pos=1,col='grey60')
+          lattice::panel.text(x2, y2, label=rev(x1), pos=2,col='grey60')
+          lattice::panel.text(x3, y3, label=rev(x1), pos=4,col='grey60')
+          
+        }
+      }
+      
+      ## Generates isoleverage plot
+      
+      colore<-c("blue","green3","red","black","purple1")
+      cl<-as.integer(input$m_pp_livellorisp_col)
+      
+      p=lattice::contourplot(yhat~base*high,cuts = 10, trian.cond,col=colore[cl],aspect = 1,
+                             region = input$m_pp_livellorisp_reg,
+                             col.regions = colorRampPalette(c("yellow","green","blue")),
+                             labels=list(col=colore[cl],cex=0.9),
+                             par.settings=list(axis.line=list(col=NA), axis.text=list(col="black")),xlab=NULL, ylab=NULL,
+                             scales=list(x=list(alternating=0),y=list(alternating=0)),
+                             xlim=c(-0.1,1.1), ylim=c(-0.1,0.96))
+      print(p)
+      lattice::trellis.focus("panel", 1, 1, highlight=FALSE)
+      lattice::panel.segments(c(0,0,0.5), c(0,0,sqrt(3)/2), c(1,1/2,1), c(0,sqrt(3)/2,0))
+      lattice::panel.xyplot(x=b,y=h, col="red",pch=20,cex=1.75)
+      grade.trellis()
+      lattice::panel.text(.53+(nchar(var[2])-1)/100,0.92,label=var[2],pos=2)
+      lattice::panel.text((nchar(var[1])-1)/50,-0.05,label=var[1],pos=2)
+      lattice::panel.text(1.01-(nchar(var[3])-1)/50,-0.05,label=var[3],pos=4)
+      lattice::trellis.unfocus()
+    }
+  })
+  output$m_pp_livellorisp_zoom<-renderPlot({
+    validate(need(input$m_pp_vincoli==TRUE,' '))
+    ## Generates triangle
+    trian <- expand.grid(base=seq(0,1,l=100), high=seq(0,sin(pi/3),l=87))
+    trian <- subset(trian, (base*sin(pi/3)*2)>high)
+    trian <- subset(trian, ((1-base)*sin(pi/3)*2)>high)
+    
+    ## Generates triangle in R^3 X1+X2+X3=1
+    new=data.frame(x1=1-trian$base-trian$high/sqrt(3))
+    new$x2=trian$high*2/sqrt(3)
+    new$x3=trian$base-trian$high/sqrt(3)
+    var<-colnames(m_pp_dis())
+    colnames(new)<-var
+    
+    ## Crea le condizioni
+    cond<-rep(TRUE,4306)
+    txt_i<-'';txt_s<-'';txt<-''
+    
+    if(input$m_pp_vincoli){
+      if(!is.null(input$m_pp_vincoliinf_txt)){
+        txt_i<-input$m_pp_vincoliinf_txt
+        for ( i in 1:length(var)){
+          txt_i<-gsub(var[i],paste0('new$',var[i]),txt_i)
+        }}
+      if(!is.null(input$m_pp_vincolisup_txt)){
+        txt_s<-input$m_pp_vincolisup_txt
+        for ( i in 1:length(var)){
+          txt_s<-gsub(var[i],paste0('new$',var[i]),txt_s)
+        }}
+      txt<-paste(txt_i,'&',txt_s)
+      if(txt_s=='')txt<-txt_i
+      if(txt_i=='')txt<-txt_s
+      cond<-tryCatch(eval(parse(text = txt)),
+                     error = function(e) "Scrivere correttamente le condizioni!")
+    }
+    
+    if(!is.logical(cond)){
+      plot(c(0, 1), c(0, 1), ann = F, bty = 'n', type = 'n', xaxt = 'n', yaxt = 'n')
+      text(0.5,0.5,"Scrivere correttamente le condizioni!",cex = 1.6, col = "red")
+    }else{
+      trian.new.cond=cbind(trian,new,cond)
+      
+      ## Generates triangle in 2 (base,high), 3 (X1,X2,X3) variables satisfying contraints
+      trian.cond=trian.new.cond[trian.new.cond$cond==TRUE,1:2]
+      new.cond=trian.new.cond[trian.new.cond$cond==TRUE,3:5]
+      
+      ## Creates model matrix on X1+X2*X3=1 (new)
+      P<-model.matrix(as.formula(m_pp_formula()),m_pp_dis())
+      n=ncol(P)
+      
+      ## Design in coord (b,h)
+      b=1-P[,1]-P[,2]/2
+      h=(sqrt(3)/2)*P[,2]
+      
+      DF=cbind.data.frame(y=as.numeric(unlist(strsplit(input$m_pp_risp," "))),P)
+      
+      mdl=lm(frm<-formula(paste0('y',m_pp_formula())),DF)
+      trian.cond$yhat <- predict(mdl, newdata=new.cond)
+      
+      ## Creates function grid and labels on the axes
+      if(input$m_pp_livellorisp_reg)col_grid=1
+      if(!input$m_pp_livellorisp_reg)col_grid='grey70'
+      
+      grade.trellis <- function(from=0.2, to=0.8, step=0.2, col=col_grid, lty=2, lwd=0.5){
+        x1 <- seq(from, to, step)
+        x2 <- x1/2
+        y2 <- x1*sqrt(3)/2
+        x3 <- (1-x1)*0.5+x1
+        y3 <- sqrt(3)/2-x1*sqrt(3)/2
+        lattice::panel.segments(x1, 0, x2, y2, col=col, lty=lty, lwd=lwd)
+        lattice::panel.segments(x1, 0, x3, y3, col=col, lty=lty, lwd=lwd)
+        lattice::panel.segments(x2, y2, 1-x2, y2, col=col, lty=lty, lwd=lwd)
+        if(input$m_pp_livellorisp_perc){
+          lattice::panel.text(x1, 0, label=x1, pos=1,col='grey60')
+          lattice::panel.text(x2, y2, label=rev(x1), pos=2,col='grey60')
+          lattice::panel.text(x3, y3, label=rev(x1), pos=4,col='grey60')
+          
+        }
+      }
+      
+      ## Generates isoleverage plot
+      colore<-c("blue","green3","red","black","purple1")
+      cl<-as.integer(input$m_pp_livellorisp_col)
+
+      ## Values to define graph limits
+      b1=min(trian.cond$base)
+      b2=max(trian.cond$base)
+      h1=min(trian.cond$high)
+      h2=max(trian.cond$high)
+      
+      p=lattice::contourplot(yhat~base*high,cuts = 10, trian.cond,col=colore[cl],aspect = 1,
+                             region = input$m_pp_livellorisp_reg,
+                             col.regions = colorRampPalette(c("yellow","green","blue")),
+                             labels=list(col=colore[cl],cex=0.9),
+                             par.settings=list(axis.line=list(col=NA), axis.text=list(col="black")),xlab=NULL, ylab=NULL,
+                             scales=list(x=list(alternating=0),y=list(alternating=0)),
+                             xlim=c(b1-0.05,b2+0.05), ylim=c(h1-0.05,h2+0.05))
+      print(p)
+      lattice::trellis.focus("panel", 1, 1, highlight=FALSE)
+      lattice::panel.segments(c(0,0,0.5), c(0,0,sqrt(3)/2), c(1,1/2,1), c(0,sqrt(3)/2,0))
+      lattice::panel.xyplot(x=b,y=h, col="red",pch=20,cex=1.75)
+      grade.trellis()
+      lattice::panel.text(.53+(nchar(var[2])-1)/100,0.92,label=var[2],pos=2)
+      lattice::panel.text((nchar(var[1])-1)/50,-0.05,label=var[1],pos=2)
+      lattice::panel.text(1.01-(nchar(var[3])-1)/50,-0.05,label=var[3],pos=4)
+      lattice::trellis.unfocus()
+    }
+  })
+  output$m_pp_livellorisp_col<-renderUI({
+    selectInput("m_pp_livellorisp_col", label = h3(""), 
+                choices = list("blu" = 1, "verde" = 2, "rosso" = 3,"nero" = 4,"viola" = 5), 
+                selected = 1,width="130px")
+  })
+
 }

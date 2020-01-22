@@ -951,13 +951,7 @@ body<-dashboardBody(
                                                   downloadButton("m_d_opt_ag_dis_download"))
                                   )
                       ))),
-    
-    
-    
-    
-    
-    
-    
+
     tabItem(tabName = "m_pp",
             fluidPage(titlePanel(uiOutput("m_pp_titolo")),
                       tags$head(
@@ -976,9 +970,21 @@ body<-dashboardBody(
                                                   uiOutput('m_pp_importa_incolla'),
                                                   uiOutput('m_pp_importa_incolla_spazio1'),
                                                   uiOutput('m_pp_importa_excel_brws')),
-                                           column(12,
+                                           column(12),
+                                           column(4,
                                                   h4('Disegno'),
                                                   tableOutput("m_pp_dis")),
+                                           column(8,
+                                                  plotOutput('m_pp_figura_dis')),
+                                           column(12,
+                                                  br(),
+                                                  br(),
+                                                  br(),
+                                                  br(),
+                                                  br(),
+                                                  br(),
+                                                  br(),
+                                                  br()),
                                            column(6,
                                                   checkboxGroupInput("m_pp_mod_tipo", label = 'Modello con:',inline = TRUE,
                                                                      choices = list("Termini quadratici" = 1,'Termine cubico'=2),selected = c(1,2))),
@@ -1012,12 +1018,6 @@ body<-dashboardBody(
                                                   br(),
                                                   plotOutput('m_pp_livellolev_zoom', width = "100%", height = "500px"))
                                            ),
-                                  
-                                  
-                                  
-                                  
-                                  
-                                  
                                   tabPanel("Modello",
                                            column(4,
                                                   br(),
@@ -1026,6 +1026,12 @@ body<-dashboardBody(
                                            column(8,
                                                   plotOutput('m_pp_figura_risp')),
                                            column(8,
+                                                  br(),
+                                                  br(),
+                                                  br(),
+                                                  br(),
+                                                  br(),
+                                                  br(),
                                                   h3("Parametri regressione"),
                                                   h4("Stima puntuale"),
                                                   verbatimTextOutput('m_pp_coeff'),
@@ -1033,43 +1039,58 @@ body<-dashboardBody(
                                                   verbatimTextOutput('m_pp_stimint')),
                                            column(2),
                                            column(2,
+                                                  br(),
+                                                  br(),
+                                                  br(),
+                                                  br(),
+                                                  br(),
+                                                  br(),
                                                   radioButtons("m_pp_resind", label = h3("Stima della varianza da:"),
                                                                choices = list("Residui" = 1, "Misure indipendenti" = 2), 
                                                                selected = 1)),
                                            column(12,
                                                   hr(),
                                                   plotOutput('m_pp_grcoeff')),
-                                           column(12,
-                                                  plotOutput('m_pp_grsigncoeff')),
-                                           column(12,
+                                           
+                                           column(4,
+                                                  br(),
+                                                  br(),
+                                                  br(),
+                                                  br(),
+                                                  br(),
+                                                  br(),
+                                                  br(),
+                                                  br(),
+                                                  br(),
+                                                  br(),
+                                                  br(),
+                                                  br(),
+                                                  br(),
+                                                  br(),
+                                                  br(),
+                                                  br(),
+                                                  br(),
+                                                  br(),
+                                                  br(),
+                                                  br(),
+                                                  br(),
+                                                  br(),
+                                                  br(),
+                                                  uiOutput("m_pp_livellorisp_col"),
+                                                  checkboxInput("m_pp_livellorisp_perc", label = "percentuali", value = FALSE),
+                                                  checkboxInput("m_pp_livellorisp_reg", label = "regioni", value = TRUE)),
+                                           column(8,
                                                   hr(),
                                                   h3("Grafico superficie risposta"),
-                                                  uiOutput('m_pp_selvar_spazio')),
-                                           # column(5,
-                                           #        uiOutput('m_pp_mod_selinteraz')),
-                                           column(3,
-                                                  uiOutput('m_pp_mod_selvar')),
-                                           column(6,
-                                                  uiOutput("m_pp_mod_fixvar")),
-                                           column(12),
-                                           column(6,
-                                                  plotOutput('m_pp_livellorisp', width = "100%", height = "500px"),
-                                                  uiOutput("m_pp_livellorisp_col"),
-                                                  # br(),
-                                                  checkboxInput("m_pp_vincolirisp", label = "Vincoli", value = FALSE),
-                                                  uiOutput("m_pp_vincolirisp_txt")),
-                                           column(6,
-                                                  plotOutput('m_pp_suprisp', width = "100%", height = "500px")),
-                                           column(6),
-                                           column(3,
+                                                  hr(),
+                                                  plotOutput('m_pp_livellorisp', width = "100%", height = "500px")),
+
+                                           column(12,
                                                   br(),
-                                                  div(style='font-size: 80%; width: 90%;',
-                                                      uiOutput('m_pp_rp_z'))),
-                                           column(3,
                                                   br(),
-                                                  div(style='font-size: 80%; width: 90%;',
-                                                      uiOutput('m_pp_rp_x'))),
-                                           column(12,hr()),
+                                                  br(),
+                                                  br(),
+                                                  br()),
                                            column(5,
                                                   textInput(inputId = "m_pp_prev",label = "Punto previsione (coord.separate da spazio)",value = ""),
                                                   verbatimTextOutput('m_pp_prev_df'),
@@ -1079,100 +1100,20 @@ body<-dashboardBody(
                                                   textInput(inputId = "m_pp_misind",label = "Misure indipendenti",value = ""),
                                                   verbatimTextOutput('m_pp_misind_media'),
                                                   verbatimTextOutput('m_pp_misind_sd'),
-                                                  verbatimTextOutput('m_pp_misind_gdl'))))))
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+                                                  verbatimTextOutput('m_pp_misind_gdl')),
+                                           column(12),
+                                           column(4),
+                                           column(8,
+                                                  hr(),
+                                                  h3("Grafico superficie risposta 'zoommato'"),
+                                                  hr(),
+                                                  plotOutput('m_pp_livellorisp_zoom', width = "100%", height = "500px"))
 
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+                                     
 
- 
-    
-    
-    
+                                           ))))
+
     ))
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

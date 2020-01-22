@@ -6415,7 +6415,7 @@ server <- function (input , output, session ){
     }
   })
   output$m_pp_livellorisp_zoom<-renderPlot({
-    validate(need(input$m_pp_vincoli==TRUE,' '))
+    validate(need(input$m_pp_vincoli==TRUE & length(as.numeric(unlist(strsplit(input$m_pp_risp," "))))==nrow(m_pp_dis()),' '))
     ## Generates triangle
     trian <- expand.grid(base=seq(0,1,l=100), high=seq(0,sin(pi/3),l=87))
     trian <- subset(trian, (base*sin(pi/3)*2)>high)
@@ -6526,6 +6526,10 @@ server <- function (input , output, session ){
     selectInput("m_pp_livellorisp_col", label = h3(""), 
                 choices = list("blu" = 1, "verde" = 2, "rosso" = 3,"nero" = 4,"viola" = 5), 
                 selected = 1,width="130px")
+  })
+  output$m_pp_livellorisp_zoom_txt<-renderUI({
+    validate(need(input$m_pp_vincoli==TRUE & length(as.numeric(unlist(strsplit(input$m_pp_risp," "))))==nrow(m_pp_dis()),' '))
+    h3("Grafico superficie risposta 'zoommato'")
   })
 
 }

@@ -1105,7 +1105,7 @@ body<-dashboardBody(
                                            column(4),
                                            column(8,
                                                   hr(),
-                                                  h3("Grafico superficie risposta 'zoommato'"),
+                                                  uiOutput('m_pp_livellorisp_zoom_txt'),
                                                   hr(),
                                                   plotOutput('m_pp_livellorisp_zoom', width = "100%", height = "500px"))
 

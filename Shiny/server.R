@@ -3281,6 +3281,27 @@ server <- function (input , output, session ){
     df<-as.data.frame(df)
     df
   })
+  
+  
+  
+  output$d_opt_vincoli<-renderUI({
+    validate(need(input$d_opt_pti_cand==1,' '))
+    checkboxInput("d_opt_vincoli", label = "Vincoli", value = FALSE)
+  })
+  output$d_opt_vincoliinf_txt<-renderUI({
+    validate(need(input$d_opt_vincoli==TRUE,' '))
+    textInput(inputId = "d_opt_vincoliinf_txt",label = h5("Inserire i vincoli inferiori separati da '&'"))
+  })
+  output$d_opt_vincolisup_txt<-renderUI({
+    validate(need(input$d_opt_vincoli==TRUE,' '))
+    textInput(inputId = "d_opt_vincolisup_txt",label = h5("Inserire i vincoli superiori separati da '&'"))
+  })
+  
+  
+  
+  
+  
+  
   d_opt_cp_griglia<-reactive({
     req(input$d_opt_nvar)
     req(input$d_opt_passo)
@@ -3299,8 +3320,62 @@ server <- function (input , output, session ){
     }
     df = expand.grid(x)
     names(df) = y
+    
+    
+    
+    
+    if(input$d_opt_vincoli==TRUE){
+      var<-y
+      if(!is.null(input$d_opt_vincoliinf_txt)){
+        if(input$d_opt_vincoliinf_txt!=""){
+          txt_inf<-input$d_opt_vincoliinf_txt
+          for ( i in 1:n){
+            txt_inf<-gsub(var[i],paste0('df$',var[i]),txt_inf)
+          }
+          cond_i<-tryCatch(eval(parse(text = txt_inf)),
+                           error = function(e) "Scrivere correttamente le condizioni!")
+          if(is.character(cond_i)|is.function(cond_i)){
+            df<-matrix(c('','',''),nrow = 1,ncol = n)
+            #colnames(cp)<-c('x1','x2','x3')
+          }else{
+            df<-df[cond_i==TRUE,]
+          }
+        }
+      }
+      
+      if(!is.null(input$d_opt_vincolisup_txt)){
+        if(input$d_opt_vincolisup_txt!=""){
+          txt_sup<-input$d_opt_vincolisup_txt
+          for ( i in 1:n){
+            txt_sup<-gsub(var[i],paste0('df$',var[i]),txt_sup)
+          }
+          cond_s<-tryCatch(eval(parse(text = txt_sup)),
+                           error = function(e) "Scrivere correttamente le condizioni!")
+          
+          if(is.character(cond_s)|is.function(cond_s)){
+            df<-matrix(c('','',''),nrow = 1,ncol = n)
+          }else{
+            df<-df[cond_s==TRUE,]
+          }
+        }
+      }
+    }
+    
+    
+    
+    
+    
+    
+    
+    
     df
   })
+  
+  
+  
+  
+  
+  
   d_opt_cp_livelli<-reactive({
     req(input$d_opt_nvar)
     n<-input$d_opt_nvar
@@ -3321,6 +3396,53 @@ server <- function (input , output, session ){
       colnames(cp)<-unlist(strsplit(c_n,","))
     }else{
       cp<-"Missing levels of some variable"}
+    
+    
+    
+    
+    
+    if(input$d_opt_vincoli==TRUE){
+      var<-colnames(cp)
+      if(!is.null(input$d_opt_vincoliinf_txt)){
+        if(input$d_opt_vincoliinf_txt!=""){
+          txt_inf<-input$d_opt_vincoliinf_txt
+          for ( i in 1:n){
+            txt_inf<-gsub(var[i],paste0('cp$',var[i]),txt_inf)
+          }
+          cond_i<-tryCatch(eval(parse(text = txt_inf)),
+                           error = function(e) "Scrivere correttamente le condizioni!")
+          if(is.character(cond_i)|is.function(cond_i)){
+            cp<-matrix(c('','',''),nrow = 1,ncol = n)
+            #colnames(cp)<-c('x1','x2','x3')
+          }else{
+            cp<-cp[cond_i==TRUE,]
+          }
+        }
+      }
+      
+      if(!is.null(input$d_opt_vincolisup_txt)){
+        if(input$d_opt_vincolisup_txt!=""){
+          txt_sup<-input$d_opt_vincolisup_txt
+          for ( i in 1:n){
+            txt_sup<-gsub(var[i],paste0('cp$',var[i]),txt_sup)
+          }
+          cond_s<-tryCatch(eval(parse(text = txt_sup)),
+                           error = function(e) "Scrivere correttamente le condizioni!")
+          
+          if(is.character(cond_s)|is.function(cond_s)){
+            cp<-matrix(c('','',''),nrow = 1,ncol = n)
+          }else{
+            cp<-cp[cond_s==TRUE,]
+          }
+        }
+      }
+    }
+    
+    
+    
+    
+    
+    
     cp
     
   })
@@ -5701,6 +5823,7 @@ server <- function (input , output, session ){
   m_pp_dis_xls<-reactive({
     req(input$m_pp_file_xlsx$datapath)
     df=read_excel(path = input$m_pp_file_xlsx$datapath,sheet = 1,col_names = TRUE)
+    df<-as.data.frame(df)
     df
   })
   m_pp_dis<-reactive({
@@ -5714,8 +5837,6 @@ server <- function (input , output, session ){
              errorClass = "myClass") 
     m_pp_dis()
   })
-  
-  
   
   output$m_pp_figura_dis<-renderPlot(width = 550,height = 500,{
     P<-m_pp_dis() ###disegno

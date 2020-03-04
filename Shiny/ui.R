@@ -605,6 +605,10 @@ body<-dashboardBody(
                                                   hr(),
                                                   h4('Matrice di dispersione'),
                                                   div(style = 'overflow-x: scroll',tableOutput("pp_matrdisp"))),
+                                           column(12,
+                                                  hr(),
+                                                  h5('VIF'),
+                                                  div(style = 'overflow-x: scroll',tableOutput("pp_vf"))),
                                            column(12,br(),
                                                   h3('Grafico Leverage')),
                                          #  column(5,
@@ -651,8 +655,20 @@ body<-dashboardBody(
                                            column(12,
                                                   hr(),
                                                   plotOutput('pp_grcoeff')),
+                                       
+                                           
+                                           
+                                           column(4,
+                                                  hr(),
+                                                  uiOutput('pp_R2_txt'),
+                                                  verbatimTextOutput('pp_R2')),
+                                           
+                                           
                                            column(12,
                                                   plotOutput('pp_grsigncoeff')),
+                                           
+                                           
+                                           
                                            column(12,
                                                   hr(),
                                                   h3("Grafico superficie risposta"),

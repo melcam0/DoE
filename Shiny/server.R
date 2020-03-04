@@ -3281,9 +3281,6 @@ server <- function (input , output, session ){
     df<-as.data.frame(df)
     df
   })
-  
-  
-  
   output$d_opt_vincoli<-renderUI({
     validate(need(input$d_opt_pti_cand==1,' '))
     checkboxInput("d_opt_vincoli", label = "Vincoli", value = FALSE)
@@ -3296,12 +3293,6 @@ server <- function (input , output, session ){
     validate(need(input$d_opt_vincoli==TRUE,' '))
     textInput(inputId = "d_opt_vincolisup_txt",label = h5("Inserire i vincoli superiori separati da '&'"))
   })
-  
-  
-  
-  
-  
-  
   d_opt_cp_griglia<-reactive({
     req(input$d_opt_nvar)
     req(input$d_opt_passo)
@@ -3320,10 +3311,6 @@ server <- function (input , output, session ){
     }
     df = expand.grid(x)
     names(df) = y
-    
-    
-    
-    
     if(input$d_opt_vincoli==TRUE){
       var<-y
       if(!is.null(input$d_opt_vincoliinf_txt)){
@@ -3342,7 +3329,6 @@ server <- function (input , output, session ){
           }
         }
       }
-      
       if(!is.null(input$d_opt_vincolisup_txt)){
         if(input$d_opt_vincolisup_txt!=""){
           txt_sup<-input$d_opt_vincolisup_txt
@@ -3360,22 +3346,8 @@ server <- function (input , output, session ){
         }
       }
     }
-    
-    
-    
-    
-    
-    
-    
-    
     df
   })
-  
-  
-  
-  
-  
-  
   d_opt_cp_livelli<-reactive({
     req(input$d_opt_nvar)
     n<-input$d_opt_nvar
@@ -3396,11 +3368,6 @@ server <- function (input , output, session ){
       colnames(cp)<-unlist(strsplit(c_n,","))
     }else{
       cp<-"Missing levels of some variable"}
-    
-    
-    
-    
-    
     if(input$d_opt_vincoli==TRUE){
       var<-colnames(cp)
       if(!is.null(input$d_opt_vincoliinf_txt)){
@@ -3419,7 +3386,6 @@ server <- function (input , output, session ){
           }
         }
       }
-      
       if(!is.null(input$d_opt_vincolisup_txt)){
         if(input$d_opt_vincolisup_txt!=""){
           txt_sup<-input$d_opt_vincolisup_txt
@@ -3428,7 +3394,6 @@ server <- function (input , output, session ){
           }
           cond_s<-tryCatch(eval(parse(text = txt_sup)),
                            error = function(e) "Scrivere correttamente le condizioni!")
-          
           if(is.character(cond_s)|is.function(cond_s)){
             cp<-matrix(c('','',''),nrow = 1,ncol = n)
           }else{
@@ -3437,14 +3402,7 @@ server <- function (input , output, session ){
         }
       }
     }
-    
-    
-    
-    
-    
-    
     cp
-    
   })
   d_opt_cp1<-reactive({
     validate(need(input$d_opt_costruisci,''))
@@ -3456,7 +3414,6 @@ server <- function (input , output, session ){
     validate(need(input$d_opt_importa,''))
     if(input$d_opt_pti_cand==2 & input$d_opt_importa==1)df<-d_opt_cp_paste()
     if(input$d_opt_pti_cand==2 & input$d_opt_importa==2)df<-d_opt_cp_xls()
-    
     df
   })
   d_opt_cp<-reactive({
@@ -3568,7 +3525,6 @@ server <- function (input , output, session ){
     x<-model.matrix(formula(d_opt_formula()),d_opt_cp())
     r<-nrow(x)
     co<-input$d_opt_Lnumexp
-    
     numericInput(inputId = 'd_opt_Unumexp',label = 'Numero massimo di esperimenti',value = co,max=r,min=co,width = "30%")
   })
   d_opt_federov<-eventReactive(input$d_opt_calc,{
@@ -3614,7 +3570,6 @@ server <- function (input , output, session ){
                   'Trovata matrice con rango insufficiente \nRiprovare!'))
     d_opt_federov()$X
   })
-  
   msg1<-eventReactive(input$d_opt_calc,{
     df<-tryCatch(d_opt_cp() ,
                  error = function(e) "1")
@@ -4242,6 +4197,20 @@ server <- function (input , output, session ){
   output$pp_lv_x<-renderUI({
     sliderInput('pp_lv_x',label = 'Rotazione verticale',min = 0,max = 90,value = 60,step = 10)
   })
+  output$pp_vf<-renderTable({
+    #req(input$d_opt_ag_numexp)
+    #req(input$d_opt_ag_Lnumexp)
+    #validate(need(ncol(d_opt_ag_federov()$X)>2 & sum(is.na(d_opt_ag_federov()$X))==0,''))
+    frml<-as.formula(pp_formula())
+    dis<-pp_dis()
+    vf<-vif(model.matrix(frml, dis))
+    cn<-attr(vf,'names')
+    cn<-str_remove(cn,"\\(")
+    cn<-str_remove(cn,"I")
+    cn<-str_remove(cn,"\\)")
+    attr(vf,'names')<-cn
+    t(vf)
+  }) 
   output$pp_risptext<-renderUI({
     X<-model.matrix(as.formula(pp_formula()),pp_dis())
     if(qr(X)$rank<ncol(X))stop()
@@ -4306,6 +4275,43 @@ server <- function (input , output, session ){
         }
          }
   })
+  
+  
+  
+  output$pp_R2_txt<-renderUI({
+    validate(need(length(as.numeric(unlist(strsplit(input$pp_risp," "))))==nrow(pp_dis()),''))
+    HTML("<h4> R <sup> 2 </sup> e R <sup> 2 </sup> aggiustato <h4>")
+  })
+  
+  output$pp_R2<-renderPrint({
+    validate(need(length(as.numeric(unlist(strsplit(input$pp_risp," "))))==nrow(pp_dis()),''))
+    sm<-summary(pp_mod())
+    R2<-as.data.frame(sm$r.squared)
+    R2<-c(sm$r.squared,sm$adj.r.squared)
+    attr(R2,'names')<-c('R2','R2_adj')
+    round(R2,3)
+    
+    
+    
+
+    
+    
+  })
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
   output$pp_grsigncoeff<-renderPlot({
     var<-attr(pp_mod()$model,"names")[-1]
     validate(need(length(var)==sum(substr(var,1,2)!='I('),''))

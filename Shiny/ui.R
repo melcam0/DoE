@@ -705,7 +705,33 @@ body<-dashboardBody(
                                                   textInput(inputId = "pp_misind",label = "Misure indipendenti",value = ""),
                                                   verbatimTextOutput('pp_misind_media'),
                                                   verbatimTextOutput('pp_misind_sd'),
-                                                  verbatimTextOutput('pp_misind_gdl')))))),
+                                                  verbatimTextOutput('pp_misind_gdl')),
+                                          column(12),
+                                          column(6,
+                                                 hr(),
+                                                 h3("Grafico residui"),
+                                                 plotOutput('pp_graf_res',brush = brushOpts(id="pp_graf_res_brush",resetOnNew = TRUE)),
+                                                 hr(),
+                                                 verbatimTextOutput('pp_graf_res_brush')),
+                                          column(6,
+                                                 hr(),
+                                                 h3("Grafico valori previsti vs sperimentali"),
+                                                 plotOutput('pp_graf_yfit',brush = brushOpts(id="pp_graf_yfit_brush",resetOnNew = TRUE)),
+                                                 hr(),
+                                                 verbatimTextOutput('pp_graf_yfit_brush'))
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          
+                                          )
+                                  
+                                  
+                                  
+                                  ))),
     
     
     

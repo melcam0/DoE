@@ -4433,11 +4433,9 @@ server <- function (input , output, session ){
         df<-cbind.data.frame(round(df[,1:6],3),round(df[,7],4),lab)
         colnames(df)<-c('2.5%','97.5%','0.5%','99.5%','0.05%','99.95%','p-value','')
         df
-        
       }else{
         cat('Non ci sono gradi di libertà')
       }
-
     }else{
       #req(input$pp_misind)
       x<-as.numeric(unlist(strsplit(input$pp_misind," ")))
@@ -4514,7 +4512,6 @@ server <- function (input , output, session ){
     }
     textInput(inputId = "pp_mod_fixvar",label = h5(txt),value = vl)
   })
-  
   output$pp_livellorisp<-renderPlot({
     X<-model.matrix(as.formula(pp_formula()),pp_dis())
     if(qr(X)$rank<ncol(X))stop()
@@ -4530,7 +4527,6 @@ server <- function (input , output, session ){
     dt_exp<-expand.grid(dt)
     data<-matrix(0,441,length(var))
     col<-c(1,2)
-
     if(length(var)>2 & length(input$pp_mod_selvar)>=2){
       col<-which(var%in%input$pp_mod_selvar==TRUE)
       col_fix<-which(var%in%var[col][1:2]==FALSE)
@@ -4542,8 +4538,6 @@ server <- function (input , output, session ){
     data[,col[2]]<-dt_exp[,2]
     data<-as.data.frame(data)
     colnames(data)<-var
-    
-    
     txt<-input$pp_vincolirisp_txt
     for ( i in 1:length(var)){
       txt<-gsub(var[i],paste0('data$',var[i]),txt)
@@ -4554,24 +4548,16 @@ server <- function (input , output, session ){
       plot(c(0, 1), c(0, 1), ann = F, bty = 'n', type = 'n', xaxt = 'n', yaxt = 'n')
       text(0.5,0.5,cond,cex = 1.6, col = "red")
     }else{
-    
-    
-    
-    
-    
     mod<-pp_mod()
-    
     Pred=data.frame(data,P=predict(mod,newdata=data))
     colnames(Pred)[col[1]]<-'x'
     colnames(Pred)[col[2]]<-'y'
     colore<-c("blue","green3","red","black","purple1")
     cl<-as.integer(input$pp_livellorisp_col)
-    
     if(is.na(Pred$P[1])==TRUE){
       plot(c(0, 1), c(0, 1), ann = F, bty = 'n', type = 'n', xaxt = 'n', yaxt = 'n')
       text(0.5,0.5,'inserire il valore delle variabili costanti',cex = 1.6, col = "red")
     }else{
-      
       if(input$pp_vincolirisp & !is.null(cond) & is.logical(cond))Pred<-Pred[cond==TRUE,]
       
       lattice::contourplot(P~x*y,data=Pred,cuts=15,main='Response Surface: Contour Plot',cex.main=0.8,
@@ -4581,13 +4567,11 @@ server <- function (input , output, session ){
     }
     }
   })
-  
   output$pp_livellorisp_col<-renderUI({
     selectInput("pp_livellorisp_col", label = h3(""), 
                 choices = list("blu" = 1, "verde" = 2, "rosso" = 3,"nero" = 4,"viola" = 5), 
                 selected = 1,width="130px")
   })
-  
   output$pp_suprisp<-renderPlot({
     X<-model.matrix(as.formula(pp_formula()),pp_dis())
     if(qr(X)$rank<ncol(X))stop()
@@ -4603,20 +4587,16 @@ server <- function (input , output, session ){
     dt_exp<-expand.grid(dt)
     data<-matrix(0,441,length(var))
     col<-c(1,2)
-    
     if(length(var)>2 & length(input$pp_mod_selvar)>=2){
       col<-which(var%in%input$pp_mod_selvar==TRUE)
       col_fix<-which(var%in%var[col][1:2]==FALSE)
       fix<-as.numeric(unlist(strsplit(input$pp_mod_fixvar," ")))
       for(i in 1:(length(var)-2))data[,col_fix[i]]<-rep(fix[i],441)
-      
     }
     data[,col[1]]<-dt_exp[,1]
     data[,col[2]]<-dt_exp[,2]
     data<-as.data.frame(data)
     colnames(data)<-var
-    
-    
     txt<-input$pp_vincolirisp_txt
     for ( i in 1:length(var)){
       txt<-gsub(var[i],paste0('data$',var[i]),txt)
@@ -4627,25 +4607,17 @@ server <- function (input , output, session ){
       plot(c(0, 1), c(0, 1), ann = F, bty = 'n', type = 'n', xaxt = 'n', yaxt = 'n')
       text(0.5,0.5,cond,cex = 1.6, col = "red")
     }else{
-    
-    
-    
-    
     mod<-pp_mod()
-    
     Pred=data.frame(data,P=predict(mod,newdata=data))
     colnames(Pred)[col[1]]<-'x'
     colnames(Pred)[col[2]]<-'y'
-    
     if(is.na(Pred$P[1])==TRUE){
       plot(c(0, 1), c(0, 1), ann = F, bty = 'n', type = 'n', xaxt = 'n', yaxt = 'n')
       text(0.5,0.5,'inserire il valore delle variabili costanti',cex = 1.6, col = "red")
     }else{
       req(input$pp_rp_z)
       req(input$pp_rp_x)
-      
       if(input$pp_vincolirisp & !is.null(cond) & is.logical(cond))Pred<-Pred[cond==TRUE,]
-      
       lattice::wireframe(P~x*y,data=Pred,drape=TRUE,col.regions = colorRampPalette(c("yellow","green","blue"))(256),
                          at=seq(min(Pred$P),max(Pred$P),(max(Pred$P)-min(Pred$P))/256),
                          screen=list(z=input$pp_rp_z,x=-input$pp_rp_x),
@@ -4654,18 +4626,44 @@ server <- function (input , output, session ){
     }
     }
   })
-  
   output$pp_vincolirisp_txt<-renderUI({
     validate(need(input$pp_vincolirisp==TRUE,' '))
     textInput(inputId = "pp_vincolirisp_txt",label = h5("Inserire i vincoli separati da '&'"))
   })
-  
   output$pp_rp_z<-renderUI({
     sliderInput('pp_rp_z',label = 'Rotazione orizzontale',min = 0,max = 360,value = 30,step = 10)
   })
-  
   output$pp_rp_x<-renderUI({
     sliderInput('pp_rp_x',label = 'Rotazione verticale',min = 0,max = 90,value = 60,step = 10)
+  })
+  output$pp_graf_res<-renderPlot({
+    df<-cbind.data.frame(pp_mod()$residuals,c(1:length(pp_mod()$residuals)))
+    colnames(df)<-c("residui","indice")
+    ggplot(df,mapping=aes(x=indice,y=residui))+labs(x="indice",y="residui")+geom_point(cex=2,col="blue")+
+      geom_hline(yintercept =0,col="blue",lty=2)+theme_light()
+  })
+  output$pp_graf_res_brush<-renderPrint({
+    req(input$pp_graf_res_brush)
+    brush <- input$pp_graf_res_brush
+    df<-cbind.data.frame(pp_mod()$residuals,c(1:length(pp_mod()$residuals)))
+    colnames(df)<-c("residui","indice")
+    cr<-which(df[,1]>brush$ymin & df[,1]<brush$ymax & df[,2] >brush$xmin & df[,2] < brush$xmax)
+    round(df[cr,1,drop=FALSE],3)
+  })
+  output$pp_graf_yfit<-renderPlot({
+    df<-cbind.data.frame(pp_mod()$fitted.value,pp_mod()$model$y)
+    colnames(df)<-c("yhat","y")
+    ggplot(df,mapping=aes(x=y,y=yhat))+labs(x="valori sperimentali",y="valori previsti")+
+      geom_point(cex=2,col="blue")+
+      geom_abline(intercept = 0,slope = 1,col="blue",lty=2)+theme_light()
+  })
+  output$pp_graf_yfit_brush<-renderPrint({
+    req(input$pp_graf_yfit_brush)
+    brush <- input$pp_graf_yfit_brush
+    df<-cbind.data.frame(pp_mod()$fitted.value,pp_mod()$model$y)
+    colnames(df)<-c("yhat","y")
+    cr<-which(df[,1]>brush$ymin & df[,1]<brush$ymax & df[,2] >brush$xmin & df[,2] < brush$xmax)
+    round(df[cr,],3)
   })
 
 ## Miscele -----------------------------------------------------------------

@@ -4275,14 +4275,10 @@ server <- function (input , output, session ){
         }
          }
   })
-  
-  
-  
   output$pp_R2_txt<-renderUI({
     validate(need(length(as.numeric(unlist(strsplit(input$pp_risp," "))))==nrow(pp_dis()),''))
     HTML("<h4> R <sup> 2 </sup> e R <sup> 2 </sup> aggiustato <h4>")
   })
-  
   output$pp_R2<-renderPrint({
     validate(need(length(as.numeric(unlist(strsplit(input$pp_risp," "))))==nrow(pp_dis()),''))
     sm<-summary(pp_mod())
@@ -4290,34 +4286,34 @@ server <- function (input , output, session ){
     R2<-c(sm$r.squared,sm$adj.r.squared)
     attr(R2,'names')<-c('R2','R2_adj')
     round(R2,3)
-    
-    
-    
-
-    
-    
   })
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
   output$pp_grsigncoeff<-renderPlot({
-    var<-attr(pp_mod()$model,"names")[-1]
-    validate(need(length(var)==sum(substr(var,1,2)!='I('),''))
+    n<-ncol(pp_dis())
+    n_lev<-rep(0,n)
+    X<-as.data.frame(pp_dis())
+    for(i in 1:n){
+      X[,i]<-as.factor(X[,i])
+      n_lev[i]<-length(levels(X[,i]))
+    }
+    validate(need(n_lev==rep(2,n),'Questa routine si applica a disegni fattoriali a 2 livelli!'))
     mod<-pp_mod()
     FrF2::DanielPlot(mod,alpha = 0.05,main='',pch=19,cex.fac=1,col="blue",datax = FALSE)
     qqline(y = coef(mod)[-1],datax = FALSE,col="blue",lty=2)
+  })
+  output$pp_grPareto<-renderPlot({
+    n<-ncol(pp_dis())
+    n_lev<-rep(0,n)
+    X<-as.data.frame(pp_dis())
+    for(i in 1:n){
+      X[,i]<-as.factor(X[,i])
+      n_lev[i]<-length(levels(X[,i]))
+    }
+    validate(need(n_lev==rep(2,n),'Questa routine si applica a disegni fattoriali a 2 livelli!'))
+    mod<-pp_mod()
+    df_coeff<-mod$coefficients[-1]
+    df_coeff<-df_coeff[order(abs(df_coeff),decreasing = TRUE)]
+    par_coeff<-(df_coeff^2/sum(df_coeff^2))*100
+    barplot(par_coeff,space=0,col='red',main='',las=2,cex.names=0.8)
   })
   output$pp_prev_df<-renderPrint({
     var<-attr(pp_mod()$model,"names")[-1]

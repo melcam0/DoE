@@ -3948,13 +3948,17 @@ server <- function (input , output, session ){
     df
   })
   output$pp_dis<-renderTable({
-    validate(need(is.data.frame(pp_dis()),"Selezionare un dataset!\n "),
-             errorClass = "myClass") 
+    df<-tryCatch(pp_dis(),
+                 error = function(e) "Selezionare un dataset!")
+    validate(need(!is.character(df),'Selezionare un dataset!'))
     pp_dis()
   })
   
   output$pp_inter<-renderUI({
     validate(need('2'%in%input$pp_mod_tipo,''))
+    df<-tryCatch(pp_dis(),
+                 error = function(e) "Selezionare un dataset!")
+    validate(need(!is.character(df),''))
     numericInput("pp_inter", label = h5("Ordine interazione"), value = 2,min = 2,width = "70px")
   })
   
@@ -3998,7 +4002,9 @@ server <- function (input , output, session ){
     var
   })
   output$pp_mod_variabx<-renderUI({
-    validate(need(is.data.frame(pp_dis()),""))
+    df<-tryCatch(pp_dis(),
+                 error = function(e) "Selezionare un dataset!")
+    validate(need(!is.character(df),''))
     selectizeInput(inputId = "pp_mod_variabx",label="Termini modello (x)",
                    #div("Termini modello (x)",style="font-weight: 400"),
                    choices = pp_var_sel(),
@@ -4019,7 +4025,9 @@ server <- function (input , output, session ){
     frm
   })
   output$pp_modello<-renderText({
-    validate(need(is.data.frame(pp_dis()),""))
+    df<-tryCatch(pp_dis(),
+                 error = function(e) "Selezionare un dataset!")
+    validate(need(!is.character(df),''))
     req(input$pp_mod_variabx)
     var<-input$pp_mod_variabx
     var<-str_remove(var,"\\(")
@@ -4036,7 +4044,9 @@ server <- function (input , output, session ){
     frm
   })
   output$pp_matrdisp<-renderTable({
-    validate(need(is.data.frame(pp_dis()),""))
+    df<-tryCatch(pp_dis(),
+                 error = function(e) "Selezionare un dataset!")
+    validate(need(!is.character(df),''))
     X<-model.matrix(as.formula(pp_formula()),pp_dis())
     validate(need(qr(X)$rank==ncol(X),"Il programma è stato interrotto perché la matrice del modello ha rango insufficiente"))
     D<-solve(t(X)%*%X)
@@ -4059,18 +4069,7 @@ server <- function (input , output, session ){
     var<-colnames(pp_dis())
     var<-var[var%in%input$pp_mod_variabx]
     validate(need(length(var)>2,''))
-    
-    
-
-    
-    
-    
-    
-    
     if(length(var)>2)validate(need(length(input$pp_selvar)==2,''))
-    
-    
-    
     X<-model.matrix(as.formula(pp_formula()),pp_dis())
     if(qr(X)$rank<ncol(X))stop()
     vl<-'0'
@@ -4100,19 +4099,8 @@ server <- function (input , output, session ){
     req(input$pp_mod_variabx)
     var<-colnames(pp_dis())
     var<-var[var%in%input$pp_mod_variabx]
-  
-    
-    
     validate(need(length(var)>1,'Modello con meno di due variabili!'))
-    
     if(length(var)>2)validate(need(length(input$pp_selvar)==2,'Selezionare 2 variabili!'))
-    
-    
-    
-    
-    
-    
-    
     X<-model.matrix(as.formula(pp_formula()),pp_dis())
     #if(qr(X)$rank<ncol(X))stop()
     validate(need(qr(X)$rank==ncol(X),''))
@@ -4167,14 +4155,8 @@ server <- function (input , output, session ){
     req(input$pp_mod_variabx)
     var<-colnames(pp_dis())
     var<-var[var%in%input$pp_mod_variabx]
-    
-    
     validate(need(length(var)>1,''))
-    
     if(length(var)>2)validate(need(length(input$pp_selvar)==2,''))
-    
-    
-    
     X<-model.matrix(as.formula(pp_formula()),pp_dis())
     validate(need(qr(X)$rank==ncol(X),""))
     dsg<-as.data.frame(pp_dis())
@@ -4197,7 +4179,6 @@ server <- function (input , output, session ){
     data[,col[2]]<-dt_exp[,2]
     data<-as.data.frame(data)
     colnames(data)<-var
-
     txt<-input$pp_vincoli_txt
     for ( i in 1:length(var)){
       txt<-gsub(var[i],paste0('data$',var[i]),txt)
@@ -4244,6 +4225,9 @@ server <- function (input , output, session ){
     req(input$pp_mod_variabx)
     var<-colnames(pp_dis())
     var<-var[var%in%input$pp_mod_variabx]
+    df<-tryCatch(pp_dis(),
+                 error = function(e) "Selezionare un dataset!")
+    validate(need(!is.character(df),''))
     validate(need(length(var)>1,'Modello con meno di due variabili!'))
     frml<-as.formula(pp_formula())
     dis<-pp_dis()
@@ -6912,4 +6896,107 @@ pp_sigma_df<-reactive({
     h3("Grafico superficie risposta 'zoommato'")
   })
 
+  # Codifica variabili -----------------------------------------------------------------  
+  output$cd_var_importa_incolla_spazio<-renderUI({
+    req(input$cd_var_importa==1)
+    br()
+  })
+  output$cd_var_importa_incolla<-renderUI({
+    req(input$cd_var_importa==1)
+    actionButton("cd_var_incolla", label = "Incolla")
+  })
+  output$cd_var_importa_incolla_spazio1<-renderUI({
+    req(input$cd_var_importa==1)
+    hr()
+  })
+  output$cd_var_importa_excel_brws<-renderUI({
+    req(input$cd_var_importa==2)
+    fileInput("cd_var_file_xlsx",label='',
+              multiple = FALSE,
+              accept = c(".xlx",".xlsx"))
+  })
+  cd_var_dis_paste<-eventReactive(input$cd_var_incolla,{
+    df<-tryCatch(read.DIF(file = "clipboard",header = TRUE,transpose = TRUE),
+                 #warning = function(w) {print('warning')},
+                 error = function(e) "Selezionare un dataset!")
+    df
+  })
+  cd_var_dis_xls<-reactive({
+    req(input$cd_var_file_xlsx$datapath)
+    df=read_excel(path = input$cd_var_file_xlsx$datapath,sheet = 1,col_names = TRUE)
+    df
+  })
+  cd_var_dis<-reactive({
+    if(input$cd_var_importa==1)df<-cd_var_dis_paste()
+    if(input$cd_var_importa==2)df<-cd_var_dis_xls()
+    if(sum(df[,1]==c(1:nrow(df)))==nrow(df))df<-df[,-1]
+    df
+  })
+  output$cd_var_dis<-renderTable({
+    #validate(need(is.data.frame(cd_var_dis()),"Selezionare un dataset!\n "),
+             #errorClass = "myClass") 
+    df<-tryCatch(cd_var_dis(),
+                 error = function(e) "Selezionare un dataset!")
+    validate(need(!is.character(df),'Selezionare un dataset!'))
+    df
+  })
+  cd_var_dis_cod<-reactive({
+    M<-cd_var_dis()
+    for(i in 1:ncol(M)){
+      if(!is.numeric(M[,i]))M[,i]<-as.numeric(as.factor(M[,i]))
+    }
+    vmax<-apply(M,2,max)
+    vmin<-apply(M,2,min)
+    D<-vmax-vmin
+    var.trans<-M
+    for(i in 1:ncol(M)){var.trans[,i]<-2*(M[,i]-vmin[i])/D[i]-1}
+    var.trans
+  })
+  output$cd_var_dis_cod<-renderTable({
+    #validate(need(is.data.frame(cd_var_dis()),"Selezionare un dataset!\n "),
+    #errorClass = "myClass") 
+    df<-tryCatch(cd_var_dis_cod(),
+                 error = function(e) "Selezionare un dataset!")
+    validate(need(!is.character(df),''))
+    df
+  })
+  output$cd_var_download <- downloadHandler(
+    filename = "dis_cod.xlsx", 
+    content = function(file) {
+      write.xlsx(cd_var_dis_cod(),file,colNames=TRUE)
+    })
+  
+  
+  
+  
+  
+  
+  
+  
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

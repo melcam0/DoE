@@ -17,10 +17,16 @@ sidebar<- dashboardSidebar(
                          menuSubItem(text = "Simplex Design",tabName = "m_simplex"),
                          menuSubItem(text = "D-ottimale",tabName = "m_d_opt"),
                          menuSubItem(text = "Piano personalizzato",tabName = "m_pp")),
+
+                
                 hr(),
                 menuItem(text = "File",icon = icon("briefcase", lib = "font-awesome"),
+                        
+                         menuSubItem(text = "Codifica variabili",tabName = "cd_var"),
+                         hr(),
                          menuSubItem("Dispensa",tabName = "dispensa"),
                          menuSubItem("Diapositive",tabName = "diapositive"),
+                         hr(),
                          actionButton("quit", "Quit",onclick = "setTimeout(function(){window.close();},200);",
                                       style='padding:4px; font-size:80%'))
                         ))
@@ -1186,13 +1192,39 @@ body<-dashboardBody(
                                                   uiOutput('m_pp_livellorisp_zoom_txt'),
                                                   hr(),
                                                   plotOutput('m_pp_livellorisp_zoom', width = "100%", height = "500px"))
-                                           )))),
+                                           ))))
     
+    # Codifica variabili --------------------------------------------------------------------  
     
-    
-    
-    
-    
+    tabItem(tabName = "cd_var",
+            fluidPage(titlePanel(HTML('Codifica variabili')),
+                      fluidPage(
+                        tabsetPanel(type = "tabs",
+                                    tabPanel("Variabili indipendenti",
+                                             column(12,
+                                                    br()),
+                                             column(4,
+                                                    radioButtons("cd_var_importa", label = "Importa disegno:",
+                                                                 choices = list("Incolla" = 1, "Excel" = 2), 
+                                                                 selected = 1,inline = TRUE)),
+                                             column(4,
+                                                    uiOutput('cd_var_importa_incolla_spazio'),
+                                                    uiOutput('cd_var_importa_incolla'),
+                                                    uiOutput('cd_var_importa_incolla_spazio1'),
+                                                    uiOutput('cd_var_importa_excel_brws')),
+                                             column(12,
+                                                    h4('Disegno'),
+                                                    tableOutput("cd_var_dis")),
+                                             column(12,
+                                                    hr(),
+                                                    h4('Disegno codificato'),
+                                                    tableOutput("cd_var_dis_cod"),
+                                                    downloadButton("cd_var_download"))
+                                             ),
+                                    tabPanel("Miscele"))
+            )
+    )),
+
     # File --------------------------------------------------------------------
     
     tabItem(tabName = "dispensa",
@@ -1236,7 +1268,10 @@ body<-dashboardBody(
                                                src=""))
                           
                           
-              )))   
+              )))
+    
+    
+
     
     
     

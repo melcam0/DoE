@@ -264,6 +264,11 @@ server <- function (input , output, session ){
 
   output$fatt_compl_fixvar<-renderUI({
     validate(need(input$fatt_compl_k>2,''))
+    
+    
+    validate(need(length(input$fatt_compl_selvar)==2,'Selezionare 2 variabili!'))
+    
+    
     req(input$fatt_compl_selvar)
     vl<-'0'
     if(input$fatt_compl_k>3){
@@ -4047,6 +4052,18 @@ server <- function (input , output, session ){
     var<-colnames(pp_dis())
     var<-var[var%in%input$pp_mod_variabx]
     validate(need(length(var)>2,''))
+    
+    
+
+    
+    
+    
+    
+    
+    if(length(var)>2)validate(need(length(input$pp_selvar)==2,''))
+    
+    
+    
     X<-model.matrix(as.formula(pp_formula()),pp_dis())
     if(qr(X)$rank<ncol(X))stop()
     vl<-'0'
@@ -4076,7 +4093,19 @@ server <- function (input , output, session ){
     req(input$pp_mod_variabx)
     var<-colnames(pp_dis())
     var<-var[var%in%input$pp_mod_variabx]
-    validate(need(length(var)>1,''))
+  
+    
+    
+    validate(need(length(var)>1,'Modello con meno di due variabili!'))
+    
+    if(length(var)>2)validate(need(length(input$pp_selvar)==2,'Selezionare 2 variabili!'))
+    
+    
+    
+    
+    
+    
+    
     X<-model.matrix(as.formula(pp_formula()),pp_dis())
     #if(qr(X)$rank<ncol(X))stop()
     validate(need(qr(X)$rank==ncol(X),''))
@@ -4131,7 +4160,14 @@ server <- function (input , output, session ){
     req(input$pp_mod_variabx)
     var<-colnames(pp_dis())
     var<-var[var%in%input$pp_mod_variabx]
+    
+    
     validate(need(length(var)>1,''))
+    
+    if(length(var)>2)validate(need(length(input$pp_selvar)==2,''))
+    
+    
+    
     X<-model.matrix(as.formula(pp_formula()),pp_dis())
     validate(need(qr(X)$rank==ncol(X),""))
     dsg<-as.data.frame(pp_dis())
@@ -4198,9 +4234,10 @@ server <- function (input , output, session ){
     sliderInput('pp_lv_x',label = 'Rotazione verticale',min = 0,max = 90,value = 60,step = 10)
   })
   output$pp_vf<-renderTable({
-    #req(input$d_opt_ag_numexp)
-    #req(input$d_opt_ag_Lnumexp)
-    #validate(need(ncol(d_opt_ag_federov()$X)>2 & sum(is.na(d_opt_ag_federov()$X))==0,''))
+    req(input$pp_mod_variabx)
+    var<-colnames(pp_dis())
+    var<-var[var%in%input$pp_mod_variabx]
+    validate(need(length(var)>1,'Modello con meno di due variabili!'))
     frml<-as.formula(pp_formula())
     dis<-pp_dis()
     vf<-vif(model.matrix(frml, dis))
@@ -4288,6 +4325,10 @@ server <- function (input , output, session ){
     round(R2,3)
   })
   output$pp_grsigncoeff<-renderPlot({
+    req(input$pp_mod_variabx)
+    var<-colnames(pp_dis())
+    var<-var[var%in%input$pp_mod_variabx]
+    validate(need(length(var)>1,'Modello con meno di due variabili!'))
     n<-ncol(pp_dis())
     n_lev<-rep(0,n)
     X<-as.data.frame(pp_dis())
@@ -4635,6 +4676,217 @@ server <- function (input , output, session ){
   })
   output$pp_rp_x<-renderUI({
     sliderInput('pp_rp_x',label = 'Rotazione verticale',min = 0,max = 90,value = 60,step = 10)
+  })
+pp_sigma<-reactive({
+    X<-model.matrix(as.formula(pp_formula()),pp_dis())
+    if(qr(X)$rank<ncol(X))stop()
+    if(input$pp_resind==1){
+      mod<-pp_mod()
+      smr<-summary(mod)
+      s<-smr$sigma
+    }else{
+      x<-as.numeric(unlist(strsplit(input$pp_misind," ")))
+      if(length(x)<=1){
+        s<-NaN
+      }else{
+        s<-sd(x)
+      }
+    }
+    s
+  })
+pp_sigma_df<-reactive({
+    X<-model.matrix(as.formula(pp_formula()),pp_dis())
+    if(qr(X)$rank<ncol(X))stop()
+    if(input$pp_resind==1){
+      mod<-pp_mod()
+      s_df<-mod$df.residual
+    }else{
+      x<-as.numeric(unlist(strsplit(input$pp_misind," ")))
+      if(length(x)<=1){
+        s_df<-0
+      }else{
+        s_df<-length(x)-1
+      }
+    }
+    s_df
+  })
+  output$pp_selvar_icp<-renderUI({
+    req(input$pp_mod_variabx)
+    var<-colnames(pp_dis())
+    var<-var[var%in%input$pp_mod_variabx]
+    validate(need(length(var)>2,''))
+    X<-model.matrix(as.formula(pp_formula()),pp_dis())
+    validate(need(qr(X)$rank==ncol(X),""))
+    selectInput("pp_selvar_icp", label = h5("Selezionare 2 variabili"), 
+                choices = var, 
+                multiple = TRUE,selected = var[1:2])
+  })
+  output$pp_fixvar_icp<-renderUI({
+    req(input$pp_mod_variabx)
+    req(input$pp_selvar_icp)
+    var<-colnames(pp_dis())
+    var<-var[var%in%input$pp_mod_variabx]
+    validate(need(length(var)>2,''))
+    validate(need(length(input$pp_selvar_icp)==2,''))
+    X<-model.matrix(as.formula(pp_formula()),pp_dis())
+    if(qr(X)$rank<ncol(X))stop()
+    vl<-'0'
+    if(length(var)>3){
+      for(i in 2:(length(var)-2)){
+        vl<-paste(vl,'0')
+      }
+    }
+    #var<-attr(pp_mod()$model,"names")[-1]
+    col<-c(1,2)
+    if(length(var)>2 & length(input$pp_selvar_icp)>=2){
+      col<-which(var%in%input$pp_selvar_icp==TRUE)
+      col_fix<-which(var%in%var[col][1:2]==FALSE)
+    }
+    var_fix<-c(NULL)
+    for(i in 1:length(col_fix)){
+      var_fix<-paste(var_fix,var[col_fix][i])
+    }
+    if(length(col_fix)==1){
+      txt<-paste('valore della  variabile',var[col_fix])
+    }else{
+      txt<-paste('valori delle  variabili',var_fix, '(separati da spazio)')
+    }
+    textInput(inputId = "pp_fixvar_icp",label = h5(txt),value = vl)
+  })
+  output$pp_livellolev_icp<-renderPlot({
+    req(input$pp_mod_variabx)
+    var<-colnames(pp_dis())
+    var<-var[var%in%input$pp_mod_variabx]
+    validate(need(length(var)>1,'Modello con meno di due variabili!'))
+    if(length(var)>2)validate(need(length(input$pp_selvar_icp)==2,'Selezionare 2 variabili!'))
+    validate(need(pp_sigma_df()>0,'Manca una stima della varianza!'))
+    X<-model.matrix(as.formula(pp_formula()),pp_dis())
+    #if(qr(X)$rank<ncol(X))stop()
+    validate(need(qr(X)$rank==ncol(X),''))
+    dsg<-as.data.frame(pp_dis())
+    dt<-as.list(NULL)
+    for(i in 1:2){
+      dt[[i]]=seq(-1,1,0.1)
+    }
+    dt_exp<-expand.grid(dt)
+    data<-matrix(0,441,length(var))
+    col<-c(1,2)
+    if(length(var)>2 & length(input$pp_selvar_icp)>=2){
+      req(input$pp_fixvar_icp)
+      col<-which(var%in%input$pp_selvar_icp==TRUE)
+      col_fix<-which(var%in%var[col][1:2]==FALSE)
+      fix<-as.numeric(unlist(strsplit(input$pp_fixvar_icp," ")))
+      for(i in 1:(length(var)-2))data[,col_fix[i]]<-rep(fix[i],441)
+    }
+    data[,col[1]]<-dt_exp[,1]
+    data[,col[2]]<-dt_exp[,2]
+    data<-as.data.frame(data)
+    colnames(data)<-var
+    
+    txt<-input$pp_vincoli_txt_icp
+    for ( i in 1:length(var)){
+      txt<-gsub(var[i],paste0('data$',var[i]),txt)
+    }
+    cond<-tryCatch(eval(parse(text = txt)),
+                   error = function(e) "Scrivere correttamente le condizioni!")
+    if(is.character(cond)){
+      plot(c(0, 1), c(0, 1), ann = F, bty = 'n', type = 'n', xaxt = 'n', yaxt = 'n')
+      text(0.5,0.5,cond,cex = 1.6, col = "red")
+    }else{
+      frm<-as.formula(pp_formula())
+      P=model.matrix(frm,data = dsg)
+      X=model.matrix(frm,data = data)
+      Q=X%*%solve(t(P)%*%P)%*%t(X)
+      if(nrow(Q)==0){
+        plot(c(0, 1), c(0, 1), ann = F, bty = 'n', type = 'n', xaxt = 'n', yaxt = 'n')
+        text(0.5,0.5,'inserire il valore delle variabili costanti',cex = 1.6, col = "red")
+      }else{
+        s<-pp_sigma()
+        s_df<-pp_sigma_df()
+        q<-qt(p = 0.975,df = s_df)
+        Lev=data.frame(data,"L"=q*s*sqrt(diag(Q)))
+        if(input$pp_vincoli_icp & !is.null(cond) & is.logical(cond))Lev<-Lev[cond==TRUE,]
+        colnames(Lev)[col[1]]<-'x'
+        colnames(Lev)[col[2]]<-'y'
+        lattice::contourplot(L~x*y,data=Lev,cuts=15,main='Semiamplitude of the confidence interval: Contour Plot',cex.main=0.8,
+                             xlab=var[col[1]],ylab=var[col[2]],col='blue',labels=list(col="blue",cex=0.9),
+                             aspect=1)}
+    }
+  })
+  output$pp_suplev_icp<-renderPlot({
+    req(input$pp_mod_variabx)
+    var<-colnames(pp_dis())
+    var<-var[var%in%input$pp_mod_variabx]
+    validate(need(length(var)>1,''))
+    if(length(var)>2)validate(need(length(input$pp_selvar_icp)==2,''))
+    validate(need(pp_sigma_df()>0,''))
+    X<-model.matrix(as.formula(pp_formula()),pp_dis())
+    validate(need(qr(X)$rank==ncol(X),""))
+    dsg<-as.data.frame(pp_dis())
+    dt<-as.list(NULL)
+    for(i in 1:2){
+      dt[[i]]=seq(-1,1,0.1)
+    }
+    dt_exp<-expand.grid(dt)
+    data<-matrix(0,441,length(var))
+    col<-c(1,2)
+    if(length(var)>2 & length(input$pp_selvar_icp)>=2){
+      req(input$pp_selvar_icp)
+      req(input$pp_fixvar_icp)
+      col<-which(var%in%input$pp_selvar_icp==TRUE)
+      col_fix<-which(var%in%var[col][1:2]==FALSE)
+      fix<-as.numeric(unlist(strsplit(input$pp_fixvar_icp," ")))
+      for(i in 1:(length(var)-2))data[,col_fix[i]]<-rep(fix[i],441)
+    }
+    data[,col[1]]<-dt_exp[,1]
+    data[,col[2]]<-dt_exp[,2]
+    data<-as.data.frame(data)
+    colnames(data)<-var
+    
+    txt<-input$pp_vincoli_txt_icp
+    for ( i in 1:length(var)){
+      txt<-gsub(var[i],paste0('data$',var[i]),txt)
+    }
+    cond<-tryCatch(eval(parse(text = txt)),
+                   error = function(e) "Scrivere correttamente le condizioni!")
+    if(is.character(cond)){
+      plot(c(0, 1), c(0, 1), ann = F, bty = 'n', type = 'n', xaxt = 'n', yaxt = 'n')
+      text(0.5,0.5,cond,cex = 1.6, col = "red")
+      #print(cond)
+    }else{
+      frm<-formula(paste(" ~ ", paste(input$pp_mod_variabx, collapse= "+")))
+      P=model.matrix(frm,data = dsg)
+      X=model.matrix(frm,data = data)
+      Q=X%*%solve(t(P)%*%P)%*%t(X)
+      if(nrow(Q)==0){
+        plot(c(0, 1), c(0, 1), ann = F, bty = 'n', type = 'n', xaxt = 'n', yaxt = 'n')
+        text(0.5,0.5,'inserire il valore delle variabili costanti',cex = 1.6, col = "red")
+      }else{
+        s<-pp_sigma()
+        s_df<-pp_sigma_df()
+        q<-qt(p = 0.975,df = s_df)
+        Lev=data.frame(data,"L"=q*s*sqrt(diag(Q)))
+        if(input$pp_vincoli_icp & !is.null(cond) & is.logical(cond))Lev<-Lev[cond==TRUE,]
+        colnames(Lev)[col[1]]<-'x'
+        colnames(Lev)[col[2]]<-'y'
+        req(input$pp_lv_z)
+        req(input$pp_lv_x)
+        lattice::wireframe(L~x*y,data=Lev,drape=TRUE,col.regions = colorRampPalette(c("yellow","green","blue"))(256),
+                           at=seq(min(Lev$L),max(Lev$L),(max(Lev$L)-min(Lev$L))/256),
+                           screen=list(z=input$pp_lv_z_icp,x=-input$pp_lv_x_icp),
+                           main='Semiamplitude of the confidence interval',cex.main=0.8,xlab=var[col[1]],
+                           ylab=var[col[2]],zlab=paste('Response'))}
+    }
+  })
+  output$pp_vincoli_txt_icp<-renderUI({
+    validate(need(input$pp_vincoli_icp==TRUE,' '))
+    textInput(inputId = "pp_vincoli_txt_icp",label = h5("Inserire i vincoli separati da '&'"))
+  })
+  output$pp_lv_z_icp<-renderUI({
+    sliderInput('pp_lv_z_icp',label = 'Rotazione orizzontale',min = 0,max = 360,value = 30,step = 10)
+  })
+  output$pp_lv_x_icp<-renderUI({
+    sliderInput('pp_lv_x_icp',label = 'Rotazione verticale',min = 0,max = 90,value = 60,step = 10)
   })
   output$pp_graf_res<-renderPlot({
     df<-cbind.data.frame(pp_mod()$residuals,c(1:length(pp_mod()$residuals)))

@@ -17,12 +17,16 @@ sidebar<- dashboardSidebar(
                          menuSubItem(text = "Simplex Design",tabName = "m_simplex"),
                          menuSubItem(text = "D-ottimale",tabName = "m_d_opt"),
                          menuSubItem(text = "Piano personalizzato",tabName = "m_pp")),
+                hr(),
                 menuItem(text = "File",icon = icon("briefcase", lib = "font-awesome"),
-                    actionButton("quit", "Quit",onclick = "setTimeout(function(){window.close();},200);",
+                         menuSubItem("Dispensa",tabName = "dispensa"),
+                         menuSubItem("Diapositive",tabName = "diapositive"),
+                         actionButton("quit", "Quit",onclick = "setTimeout(function(){window.close();},200);",
                                       style='padding:4px; font-size:80%'))
                         ))
 
 body<-dashboardBody(
+  # Indipendenti --------------------------------------------------------------------
   tabItems(
     tabItem(tabName = "fatt_compl",
         fluidPage(titlePanel(uiOutput("fatt_compl_titolo")),
@@ -596,7 +600,8 @@ body<-dashboardBody(
                                                   checkboxGroupInput("pp_mod_tipo", label = 'Modello con:',inline = TRUE,
                                                                      choices = list("Intercetta" = 1,'Termini di ordine superiore'=2),selected = c(1,2))),
                                            column(6,
-                                                  uiOutput("pp_mod_variabx")),
+                                                  uiOutput("pp_mod_variabx"),
+                                                  uiOutput('pp_inter')),
                                            column(12,
                                                   hr(),
                                                   h4('Modello'),
@@ -767,7 +772,7 @@ body<-dashboardBody(
     
     
     
-    
+    # Miscele --------------------------------------------------------------------
     
     
     
@@ -1181,12 +1186,61 @@ body<-dashboardBody(
                                                   uiOutput('m_pp_livellorisp_zoom_txt'),
                                                   hr(),
                                                   plotOutput('m_pp_livellorisp_zoom', width = "100%", height = "500px"))
-
-                                     
-
-                                           ))))
-
-    ))
+                                           )))),
+    
+    
+    
+    
+    
+    
+    # File --------------------------------------------------------------------
+    
+    tabItem(tabName = "dispensa",
+            fluidPage(
+              tabsetPanel(type = "tabs",
+                          tabPanel("Glossario",
+                                   tags$iframe(style="height:600px; width:100%; scrolling=yes", 
+                                               src="")),
+                          tabPanel("Fattoriale completo",
+                                   tags$iframe(style="height:600px; width:100%; scrolling=yes", 
+                                               src="")),
+                          tabPanel("Frazionario",
+                                   tags$iframe(style="height:600px; width:100%; scrolling=yes", 
+                                               src="")),
+                          tabPanel("Plackett-Burmann",
+                                   tags$iframe(style="height:600px; width:100%; scrolling=yes", 
+                                               src="")),
+                          tabPanel("CCD",
+                                   tags$iframe(style="height:600px; width:100%; scrolling=yes", 
+                                               src="")),
+                          tabPanel("D-ottimale",
+                                   tags$iframe(style="height:600px; width:100%; scrolling=yes", 
+                                               src=""))
+                          
+              ))),
+    
+    tabItem(tabName = "diapositive",
+            fluidPage(
+              tabsetPanel(type = "tabs",
+                          tabPanel("",
+                                   tags$iframe(style="height:600px; width:100%; scrolling=yes", 
+                                               src="")),
+                          tabPanel("",
+                                   tags$iframe(style="height:600px; width:100%; scrolling=yes", 
+                                               src="")),
+                          tabPanel("",
+                                   tags$iframe(style="height:600px; width:100%; scrolling=yes", 
+                                               src="")),
+                          tabPanel("",
+                                   tags$iframe(style="height:600px; width:100%; scrolling=yes", 
+                                               src=""))
+                          
+                          
+              )))   
+    
+    
+    
+            ))
 
 
 

@@ -3952,6 +3952,12 @@ server <- function (input , output, session ){
              errorClass = "myClass") 
     pp_dis()
   })
+  
+  output$pp_inter<-renderUI({
+    validate(need('2'%in%input$pp_mod_tipo,''))
+    numericInput("pp_inter", label = h5("Ordine interazione"), value = 2,min = 2,width = "70px")
+  })
+  
   pp_var_sel<-reactive({
     validate(need(is.data.frame(pp_dis()),""))
     var<-colnames(pp_dis())
@@ -3960,7 +3966,8 @@ server <- function (input , output, session ){
     quad<-paste0('I(',var,'^2)')
     frm_quad<-paste0(quad,collapse = '+')
     #frm_inter<-paste0(var,collapse = '*')
-    frm_inter<-paste0('(',frm_lin,')^2')
+    n<-input$pp_inter
+    frm_inter<-paste0('(',frm_lin,')^',n)
     if(!'2'%in%input$pp_mod_tipo)frm<-frm_lin
     if('2'%in%input$pp_mod_tipo)frm<-paste0(frm_lin,'+',frm_quad,'+',frm_inter)
     frm<-paste0('~',frm)

@@ -1192,7 +1192,7 @@ body<-dashboardBody(
                                                   uiOutput('m_pp_livellorisp_zoom_txt'),
                                                   hr(),
                                                   plotOutput('m_pp_livellorisp_zoom', width = "100%", height = "500px"))
-                                           ))))
+                                           )))),
     
     # Codifica variabili --------------------------------------------------------------------  
     

@@ -6930,6 +6930,7 @@ pp_sigma_df<-reactive({
     if(input$cd_var_importa==1)df<-cd_var_dis_paste()
     if(input$cd_var_importa==2)df<-cd_var_dis_xls()
     if(sum(df[,1]==c(1:nrow(df)))==nrow(df))df<-df[,-1]
+    df<-as.data.frame(df)
     df
   })
   output$cd_var_dis<-renderTable({
@@ -6965,10 +6966,7 @@ pp_sigma_df<-reactive({
     content = function(file) {
       write.xlsx(cd_var_dis_cod(),file,colNames=TRUE)
     })
-  
-  
-  
-  
+
   
   
   

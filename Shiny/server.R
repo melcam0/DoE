@@ -43,7 +43,6 @@ server <- function (input , output, session ){
   output$fatt_compl_titolo<-renderUI({
     HTML("Fattoriale completo 2 <sup>",input$fatt_compl_k,"<sup>" )
   })
-  
   dis_fatt_compl<-reactive({
     req(input$fatt_compl_k)
     dis<-as.list(NULL)
@@ -61,13 +60,11 @@ server <- function (input , output, session ){
     df<-cbind.data.frame('Exp#'=exp,df)
     df
   })
-  
   output$fatt_compl_download <- downloadHandler(
     filename = "fatt_compl.xlsx", 
     content = function(file) {
       write.xlsx(dis_fatt_compl(),file,colNames=TRUE)
     })
-  
   output$fatt_compl_dis<-renderTable({
     validate(need(input$fatt_compl_k>0,'Inserire un numero di fattori > 0'))
     req(input$fatt_compl_k)
@@ -86,7 +83,6 @@ server <- function (input , output, session ){
     df<-cbind.data.frame('Exp#'=exp,df)
     df
   })
-  
   output$fatt_compl_figura_dis<-renderPlot({
     validate(need(input$fatt_compl_k<=3,''))
     require(ggplot2)
@@ -179,7 +175,6 @@ server <- function (input , output, session ){
       print(gr)
     }
   })
-  
   output$fatt_compl_matrdisp<-renderTable({
     req(input$fatt_compl_k)
     validate(need(input$fatt_compl_k>0,''))
@@ -210,7 +205,6 @@ server <- function (input , output, session ){
     D<-solve(t(X)%*%X)
     D
   })
-
   output$fatt_compl_modello<-renderText({
     req(input$fatt_compl_k)
     validate(need(input$fatt_compl_k>0,''))
@@ -245,7 +239,6 @@ server <- function (input , output, session ){
     }
     modello
   })
-
   output$fatt_compl_selvar<-renderUI({
     validate(need(input$fatt_compl_k>2,''))
       var<-c(NULL)
@@ -256,19 +249,13 @@ server <- function (input , output, session ){
                 choices = var, 
                 multiple = TRUE,selected = var[1:2])
   })
-  
   output$fatt_compl_selvar_spazio<-renderUI({
     validate(need(input$fatt_compl_k==2,''))
     br()
   })
-
   output$fatt_compl_fixvar<-renderUI({
     validate(need(input$fatt_compl_k>2,''))
-    
-    
-    validate(need(length(input$fatt_compl_selvar)==2,'Selezionare 2 variabili!'))
-    
-    
+    validate(need(length(input$fatt_compl_selvar)==2,'\n \n Selezionare 2 variabili!'))
     req(input$fatt_compl_selvar)
     vl<-'0'
     if(input$fatt_compl_k>3){
@@ -296,9 +283,9 @@ server <- function (input , output, session ){
     }
     textInput(inputId = "fatt_compl_fixvar",label = h5(txt),value = vl)
   })
-
   output$fatt_compl_livellolev<-renderPlot({
     validate(need(input$fatt_compl_k>1,''))
+    if(input$fatt_compl_k>2)validate(need(length(input$fatt_compl_selvar)==2,''))
     req(input$fatt_compl_k)
    # req(input$fatt_compl_fixvar)
     var<-c(NULL)
@@ -343,7 +330,6 @@ server <- function (input , output, session ){
         lin<-paste(lin,x)
       }
     }
-    
     frm<-formula(paste('~x1',lin))
     P=model.matrix(frm,data = dsg)
     X=model.matrix(frm,data = data)
@@ -361,9 +347,9 @@ server <- function (input , output, session ){
                          aspect=1)
     }
   })
-
   output$fatt_compl_suplev<-renderPlot({
     validate(need(input$fatt_compl_k>1,''))
+    if(input$fatt_compl_k>2)validate(need(length(input$fatt_compl_selvar)==2,''))
     req(input$fatt_compl_k)
     #req(input$fatt_compl_fixvar)
     var<-c(NULL)
@@ -430,19 +416,15 @@ server <- function (input , output, session ){
                          ylab=var[col[2]],zlab=paste('Response')) 
     }   
   })
-  
   output$fatt_compl_lv_z<-renderUI({
     sliderInput('fatt_compl_lv_z',label = 'Rotazione orizzontale',min = 0,max = 360,value = 30,step = 10)
   })
-  
   output$fatt_compl_lv_x<-renderUI({
     sliderInput('fatt_compl_lv_x',label = 'Rotazione verticale',min = 0,max = 90,value = 60,step = 10)
   })
-
   output$fatt_compl_risptext<-renderUI({
     h4(paste('Risposte (',2^input$fatt_compl_k,', separate da spazio)',sep=''))
   })
-  
   output$fatt_compl_figura_risp<-renderPlot({
     validate(need(input$fatt_compl_k<=3,''))
     validate(need(length(as.numeric(unlist(strsplit(input$fatt_compl_risp," "))))==2^input$fatt_compl_k,''))
@@ -537,9 +519,7 @@ server <- function (input , output, session ){
         annotate(geom="text", x=1.35, y=0.1, label="x3",size=5)+xlim(-0.5,1.5)
       print(gr)
     }
-    
   }) 
-  
   output$fatt_compl_coeff<-renderPrint({
     validate(need(length(as.numeric(unlist(strsplit(input$fatt_compl_risp," "))))==2^input$fatt_compl_k,''))
     req(input$fatt_compl_k)
@@ -568,7 +548,6 @@ server <- function (input , output, session ){
     mod<-lm(frm,df)
     round(mod$coefficients,2)
   })
-
   output$fatt_compl_grcoeff<-renderPlot({
     validate(need(length(as.numeric(unlist(strsplit(input$fatt_compl_risp," "))))==2^input$fatt_compl_k,''))
     req(input$fatt_compl_k)
@@ -621,10 +600,10 @@ server <- function (input , output, session ){
                     width=0.2, colour="green3")
     }
   })
-  
   output$fatt_compl_grsigncoeff<-renderPlot({
     validate(need(length(as.numeric(unlist(strsplit(input$fatt_compl_risp," "))))==2^input$fatt_compl_k,''))
     req(input$fatt_compl_k)
+    validate(need(input$fatt_compl_k>1,''))
     dis<-as.list(NULL)
     for(i in 1:input$fatt_compl_k){
       dis[[i]]=c(-1,1)
@@ -652,7 +631,37 @@ server <- function (input , output, session ){
     FrF2::DanielPlot(mod,alpha = 0.05,main='',pch=19,cex.fac=1,col="blue",datax = FALSE)
     qqline(y = coef(mod)[-1],datax = FALSE,col="blue",lty=2)
     })
-
+  output$fatt_compl_grPareto<-renderPlot({
+    validate(need(length(as.numeric(unlist(strsplit(input$fatt_compl_risp," "))))==2^input$fatt_compl_k,''))
+    req(input$fatt_compl_k)
+    dis<-as.list(NULL)
+    for(i in 1:input$fatt_compl_k){
+      dis[[i]]=c(-1,1)
+    }
+    df<-expand.grid(dis)
+    var<-c(NULL)
+    for(i in 1:input$fatt_compl_k){
+      var[i]<-paste("x",i,sep="")
+      df[,i]<-as.integer(df[,i])
+    }
+    colnames(df)<-var
+    y<- as.numeric(unlist(strsplit(input$fatt_compl_risp," ")))
+    df<-cbind.data.frame(df,y=y)
+    m<-input$fatt_compl_k
+    lin<-NULL
+    if(m>1){
+      for(i in 2:m){
+        x<-paste("*x",i,sep="")
+        lin<-paste(lin,x)
+      }
+    }
+    frm<-formula(paste('y~x1',lin))
+    mod<-lm(frm,df)
+    df_coeff<-mod$coefficients[-1]
+    df_coeff<-df_coeff[order(abs(df_coeff),decreasing = TRUE)]
+    par_coeff<-(df_coeff^2/sum(df_coeff^2))*100
+    barplot(par_coeff,space=0,col='red',main='',las=2,cex.names=0.8)
+  })
   output$fatt_compl_prev_df<-renderPrint({
     validate(need(length(as.numeric(unlist(strsplit(input$fatt_compl_risp," "))))==2^input$fatt_compl_k,''))
     req(input$fatt_compl_k)
@@ -690,7 +699,6 @@ server <- function (input , output, session ){
       cat(paste('inserire le',input$fatt_compl_k,'coord. del punto'))
     }
   })
-  
   output$fatt_compl_intprev<-renderPrint({
     validate(need(length(as.numeric(unlist(strsplit(input$fatt_compl_risp," "))))==2^input$fatt_compl_k &
                     length(as.numeric(unlist(strsplit(input$fatt_compl_misind," "))))>0 &
@@ -756,7 +764,6 @@ server <- function (input , output, session ){
       df
     }
   })
-
   output$fatt_compl_misind_media<-renderPrint({
     validate(need(length(as.numeric(unlist(strsplit(input$fatt_compl_misind," "))))>1,''))
     x<-as.numeric(unlist(strsplit(input$fatt_compl_misind," ")))
@@ -766,7 +773,6 @@ server <- function (input , output, session ){
     attr(media,'names')<-c('media','2.5%','97.5%')
     round(media,3)
   })
-  
   output$fatt_compl_misind_sd<-renderPrint({
     validate(need(length(as.numeric(unlist(strsplit(input$fatt_compl_misind," "))))>1,''))
     x<-as.numeric(unlist(strsplit(input$fatt_compl_misind," ")))
@@ -776,7 +782,6 @@ server <- function (input , output, session ){
     attr(df,'names')<-c('dev.st.')
     df
   })
-  
   output$fatt_compl_misind_gdl<-renderPrint({
     validate(need(length(as.numeric(unlist(strsplit(input$fatt_compl_misind," "))))>1,''))
     x<-as.numeric(unlist(strsplit(input$fatt_compl_misind," ")))
@@ -785,13 +790,11 @@ server <- function (input , output, session ){
     attr(df,'names')<-c( 'gdl')
     df
   })
-  
   output$fatt_compl_stimint_txt<-renderUI({
     validate(need(length(as.numeric(unlist(strsplit(input$fatt_compl_misind," "))))>0 &
                     length(as.numeric(unlist(strsplit(input$fatt_compl_risp," "))))==2^input$fatt_compl_k,''))
     h4('Stima per intervallo')
   })
- 
   output$fatt_compl_stimint<-renderPrint({
     validate(need(length(as.numeric(unlist(strsplit(input$fatt_compl_misind," "))))>0 &
                     length(as.numeric(unlist(strsplit(input$fatt_compl_risp," "))))==2^input$fatt_compl_k,''))
@@ -850,7 +853,6 @@ server <- function (input , output, session ){
       df[,-1]
     }
   })
-
   output$fatt_compl_mod_selvar<-renderUI({
     validate(need(input$fatt_compl_k>2,''))
     var<-c(NULL)
@@ -861,9 +863,9 @@ server <- function (input , output, session ){
                 choices = var, 
                 multiple = TRUE,selected = var[1:2])
   })
-  
   output$fatt_compl_mod_fixvar<-renderUI({
     validate(need(input$fatt_compl_k>2,''))
+    validate(need(length(input$fatt_compl_mod_selvar)==2,'\n \n Selezionare 2 variabili!'))
     req(input$fatt_compl_mod_selvar)
     vl<-'0'
     if(input$fatt_compl_k>3){
@@ -892,9 +894,10 @@ server <- function (input , output, session ){
     }
     textInput(inputId = "fatt_compl_mod_fixvar",label = h5(txt),value = vl)
   })
-  
   output$fatt_compl_livellorisp<-renderPlot({
     validate(need(length(as.numeric(unlist(strsplit(input$fatt_compl_risp," "))))==2^input$fatt_compl_k,''))
+    validate(need(input$fatt_compl_k>1,''))
+    if(input$fatt_compl_k>2)validate(need(length(input$fatt_compl_mod_selvar)==2,''))
     req(input$fatt_compl_k)
     var<-c(NULL)
     for(i in 1:input$fatt_compl_k){
@@ -957,16 +960,16 @@ server <- function (input , output, session ){
                          aspect=1)
     }
   })
-
   output$fatt_compl_livellorisp_col<-renderUI({
     validate(need(length(as.numeric(unlist(strsplit(input$fatt_compl_risp," "))))==2^input$fatt_compl_k,''))
     selectInput("fatt_compl_livellorisp_col", label = h3(""), 
                 choices = list("blu" = 1, "verde" = 2, "rosso" = 3,"nero" = 4,"viola" = 5), 
                 selected = 1,width="130px")
   })
-  
   output$fatt_compl_suprisp<-renderPlot({
     validate(need(length(as.numeric(unlist(strsplit(input$fatt_compl_risp," "))))==2^input$fatt_compl_k,''))
+    validate(need(input$fatt_compl_k>1,''))
+    if(input$fatt_compl_k>2)validate(need(length(input$fatt_compl_mod_selvar)==2,''))
     req(input$fatt_compl_k)
     var<-c(NULL)
     for(i in 1:input$fatt_compl_k){
@@ -1031,18 +1034,15 @@ server <- function (input , output, session ){
                        ylab=var[col[2]],zlab=paste('Response')) 
     }
   })
-  
   output$fatt_compl_rp_z<-renderUI({
     sliderInput('fatt_compl_rp_z',label = 'Rotazione orizzontale',min = 0,max = 360,value = 30,step = 10)
   })
-  
   output$fatt_compl_rp_x<-renderUI({
     sliderInput('fatt_compl_rp_x',label = 'Rotazione verticale',min = 0,max = 90,value = 60,step = 10)
   })
   
 # Frazionario -----------------------------------------------------------------  
   output$logo <- renderImage({list(src = "Risoluzione.png",width=1050, height=400)}, deleteFile = FALSE)
-  
   dis_frazionario<-reactive({
     require(FrF2)
     fattori<-c("x1")
@@ -1052,19 +1052,16 @@ server <- function (input , output, session ){
           factor.names = fattori,randomize = FALSE)
     dis
   })
-  
   output$frazion_titolo<-renderUI({
     require(FrF2)
     ris<-c("I","II","III","IV","V","VI","VII","VIII","IX","X")
     r<-min(nchar(unlist(generators(dis_frazionario()))))-1
     HTML("Frazionario 2 <sup>",input$frazion_k,"-",input$frazion_p,"</sup> <sub ><sub>",ris[r],"</sub></sub>" )
   })
-  
   output$frazion_generat<-renderPrint({
     require(FrF2)
     unlist(generators(dis_frazionario()))
   })
-  
   output$frazion_download <- downloadHandler(
     filename = "frazionario.xlsx", 
     content = function(file) {
@@ -1073,13 +1070,11 @@ server <- function (input , output, session ){
       dis<-cbind.data.frame('Exp#'=exp,dis)
       write.xlsx(dis, file ,colNames=TRUE)
     })
-
   output$frazion_dis<-renderTable(digits=0,{
     dis<-attr(dis_frazionario(),"desnum")
     exp<-seq(1,nrow(dis))
     dis<-cbind.data.frame('Exp#'=exp,dis)
   })
-  
   output$frazion_modello<-renderText({
     req(input$frazion_k)
     m<-input$frazion_k
@@ -1103,7 +1098,6 @@ server <- function (input , output, session ){
     }
     modello
   })
-  
   output$frazion_confusioni<-renderPrint({
     req(input$frazion_k)
     require(FrF2)
@@ -1122,7 +1116,6 @@ server <- function (input , output, session ){
     mod<-lm(frm,df)
     aliases(mod)
   })
-
   output$frazion_matrdisp<-renderTable({
     req(input$frazion_k)
     m<-input$frazion_k
@@ -1149,7 +1142,6 @@ server <- function (input , output, session ){
     D<-solve(t(X)%*%X)
     D 
   })
-
   output$frazion_selvar<-renderUI({
     validate(need(input$frazion_k>2,''))
     var<-c(NULL)
@@ -1160,14 +1152,13 @@ server <- function (input , output, session ){
                 choices = var, 
                 multiple = TRUE,selected = var[1:2])
   })
-  
   output$frazion_selvar_spazio<-renderUI({
     validate(need(input$frazion_k==2,''))
     br()
   })
-  
   output$frazion_fixvar<-renderUI({
     validate(need(input$frazion_k>2,''))
+    validate(need(length(input$frazion_selvar)==2,'\n \n Selezionare 2 variabili!'))
     req(input$frazion_selvar)
     vl<-'0'
     if(input$frazion_k>3){
@@ -1196,9 +1187,9 @@ server <- function (input , output, session ){
     }
     textInput(inputId = "frazion_fixvar",label = h5(txt),value = vl)
   })
-  
   output$frazion_livellolev<-renderPlot({
     validate(need(input$frazion_k>2,''))
+    validate(need(length(input$frazion_selvar)==2,''))
     req(input$frazion_k)
     req(input$frazion_fixvar)
     var<-c(NULL)
@@ -1265,9 +1256,9 @@ server <- function (input , output, session ){
                          xlab=var[col[1]],ylab=var[col[2]],col='blue',labels=list(col="blue",cex=0.9),
                          aspect=1)}
   })
-  
   output$frazion_suplev<-renderPlot({
     validate(need(input$frazion_k>1,''))
+    validate(need(length(input$frazion_selvar)==2,''))
     req(input$frazion_k)
     req(input$frazion_selvar)
     req(input$frazion_fixvar)
@@ -1338,19 +1329,15 @@ server <- function (input , output, session ){
                        main='Plot of Leverage',cex.main=0.8,xlab=var[col[1]],
                        ylab=var[col[2]],zlab=paste('Response')) }
   })
-  
   output$frazion_lv_z<-renderUI({
     sliderInput('frazion_lv_z',label = 'Rotazione orizzontale',min = 0,max = 360,value = 30,step = 10)
   })
-  
   output$frazion_lv_x<-renderUI({
     sliderInput('frazion_lv_x',label = 'Rotazione verticale',min = 0,max = 90,value = 60,step = 10)
   })
-  
   output$frazion_risptext<-renderUI({
     h4(paste('Risposte (',2^(input$frazion_k-input$frazion_p),', separate da spazio)',sep=''))
   })
-
   output$frazion_coeff<-renderPrint({
     validate(need(length(as.numeric(unlist(strsplit(input$frazion_risp," "))))==2^(input$frazion_k-input$frazion_p),''))
     req(input$frazion_k)
@@ -1387,7 +1374,6 @@ server <- function (input , output, session ){
     mod<-lm(frm,df)
     round(mod$coefficients,2)
   })
-
   output$frazion_grcoeff<-renderPlot({
     validate(need(length(as.numeric(unlist(strsplit(input$frazion_risp," "))))==2^(input$frazion_k-input$frazion_p),''))
     req(input$frazion_k)
@@ -1450,22 +1436,17 @@ server <- function (input , output, session ){
                       width=0.2, colour="green3")
     }
   }) 
-  
   output$frazion_grsigncoeff<-renderPlot({
     validate(need(length(as.numeric(unlist(strsplit(input$frazion_risp," "))))==2^(input$frazion_k-input$frazion_p),''))
     req(input$frazion_k)
-    
     var<-c(NULL)
     for(i in 1:input$frazion_k){
       var[i]<-paste("x",i,sep="")
     }
-    
     dis<-attr(dis_frazionario(),"desnum")
     dsg<-cbind.data.frame(dis)
-    
     y<- as.numeric(unlist(strsplit(input$frazion_risp," ")))
     df<-cbind.data.frame(dsg,y=y)
-    
     m<-input$frazion_k
     lin<-NULL
     if(m>1){
@@ -1488,7 +1469,41 @@ server <- function (input , output, session ){
     FrF2::DanielPlot(mod,alpha = 0.05,main='',pch=19,cex.fac=1,col="blue",datax = FALSE)
     qqline(y = coef(mod)[-1],datax = FALSE,col="blue",lty=2)
   })
-
+  output$frazion_grPareto<-renderPlot({
+    validate(need(length(as.numeric(unlist(strsplit(input$frazion_risp," "))))==2^(input$frazion_k-input$frazion_p),''))
+    req(input$frazion_k)
+    var<-c(NULL)
+    for(i in 1:input$frazion_k){
+      var[i]<-paste("x",i,sep="")
+    }
+    dis<-attr(dis_frazionario(),"desnum")
+    dsg<-cbind.data.frame(dis)
+    y<- as.numeric(unlist(strsplit(input$frazion_risp," ")))
+    df<-cbind.data.frame(dsg,y=y)
+    m<-input$frazion_k
+    lin<-NULL
+    if(m>1){
+      for(i in 2:m){
+        x<-paste("*x",i,sep="")
+        lin<-paste(lin,x)
+      }
+    }
+    frm<-formula(paste('y~x1',lin))
+    df<-cbind.data.frame(dis,y=y)
+    mod<-lm(frm,df)
+    coeff<-names(mod$effects)
+    n<-sum(!is.na(mod$coefficients))
+    frm<-'y ~ 1'
+    for (i in 2:n){
+      frm<-paste(frm,'+', coeff[i])
+    }
+    frm<-as.formula(frm)
+    mod<-lm(frm,df)
+    df_coeff<-mod$coefficients[-1]
+    df_coeff<-df_coeff[order(abs(df_coeff),decreasing = TRUE)]
+    par_coeff<-(df_coeff^2/sum(df_coeff^2))*100
+    barplot(par_coeff,space=0,col='red',main='',las=2,cex.names=0.8)
+  })
   output$frazion_prev_df<-renderPrint({
     validate(need(length(as.numeric(unlist(strsplit(input$frazion_risp," "))))==2^(input$frazion_k-input$frazion_p),''))
     req(input$frazion_k)
@@ -1535,7 +1550,6 @@ server <- function (input , output, session ){
       cat(paste('inserire le',input$frazion_k,'coord. del punto'))
     }
   })
-  
   output$frazion_intprev<-renderPrint({
     validate(need(length(as.numeric(unlist(strsplit(input$frazion_risp," "))))==2^(input$frazion_k-input$frazion_p) &
                     length(as.numeric(unlist(strsplit(input$frazion_misind," "))))>0 &
@@ -1604,7 +1618,6 @@ server <- function (input , output, session ){
       df
     }
   })
-
   output$frazion_misind_media<-renderPrint({
     validate(need(length(as.numeric(unlist(strsplit(input$frazion_misind," "))))>1,''))
     x<-as.numeric(unlist(strsplit(input$frazion_misind," ")))
@@ -1614,7 +1627,6 @@ server <- function (input , output, session ){
     attr(media,'names')<-c('media','2.5%','97.5%')
     round(media,3)
   })
-
   output$frazion_misind_sd<-renderPrint({
     validate(need(length(as.numeric(unlist(strsplit(input$frazion_misind," "))))>1,''))
     x<-as.numeric(unlist(strsplit(input$frazion_misind," ")))
@@ -1624,7 +1636,6 @@ server <- function (input , output, session ){
     attr(df,'names')<-c('dev.st.')
     df
   })
-  
   output$frazion_misind_gdl<-renderPrint({
     validate(need(length(as.numeric(unlist(strsplit(input$frazion_misind," "))))>1,''))
     x<-as.numeric(unlist(strsplit(input$frazion_misind," ")))
@@ -1633,13 +1644,11 @@ server <- function (input , output, session ){
     attr(df,'names')<-c( 'gdl')
     df
   })
-  
   output$frazion_stimint_txt<-renderUI({
     validate(need(length(as.numeric(unlist(strsplit(input$frazion_misind," "))))>0 &
                     length(as.numeric(unlist(strsplit(input$frazion_risp," "))))==2^(input$frazion_k-input$frazion_p),''))
     h4('Stima per intervallo')
   })
-
   output$frazion_stimint<-renderPrint({
     validate(need(length(as.numeric(unlist(strsplit(input$frazion_misind," "))))>0 &
                     length(as.numeric(unlist(strsplit(input$frazion_risp," "))))==2^(input$frazion_k-input$frazion_p),''))
@@ -1706,7 +1715,6 @@ server <- function (input , output, session ){
       df[,-1]
     }
   })
-
   output$frazion_mod_selvar<-renderUI({
     validate(need(input$frazion_k>2,''))
     var<-c(NULL)
@@ -1717,9 +1725,9 @@ server <- function (input , output, session ){
                 choices = var, 
                 multiple = TRUE,selected = var[1:2])
   })
-  
   output$frazion_mod_fixvar<-renderUI({
     validate(need(input$frazion_k>2,''))
+    validate(need(length(input$frazion_mod_selvar)==2,'\n \n Selezionare 2 variabili!'))
     req(input$frazion_mod_selvar)
     vl<-'0'
     if(input$frazion_k>3){
@@ -1748,9 +1756,9 @@ server <- function (input , output, session ){
     }
     textInput(inputId = "frazion_mod_fixvar",label = h5(txt),value = vl)
   })
-  
   output$frazion_livellorisp<-renderPlot({
     validate(need(length(as.numeric(unlist(strsplit(input$frazion_risp," "))))==2^(input$frazion_k-input$frazion_p),''))
+    validate(need(length(input$frazion_mod_selvar)==2,''))
     req(input$frazion_k)
 
     var<-c(NULL)
@@ -1818,16 +1826,15 @@ server <- function (input , output, session ){
                          labels=list(col=colore[cl],cex=0.9),
                          aspect=1)}
   })
-  
   output$frazion_livellorisp_col<-renderUI({
     validate(need(length(as.numeric(unlist(strsplit(input$frazion_risp," "))))==2^(input$frazion_k-input$frazion_p),''))
     selectInput("frazion_livellorisp_col", label = h3(""), 
                 choices = list("blu" = 1, "verde" = 2, "rosso" = 3,"nero" = 4,"viola" = 5), 
                 selected = 1,width="130px")
   })
-
   output$frazion_suprisp<-renderPlot({
     validate(need(length(as.numeric(unlist(strsplit(input$frazion_risp," "))))==2^(input$frazion_k-input$frazion_p),''))
+    validate(need(length(input$frazion_mod_selvar)==2,''))
     req(input$frazion_k)
 
     var<-c(NULL)
@@ -1896,11 +1903,9 @@ server <- function (input , output, session ){
                        main='Response Surface',cex.main=0.8,xlab=var[col[1]],
                        ylab=var[col[2]],zlab=paste('Response'))} 
   })
-  
   output$frazion_rp_z<-renderUI({
     sliderInput('frazion_rp_z',label = 'Rotazione orizzontale',min = 0,max = 360,value = 30,step = 10)
   })
-  
   output$frazion_rp_x<-renderUI({
     sliderInput('frazion_rp_x',label = 'Rotazione verticale',min = 0,max = 90,value = 60,step = 10)
   })
@@ -1910,7 +1915,6 @@ server <- function (input , output, session ){
   output$pb_titolo<-renderUI({
     HTML("Plackett-Burman" )
   })
-  
   n_pb<-reactive({
     n<-0 
     for (m in 1:10000){
@@ -1921,20 +1925,17 @@ server <- function (input , output, session ){
     }
     n
   })
-  
   output$pb_n<-renderUI({
     selectInput("pb_n", label = "n° esperimenti",width = "25%", 
                 choices = list(n_pb(),n_pb()+4), 
                 selected = 1)
   })
-
   output$dis16<-renderUI({
     validate(need(as.integer(input$pb_n)==16,""))
     radioButtons("dis16", label = h3(""),
                  choices = list("Plackett-Burman" = 1, "Box-Tyssedal" = 2), 
                  selected = 1)
   })
-                    
   dis_pb<-reactive({
     require(FrF2)
     req(input$pb_k)
@@ -1952,7 +1953,6 @@ server <- function (input , output, session ){
     } 
     attr(plbur,"desnum")
   })
-  
   output$pb_download <- downloadHandler(
     filename = "pb.xlsx", 
     content = function(file) {
@@ -1961,13 +1961,11 @@ server <- function (input , output, session ){
       dis<-cbind.data.frame('Exp#'=exp,dis)
       write.xlsx(dis, file,colNames=TRUE)
     })
-  
   output$pb_dis<-renderTable(digits=0,{
     dis<-dis_pb()
     exp<-seq(1,nrow(dis))
     dis<-cbind.data.frame('Exp#'=exp,dis)
   })
-
   output$pb_modello<-renderText({
     req(input$pb_k)
     req(input$pb_n)
@@ -1982,7 +1980,6 @@ server <- function (input , output, session ){
     modello<-paste('y~1+x1',lin)
     modello
   })
-
   output$pb_matrdisp<-renderTable({
     req(input$pb_k)
     req(input$pb_n)
@@ -2004,7 +2001,6 @@ server <- function (input , output, session ){
     D<-solve(t(X)%*%X)
     D 
   })
-  
   output$pb_suggerimento<-renderUI({
     potenze<-c(8,16,32,64,128,256,512,1024,2048,4096,8192,16384)
     exp<-c(3,4,5,6,7,8,9,10,11,12,13,14)
@@ -2029,7 +2025,6 @@ server <- function (input , output, session ){
       }
     }
   })
-
   output$pb_confusioni<-renderPrint({
     req(input$pb_k)
     req(input$pb_n)
@@ -2057,11 +2052,9 @@ server <- function (input , output, session ){
     if(as.integer(input$pb_n)%in%potenze) print(A)
     if(!as.integer(input$pb_n)%in%potenze)round(A,2)
   })
-
   output$pb_risptext<-renderUI({
     h4(paste('Risposte (',input$pb_n,', separate da spazio)',sep=''))
   })
-
   output$pb_coeff<-renderPrint({
     validate(need(length(as.numeric(unlist(strsplit(input$pb_risp," "))))==input$pb_n,''))
     req(input$pb_k)
@@ -2086,7 +2079,6 @@ server <- function (input , output, session ){
     mod<-lm(frm,df)
     round(mod$coefficients,2)
   })
-
   output$pb_grcoeff<-renderPlot({
     validate(need(length(as.numeric(unlist(strsplit(input$pb_risp," "))))==input$pb_n,''))
     req(input$pb_k)
@@ -2120,10 +2112,8 @@ server <- function (input , output, session ){
      }
     gr
   }) 
-  
   output$pb_grsigncoeff<-renderPlot({
     validate(need(length(as.numeric(unlist(strsplit(input$pb_risp," "))))==input$pb_n,''))
-    
     m<-length(colnames(dis_pb()))
     dsg<-as.data.frame(dis_pb())
     y<- as.numeric(unlist(strsplit(input$pb_risp," ")))
@@ -2139,10 +2129,8 @@ server <- function (input , output, session ){
     lin<-paste('y~x1',lin,sep="")
     frm<-formula(lin)
     mod<-lm(frm,df)
-    
     coeff<-coef(mod)[-1]
     coeff<-coeff[1:input$pb_k]
-    
     # costr dis pb tipo disegno
     require(FrF2)
     req(input$pb_k)
@@ -2154,11 +2142,36 @@ server <- function (input , output, session ){
     n<-as.integer(input$pb_n)
     plbur<-pb(nruns = n,factor.names = fattori,randomize = FALSE,boxtyssedal=FALSE)
     dis.pb.resp <- add.response(plbur, y)
-    
-    FrF2::DanielPlot(dis.pb.resp,alpha = 0.05,main='',pch=19,cex.fac=1,col="blue",datax = FALSE)
+    FrF2::DanielPlot(dis.pb.resp,alpha = 0.05,main='',pch=19,cex.fac=1,col="blue",
+                     datax = FALSE,autolab = TRUE)
     qqline(y = coeff,datax = FALSE,col="blue",lty=2)
   })
-
+  output$pb_grPareto<-renderPlot({
+    validate(need(length(as.numeric(unlist(strsplit(input$pb_risp," "))))==input$pb_n,''))
+    req(input$pb_k)
+    m<-length(colnames(dis_pb()))
+    dsg<-as.data.frame(dis_pb())
+    y<- as.numeric(unlist(strsplit(input$pb_risp," ")))
+    df<-cbind.data.frame(dsg,y=y)
+    m<-length(colnames(dis_pb())) 
+    lin<-NULL
+    if(m>1){
+      for(i in 2:m){
+        x<-paste("+",colnames(dis_pb())[i],sep="")
+        lin<-paste(lin,x)
+      }
+    }
+    lin<-paste('y~x1',lin,sep="")
+    frm<-formula(lin)
+    mod<-lm(frm,df)
+    df_coeff<-mod$coefficients[-1]
+    
+    df_coeff<-df_coeff[1:input$pb_k]
+    
+    df_coeff<-df_coeff[order(abs(df_coeff),decreasing = TRUE)]
+    par_coeff<-(df_coeff^2/sum(df_coeff^2))*100
+    barplot(par_coeff,space=0,col='red',main='',las=2,cex.names=0.8)
+  })
   output$pb_graf_alias<-renderPlot({
     validate(need(length(as.numeric(unlist(strsplit(input$pb_risp," "))))==input$pb_n,''))
     req(input$pb_k)
@@ -2221,7 +2234,6 @@ server <- function (input , output, session ){
   output$ccd_titolo<-renderUI({
     HTML("Central Composite Design" )
   })
-  
   ccd_alfa<-reactive({
     k<-input$ccd_k
     n<-input$ccd_n
@@ -2231,7 +2243,6 @@ server <- function (input , output, session ){
     if(input$ccd_alfa==4)a<-sqrt((sqrt((2^k+2*k+n)*2^k)-2^k)/2)
     a
   })
-  
   dis_ccd<-reactive({
     require(rsm)
     rotd <- ccd(input$ccd_k, n0 = c(0,input$ccd_n), alpha = ccd_alfa(),randomize = FALSE)
@@ -2244,7 +2255,6 @@ server <- function (input , output, session ){
     colnames(rotdm)<-var
     rotdm
   })
-  
   output$ccd_download <- downloadHandler(
     filename = "ccd.xlsx", 
     content = function(file) {
@@ -2253,7 +2263,6 @@ server <- function (input , output, session ){
       dis<-cbind.data.frame('Exp#'=exp,dis)
       write.xlsx(dis, file,colNames=TRUE)
     })
-
   output$ccd_dis<-renderTable({
     req(input$ccd_k)
     req(input$ccd_n)
@@ -2261,7 +2270,6 @@ server <- function (input , output, session ){
     exp<-seq(1,nrow(dis))
     dis<-cbind.data.frame('Exp#'=exp,dis)
   })
-  
   output$ccd_figura_dis<-renderPlot({
     validate(need(input$ccd_k<=3,''))
     require(ggplot2)
@@ -2353,7 +2361,6 @@ server <- function (input , output, session ){
       print(gr)
     }
   })
-  
   output$ccd_matrdisp<-renderTable({
     req(input$ccd_k)
     df<-dis_ccd()
@@ -2382,7 +2389,6 @@ server <- function (input , output, session ){
     D<-solve(t(X)%*%X)
     D
   })
-  
   output$ccd_modello<-renderText({
     req(input$ccd_k)
     df<-dis_ccd()
@@ -2415,7 +2421,6 @@ server <- function (input , output, session ){
     modello<-paste(modello,quad,sep="")
     modello
   })
-  
   output$ccd_selvar<-renderUI({
     validate(need(input$ccd_k>2,''))
     var<-c(NULL)
@@ -2426,14 +2431,13 @@ server <- function (input , output, session ){
                 choices = var, 
                 multiple = TRUE,selected = var[1:2])
   })
-  
   output$ccd_selvar_spazio<-renderUI({
     validate(need(input$ccd_k==2,''))
     br()
   })
-  
   output$ccd_fixvar<-renderUI({
     validate(need(input$ccd_k>2,''))
+    validate(need(length(input$ccd_selvar)==2,'\n \n Selezionare 2 variabili!'))
     req(input$ccd_selvar)
     vl<-'0'
     if(input$ccd_k>3){
@@ -2461,9 +2465,9 @@ server <- function (input , output, session ){
     }
     textInput(inputId = "ccd_fixvar",label = h5(txt),value = vl)
   })
-  
   output$ccd_livellolev<-renderPlot({
     validate(need(input$ccd_k>1,''))
+    if(input$ccd_k>2)validate(need(length(input$ccd_selvar)==2,''))
     req(input$ccd_k)
     dsg<-dis_ccd()
     var<-c(NULL)
@@ -2521,9 +2525,9 @@ server <- function (input , output, session ){
                          xlab=var[col[1]],ylab=var[col[2]],col='blue',labels=list(col="blue",cex=0.9),
                          aspect=1)}
   })
-  
   output$ccd_suplev<-renderPlot({
     validate(need(input$ccd_k>1,''))
+    if(input$ccd_k>2)validate(need(length(input$ccd_selvar)==2,''))
     req(input$ccd_k)
     dsg<-dis_ccd()
     var<-c(NULL)
@@ -2586,23 +2590,15 @@ server <- function (input , output, session ){
                        main='Plot of Leverage',cex.main=0.8,xlab=var[col[1]],
                        ylab=var[col[2]],zlab=paste('Response'))}
   })
-  
-  
-  
-  
   output$ccd_lv_z<-renderUI({
     sliderInput('ccd_lv_z',label = 'Rotazione orizzontale',min = 0,max = 360,value = 30,step = 10)
   })
-  
   output$ccd_lv_x<-renderUI({
     sliderInput('ccd_lv_x',label = 'Rotazione verticale',min = 0,max = 90,value = 60,step = 10)
   })
-  
-  
   output$ccd_risptext<-renderUI({
     h4(paste('Risposte (',nrow(dis_ccd()),', separate da spazio)',sep=''))
   })
-
   output$ccd_coeff<-renderPrint({
     validate(need(length(as.numeric(unlist(strsplit(input$ccd_risp," "))))==nrow(dis_ccd()),''))
     req(input$ccd_k)
@@ -2634,7 +2630,6 @@ server <- function (input , output, session ){
     mod<-lm(frm,df)
     round(mod$coefficients,2)
   })
-
   output$ccd_grcoeff<-renderPlot({
     validate(need(length(as.numeric(unlist(strsplit(input$ccd_risp," "))))==nrow(dis_ccd()),''))
     req(input$ccd_k)
@@ -2679,7 +2674,6 @@ server <- function (input , output, session ){
                     width=0.2, colour="green3")
     
   })
-
   output$ccd_prev_df<-renderPrint({
     validate(need(length(as.numeric(unlist(strsplit(input$ccd_risp," "))))==nrow(dis_ccd()),''))
     req(input$ccd_k)
@@ -2719,7 +2713,6 @@ server <- function (input , output, session ){
       cat(paste('inserire le',input$ccd_k,'coord. del punto'))
     }
   })
-
   output$ccd_intprev<-renderPrint({
     validate(need(length(as.numeric(unlist(strsplit(input$ccd_risp," "))))==nrow(dis_ccd()) &
                     length(as.numeric(unlist(strsplit(input$ccd_prev," "))))==input$ccd_k,''))
@@ -2763,7 +2756,6 @@ server <- function (input , output, session ){
     colnames(df)<-c('2.5%','97.5%','0.5%','99.5%','0.05%','99.95%')
     df
   })
-
   output$ccd_misind_media<-renderPrint({
     validate(need(length(as.numeric(unlist(strsplit(input$ccd_misind," "))))>1,''))
     x<-as.numeric(unlist(strsplit(input$ccd_misind," ")))
@@ -2773,7 +2765,6 @@ server <- function (input , output, session ){
     attr(media,'names')<-c('media','2.5%','97.5%')
     round(media,3)
   })
-  
   output$ccd_misind_sd<-renderPrint({
     validate(need(length(as.numeric(unlist(strsplit(input$ccd_misind," "))))>1,''))
     x<-as.numeric(unlist(strsplit(input$ccd_misind," ")))
@@ -2783,7 +2774,6 @@ server <- function (input , output, session ){
     attr(df,'names')<-c('dev.st.')
     df
   })
-  
   output$ccd_misind_gdl<-renderPrint({
     validate(need(length(as.numeric(unlist(strsplit(input$ccd_misind," "))))>1,''))
     x<-as.numeric(unlist(strsplit(input$ccd_misind," ")))
@@ -2792,13 +2782,11 @@ server <- function (input , output, session ){
     attr(df,'names')<-c( 'gdl')
     df
   })
-  
   output$ccd_stimint_txt<-renderUI({
     validate(need(length(as.numeric(unlist(strsplit(input$ccd_misind," "))))>0 &
                     length(as.numeric(unlist(strsplit(input$ccd_risp," "))))==nrow(dis_ccd()),''))
     h4('Stima per intervallo')
   })
-
   output$ccd_stimint<-renderPrint({
     validate(need(length(as.numeric(unlist(strsplit(input$ccd_risp," "))))==nrow(dis_ccd()),''))
       req(input$ccd_k)
@@ -2844,7 +2832,6 @@ server <- function (input , output, session ){
       colnames(df)<-c('2.5%','97.5%','0.5%','99.5%','0.05%','99.95%','p-value','')
       df
   })
-
   output$ccd_mod_selvar<-renderUI({
     validate(need(input$ccd_k>2,''))
     var<-c(NULL)
@@ -2855,9 +2842,9 @@ server <- function (input , output, session ){
                 choices = var, 
                 multiple = TRUE,selected = var[1:2])
   })
-  
   output$ccd_mod_fixvar<-renderUI({
     validate(need(input$ccd_k>2,''))
+    validate(need(length(input$ccd_mod_selvar)==2,'\n \n Selezionare 2 variabili!'))
     req(input$ccd_mod_selvar)
     vl<-'0'
     if(input$ccd_k>3){
@@ -2885,9 +2872,9 @@ server <- function (input , output, session ){
     }
     textInput(inputId = "ccd_mod_fixvar",label = h5(txt),value = vl)
   })
-
   output$ccd_livellorisp<-renderPlot({
     validate(need(length(as.numeric(unlist(strsplit(input$ccd_risp," "))))==nrow(dis_ccd()),''))
+    if(input$ccd_k>2)validate(need(length(input$ccd_mod_selvar)==2,''))
     req(input$ccd_k)
     req(input$ccd_livellorisp_col)
     dis<-dis_ccd()
@@ -2950,16 +2937,15 @@ server <- function (input , output, session ){
                          labels=list(col=colore[cl],cex=0.9),
                          aspect=1)}
   })
-  
   output$ccd_livellorisp_col<-renderUI({
     validate(need(length(as.numeric(unlist(strsplit(input$ccd_risp," "))))==nrow(dis_ccd()),''))
     selectInput("ccd_livellorisp_col", label = h3(""), 
                 choices = list("blu" = 1, "verde" = 2, "rosso" = 3,"nero" = 4,"viola" = 5), 
                 selected = 1,width="130px")
   })
-  
   output$ccd_suprisp<-renderPlot({
     validate(need(length(as.numeric(unlist(strsplit(input$ccd_risp," "))))==nrow(dis_ccd()),''))
+    if(input$ccd_k>2)validate(need(length(input$ccd_mod_selvar)==2,''))
     req(input$ccd_k)
     dis<-dis_ccd()
     var<-c(NULL)
@@ -3021,11 +3007,9 @@ server <- function (input , output, session ){
                        ylab=var[col[2]],zlab=paste('Response'))
     }
   })
-  
   output$ccd_rp_z<-renderUI({
     sliderInput('ccd_rp_z',label = 'Rotazione orizzontale',min = 0,max = 360,value = 30,step = 10)
   })
-  
   output$ccd_rp_x<-renderUI({
     sliderInput('ccd_rp_x',label = 'Rotazione verticale',min = 0,max = 90,value = 60,step = 10)
   })
@@ -4327,7 +4311,10 @@ server <- function (input , output, session ){
       X[,i]<-as.factor(X[,i])
       n_lev[i]<-length(levels(X[,i]))
     }
-    validate(need(n_lev==rep(2,n),'Questa routine si applica a disegni fattoriali a 2 livelli!'))
+    frml<-as.formula(pp_formula())
+    dis<-pp_dis()
+    vf<-vif(model.matrix(frml, dis))
+    validate(need(n_lev==rep(2,n) & max(vf)==1,'Questa routine si applica a disegni fattoriali a 2 livelli e a modelli con termini non confusi!'))
     mod<-pp_mod()
     FrF2::DanielPlot(mod,alpha = 0.05,main='',pch=19,cex.fac=1,col="blue",datax = FALSE)
     qqline(y = coef(mod)[-1],datax = FALSE,col="blue",lty=2)
@@ -4342,6 +4329,8 @@ server <- function (input , output, session ){
     }
     validate(need(n_lev==rep(2,n),'Questa routine si applica a disegni fattoriali a 2 livelli!'))
     mod<-pp_mod()
+    
+    
     df_coeff<-mod$coefficients[-1]
     df_coeff<-df_coeff[order(abs(df_coeff),decreasing = TRUE)]
     par_coeff<-(df_coeff^2/sum(df_coeff^2))*100
@@ -6939,6 +6928,7 @@ pp_sigma_df<-reactive({
     df<-tryCatch(cd_var_dis(),
                  error = function(e) "Selezionare un dataset!")
     validate(need(!is.character(df),'Selezionare un dataset!'))
+    if(input$cd_var_dis_ha==1)df<-head(df)
     df
   })
   cd_var_dis_cod<-reactive({
@@ -6959,6 +6949,7 @@ pp_sigma_df<-reactive({
     df<-tryCatch(cd_var_dis_cod(),
                  error = function(e) "Selezionare un dataset!")
     validate(need(!is.character(df),''))
+    if(input$cd_var_dis_cod_ha==1)df<-head(df)
     df
   })
   output$cd_var_download <- downloadHandler(

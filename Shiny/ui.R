@@ -32,6 +32,7 @@ sidebar<- dashboardSidebar(
                         ))
 
 body<-dashboardBody(
+  fluidRow(useShinyjs(),
   # Indipendenti --------------------------------------------------------------------
   tabItems(
     tabItem(tabName = "fatt_compl",
@@ -96,7 +97,13 @@ body<-dashboardBody(
                                               hr(),
                                               plotOutput('fatt_compl_grcoeff')),
                                        column(12,
+                                              hr(),
+                                              h3("Grafico di Daniel (qq-plot)"),
                                               plotOutput('fatt_compl_grsigncoeff')),
+                                       column(12,
+                                              hr(),
+                                              h3("Grafico quadrato effetti normalizzati"),
+                                              plotOutput('fatt_compl_grPareto')),
                                        column(12,
                                               hr(),
                                               h3("Grafico superficie risposta"),
@@ -204,7 +211,13 @@ body<-dashboardBody(
                                               hr(),
                                               plotOutput('frazion_grcoeff')),
                                        column(12,
+                                              hr(),
+                                              h3("Grafico di Daniel (qq-plot)"),
                                               plotOutput('frazion_grsigncoeff')),
+                                       column(12,
+                                              hr(),
+                                              h3("Grafico quadrato effetti normalizzati"),
+                                              plotOutput('frazion_grPareto')),
                                        column(12,
                                               hr(),
                                               h3("Grafico superficie risposta"),
@@ -289,7 +302,13 @@ body<-dashboardBody(
                                                   hr(),
                                                   plotOutput('pb_grcoeff')),
                                            column(12,
+                                                  hr(),
+                                                  h3("Grafico di Daniel (qq-plot)"),
                                                   plotOutput('pb_grsigncoeff')),
+                                           column(12,
+                                                  hr(),
+                                                  h3("Grafico quadrato effetti normalizzati"),
+                                                  plotOutput('pb_grPareto')),
                                            column(12,
                                                   hr(),hr(),h3("Plot alias"),hr(),
                                                   plotOutput("pb_graf_alias")))))),
@@ -479,7 +498,29 @@ body<-dashboardBody(
                                                  h4('Matrice punti candidati'),
                                                  radioButtons("d_opt_cp_ha", "Display",choices = c('Head' = 1,"All" =2),selected = 1,inline=TRUE),
                                                  div(style = 'overflow-x: scroll',tableOutput("d_opt_cp")),
-                                                 downloadButton("d_opt_download"))
+                                                 downloadButton("d_opt_download"),
+                                                 uiOutput('d_opt_cod')),
+                                          
+                                          
+                                          column(12,
+                                                 uiOutput('d_opt_cp_cod_title'),
+                                                 uiOutput('d_opt_cp_cod_ha'),
+                                                 div(style = 'overflow-x: scroll',tableOutput("d_opt_cp_cod")),
+                                                 
+                                                 #downloadButton("d_opt_cp_cod_download")
+                                                 shinyjs::hidden(downloadButton("d_opt_cp_cod_download"))
+                                                 #uiOutput('d_opt_cp_cod_download')
+                                                 
+                                        )
+                                          
+                                          
+                                          
+                                   
+                                          
+                                          
+                                          
+                              
+                                          
                                            ),
                                   tabPanel('D-ottimale',
                                            column(12,
@@ -1214,10 +1255,12 @@ body<-dashboardBody(
                                                     uiOutput('cd_var_importa_excel_brws')),
                                              column(12,
                                                     h4('Disegno'),
+                                                    radioButtons("cd_var_dis_ha", "Display",choices = c('Head' = 1,"All" =2),selected = 1,inline=TRUE),
                                                     tableOutput("cd_var_dis")),
                                              column(12,
                                                     hr(),
                                                     h4('Disegno codificato'),
+                                                    radioButtons("cd_var_dis_cod_ha", "Display",choices = c('Head' = 1,"All" =2),selected = 1,inline=TRUE),
                                                     tableOutput("cd_var_dis_cod"),
                                                     downloadButton("cd_var_download"))
                                              ),
@@ -1275,7 +1318,7 @@ body<-dashboardBody(
     
     
     
-            ))
+            )))
 
 
 

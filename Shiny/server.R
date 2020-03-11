@@ -3426,6 +3426,90 @@ server <- function (input , output, session ){
       dis<-cbind.data.frame('Exp#'=exp,dis)
       write.xlsx(dis, file,colNames=TRUE)
     })
+  
+  ##################
+  output$d_opt_cod<-renderUI({
+    validate(need(input$d_opt_pti_cand==1 & input$d_opt_costruisci==1,''))
+    checkboxInput("d_opt_cod", label = "Codifica variabili", value = FALSE)
+  })
+  
+  output$d_opt_cp_cod_title<-renderUI({
+    validate(need(input$d_opt_pti_cand==1 & input$d_opt_costruisci==1,''))
+    validate(need(input$d_opt_cod==TRUE,''))
+    HTML('<h4>Matrice punti candidati codificati<h4>')
+  })
+  
+  d_opt_cp_cod<-reactive({
+    validate(need(input$d_opt_pti_cand==1 & input$d_opt_costruisci==1,''))
+    M<-d_opt_cp()
+    for(i in 1:ncol(M)){
+      if(!is.numeric(M[,i]))M[,i]<-as.numeric(as.factor(M[,i]))
+    }
+    vmax<-apply(M,2,max)
+    vmin<-apply(M,2,min)
+    D<-vmax-vmin
+    var.trans<-M
+    for(i in 1:ncol(M)){var.trans[,i]<-2*(M[,i]-vmin[i])/D[i]-1}
+    var.trans
+  })
+  
+  
+  
+  
+  output$d_opt_cp_cod_ha<-renderUI({
+    validate(need(input$d_opt_pti_cand==1 & input$d_opt_costruisci==1 & input$d_opt_cod==TRUE,''))
+    validate(need(input$d_opt_cod==TRUE,''))
+    radioButtons("d_opt_cp_cod_ha", "Display",choices = c('Head' = 1,"All" =2),selected = 1,inline=TRUE)
+  })
+  
+  
+  
+  output$d_opt_cp_cod<-renderTable({
+    validate(need(input$d_opt_pti_cand==1 & input$d_opt_costruisci==1 & input$d_opt_cod==TRUE,''))
+    #validate(need(is.data.frame(cd_var_dis()),"Selezionare un dataset!\n "),
+    #errorClass = "myClass") 
+    req(input$d_opt_cp_cod_ha)
+    df<-tryCatch(d_opt_cp_cod(),
+                 error = function(e) "Selezionare un dataset!")
+    validate(need(!is.character(df),''))
+    if(input$d_opt_cp_cod_ha==1)df<-head(df)
+    df
+  })
+  
+  
+  output$d_opt_cp_cod_download<-renderUI({
+    validate(need(input$d_opt_pti_cand==1 & input$d_opt_costruisci==1 & input$d_opt_cod==TRUE,''))
+    downloadButton("d_opt_cp_cod_download")
+  })
+  
+  observeEvent(input$d_opt_cod, {
+    if (input$d_opt_cod==FALSE)
+      shinyjs::hide("d_opt_cp_cod_download")
+    else
+      shinyjs::show("d_opt_cp_cod_download")
+  })
+  
+  output$d_opt_cp_cod_download<- downloadHandler(
+    
+    filename = "cp_cod.xlsx", 
+    content = function(file) {
+      
+      write.xlsx(d_opt_cp_cod(),file,colNames=TRUE)
+    })
+  
+  
+  
+
+  
+
+  
+  
+  
+  #################
+  
+  
+  
+  
   d_opt_var_sel<-reactive({
     validate(need(is.data.frame(d_opt_cp()),""))
     var<-colnames(d_opt_cp())
@@ -3521,6 +3605,8 @@ server <- function (input , output, session ){
     req(input$d_opt_Lnumexp)
     fmrl<-formula(d_opt_formula())
     data<-d_opt_cp()
+    if(input$d_opt_cod==TRUE)data<-d_opt_cp_cod()
+    
     nTrials<-input$d_opt_Unumexp
     p <- input$d_opt_Lnumexp
     nRepeats<-10

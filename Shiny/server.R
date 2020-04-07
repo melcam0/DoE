@@ -3656,14 +3656,16 @@ server <- function (input , output, session ){
   output$d_opt_graf_D<-renderPlot({
     validate(need(ncol(d_opt_federov()$X)>0 & sum(is.na(d_opt_federov()$X))==0,''))
     plot(d_opt_federov()$X[,1],d_opt_federov()$X[,2],col='red',type='b',xlab='Numero di esperimenti',
-         ylab='D');grid()
+         ylab='D',xaxt="n")
+    axis(1, at=d_opt_federov()$X[,1])
+    grid()
   })
   output$d_opt_graf_Vif<-renderPlot({
     validate(need(ncol(d_opt_federov()$X)>0 & sum(is.na(d_opt_federov()$X))==0,''))
     maxinfl<-max(d_opt_federov()$X[,3])
     plot(d_opt_federov()$X[,1],d_opt_federov()$X[,3],col='red',type='b',xlab='Numero di esperimenti',
          ylim=c(1,max(maxinfl,8)),
-         ylab='Vif.max');grid()
+         ylab='Vif.max',xaxt="n");grid();axis(1, at=d_opt_federov()$X[,1])
     abline(h = 4, lty = 2, col = "green4")
     abline(h = 8, lty = 2, col = "red")
   })
@@ -7045,6 +7047,113 @@ pp_sigma_df<-reactive({
     })
 
   
+  
+  
+  
+  
+  
+  
+  ### Prove Pareto
+  
+  
+  
+  output$pareto_importa_incolla_spazio<-renderUI({
+    req(input$pareto_importa==1)
+    br()
+  })
+  output$pareto_importa_incolla<-renderUI({
+    req(input$pareto_importa==1)
+    actionButton("pareto_incolla", label = "Incolla")
+  })
+  output$pareto_importa_incolla_spazio1<-renderUI({
+    req(input$pareto_importa==1)
+    hr()
+  })
+  output$pareto_importa_excel_brws<-renderUI({
+    req(input$pareto_importa==2)
+    fileInput("pareto_file_xlsx",label='',
+              multiple = FALSE,
+              accept = c(".xlx",".xlsx"))
+  })
+  pareto_dis_paste<-eventReactive(input$pareto_incolla,{
+    df<-tryCatch(read.DIF(file = "clipboard",header = TRUE,transpose = TRUE),
+                 #warning = function(w) {print('warning')},
+                 error = function(e) "Selezionare un dataset!")
+    df
+  })
+  pareto_dis_xls<-reactive({
+    req(input$pareto_file_xlsx$datapath)
+    df=read_excel(path = input$pareto_file_xlsx$datapath,sheet = 1,col_names = TRUE)
+    df
+  })
+  pareto_dis<-reactive({
+    if(input$pareto_importa==1)df<-pareto_dis_paste()
+    if(input$pareto_importa==2)df<-pareto_dis_xls()
+    if(sum(df[,1]==c(1:nrow(df)))==nrow(df))df<-df[,-1]
+    df<-as.data.frame(df)
+    df
+  })
+  
+  
+  
+  
+  Prev<-reactiveVal(data.frame())
+  nclick<-reactiveVal(0)
+  
+  
+  observeEvent(input$action,{
+    mod<-pp_mod()
+    data<- pareto_dis()
+    P<-as.data.frame(predict(mod,newdata=data))
+    m<-nclick()
+   
+    colnames(P)<-paste0('R',m+1)
+    if(m>0){
+      P<-cbind.data.frame(Prev(),P)
+    }
+    Prev(P)
+    m<-m+1
+    nclick(m)
+    
+  })
+  
+  
+  observeEvent(input$action1, {
+    P<-data.frame()    
+    Prev(P) 
+    nclick(0)
+  })
+
+  output$a<-renderPrint({
+    head(Prev())
+
+  })
+  
+  
+  
+  output$sliders <- renderUI({
+    m <- nclick()
+    if (m > 0) {
+        lapply(seq(m), function(i) {
+          radioButtons(inputId = paste0("radio",i), label = paste0('R',i),
+                       choices = list("max." = 1, "min." = 2, "target" = 3),inline=T)
+        })
+    }
+  })
+  
+
+  output$target <- renderUI({
+    m <- nclick()
+    if (m > 0) {
+      lapply(seq(m), function(i) {
+        inputname<-paste0("radio",i)
+        req(input[[inputname]])
+        if(input[[inputname]]==3)textInput(paste0("num",i), label = paste0('Target R',i), value = '')
+        
+
+      })
+    }
+  })
   
   
   

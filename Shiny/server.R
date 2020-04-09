@@ -4042,6 +4042,7 @@ server <- function (input , output, session ){
     quad<-paste0('I(',var,'^2)')
     frm_quad<-paste0(quad,collapse = '+')
     #frm_inter<-paste0(var,collapse = '*')
+    req(input$pp_inter)
     n<-input$pp_inter
     frm_inter<-paste0('(',frm_lin,')^',n)
     if(!'2'%in%input$pp_mod_tipo)frm<-frm_lin
@@ -7097,11 +7098,14 @@ pp_sigma_df<-reactive({
   
   
   
+  
+  
+  
   Prev<-reactiveVal(data.frame())
   nclick<-reactiveVal(0)
   
   
-  observeEvent(input$action,{
+  observeEvent(input$pareto_previsione,{
     mod<-pp_mod()
     data<- pareto_dis()
     P<-as.data.frame(predict(mod,newdata=data))
@@ -7118,42 +7122,106 @@ pp_sigma_df<-reactive({
   })
   
   
-  observeEvent(input$action1, {
+  observeEvent(input$pareto_delete, {
     P<-data.frame()    
     Prev(P) 
     nclick(0)
   })
 
-  output$a<-renderPrint({
-    head(Prev())
-
+  
+  
+  
+  output$pareto_pred_ha<-renderUI({
+    validate(need(ncol(Prev())>0,''))
+    radioButtons("pareto_pred_ha", "Display",choices = c('Head' = 1,"All" =2),selected = 1,inline=TRUE)
+  })
+  
+  
+  output$pareto_pred<-renderPrint({
+    validate(need(ncol(Prev())>0,""))
+    df<-Prev()
+    req(input$pareto_pred_ha)
+    if(input$pareto_pred_ha==1)df<-head(df)
+    df
   })
   
   
   
-  output$sliders <- renderUI({
+  output$pareto_radiobt <- renderUI({
     m <- nclick()
     if (m > 0) {
         lapply(seq(m), function(i) {
-          radioButtons(inputId = paste0("radio",i), label = paste0('R',i),
+          radioButtons(inputId = paste0("pareto_mmt",i), label = paste0('R',i),
                        choices = list("max." = 1, "min." = 2, "target" = 3),inline=T)
         })
     }
   })
   
 
-  output$target <- renderUI({
+  output$pareto_target <- renderUI({
     m <- nclick()
     if (m > 0) {
       lapply(seq(m), function(i) {
-        inputname<-paste0("radio",i)
+        inputname<-paste0("pareto_mmt",i)
         req(input[[inputname]])
-        if(input[[inputname]]==3)textInput(paste0("num",i), label = paste0('Target R',i), value = '')
+        if(input[[inputname]]==3)textInput(paste0("pareto_target",i), label = paste0('Target R',i), value = '')
         
 
       })
     }
   })
+  
+  
+  
+  
+  
+  
+  
+  output$pareto_dominati<-renderPrint({
+    validate(need(ncol(Prev())>0,""))
+    
+    M_<-Prev();M_i<-M_
+    frm<-"high(M_[,1])"
+    req(input$pareto_mmt1)
+    if(input$pareto_mmt1==2)frm<-"low(M_[,1])"
+    if(input$pareto_mmt1==3){
+      M_[,1]<-abs(M_[,1]-as.numeric(input$pareto_target1))
+      frm<-"low(M_[,1])"
+    }
+    
+    for (i in 2:ncol(M_)){
+      inputname<-paste0("pareto_mmt",i)
+      req(input[[inputname]])
+      if(input[[inputname]]==1)frm<-paste(frm,"*high(M_[,",i,"])",sep="")
+      if(input[[inputname]]==2)frm<-paste(frm,"*low(M_[,",i,"])",sep="")
+      if(input[[inputname]]==3){
+        inputname<-paste0("pareto_target",i)
+        req(input[[inputname]])
+        M_[,i]<-abs(M_[,i]-as.numeric(input[[inputname]]))
+        frm<-paste(frm,"*low(M_[,",i,"])",sep="")
+      }
+      frm<-eval(parse(text=frm))
+      #nondom <- psel(M_,frm)
+      nondom<-M_i[row.names(psel(M_,frm)),]
+    }
+    
+    nondom
+   
+  })
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
   
   
   

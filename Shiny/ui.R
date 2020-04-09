@@ -23,6 +23,7 @@ sidebar<- dashboardSidebar(
                 menuItem(text = "File",icon = icon("briefcase", lib = "font-awesome"),
                         
                          menuSubItem(text = "Codifica variabili",tabName = "cd_var"),
+                         menuSubItem(text = "Fronte di Pareto",tabName = "pareto"),
                          hr(),
                          menuSubItem("Dispensa",tabName = "dispensa"),
                          menuSubItem("Diapositive",tabName = "diapositive"),
@@ -625,8 +626,7 @@ body<-dashboardBody(
              tabItem(tabName = "pp",
                      fluidPage(titlePanel(uiOutput("pp_titolo")),
                                tags$head(
-                                 tags$style(HTML(".shiny-output-error-validation {color: red;font-size: 130%; "))
-                               ),
+                                 tags$style(HTML(".shiny-output-error-validation {color: red;font-size:130%; "))),
                                tabsetPanel(type = "tabs",
                                            tabPanel("Disegno",
                                                     column(12,
@@ -1267,35 +1267,59 @@ body<-dashboardBody(
                                              tabPanel("Miscele",
                                                       
                                                       
-                                                      column(12,
-                                                             br()),
-                                                      column(4,
-                                                             radioButtons("pareto_importa", label = "Importa disegno:",
-                                                                          choices = list("Incolla" = 1, "Excel" = 2), 
-                                                                          selected = 1,inline = TRUE)),
-                                                      column(4,
-                                                             uiOutput('pareto_importa_incolla_spazio'),
-                                                             uiOutput('pareto_importa_incolla'),
-                                                             uiOutput('pareto_importa_incolla_spazio1'),
-                                                             uiOutput('pareto_importa_excel_brws')),
                                                       
-                                                      
-                                                      
-                                                      
-                                                      column(12,
-                                                             actionButton("action", label = "Action"),
-                                                             actionButton("action1", label = "Delete"),
-                                                             verbatimTextOutput('a')),
-                                                      
-                                                      column(6,
-                                                             uiOutput('sliders')),
-                                                      column(6,
-                                                             uiOutput('target'))
                                                       
                                                       
                                                       ))
                                )
                      )),
+             
+             
+             
+             tabItem(tabName = "pareto",
+                     fluidPage(titlePanel(HTML('Fronte di Pareto')),
+
+                               fluidPage(                               
+                     
+                                 
+                                 column(12,
+                                        br()),
+                                 column(4,
+                                        radioButtons("pareto_importa", label = "Importa punti previsione:",
+                                                     choices = list("Incolla" = 1, "Excel" = 2), 
+                                                     selected = 1,inline = TRUE)),
+                                 column(4,
+                                        uiOutput('pareto_importa_incolla_spazio'),
+                                        uiOutput('pareto_importa_incolla'),
+                                        uiOutput('pareto_importa_incolla_spazio1'),
+                                        uiOutput('pareto_importa_excel_brws')),
+                                 
+                                 column(12,
+                                        h4('Creare un modello in Piano Personalizzato e cliccare su Previsione, dopo aver importato un dataset di punti, per ogni nuovo set di Risposte inserite!')),
+                                 column(12),
+                                 
+                                 column(6,
+                                        br(),
+                                        actionButton("pareto_previsione", label = "Previsione"),
+                                        actionButton("pareto_delete", label = "Delete"),
+                                       
+                                        h4('Previsione sui dati importati'),
+                                        uiOutput('pareto_pred_ha'),
+                                        verbatimTextOutput('pareto_pred')),
+                                 column(12),
+                                 column(6,
+                                        uiOutput('pareto_radiobt')),
+                                 column(6,
+                                        uiOutput('pareto_target')),
+                                 column(12),
+                                 column(6,
+                                        verbatimTextOutput('pareto_dominati'))
+                                 
+                                 
+                                 
+                                 
+                                 ))),
+                                             
              
              # File --------------------------------------------------------------------
              

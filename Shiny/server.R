@@ -7205,6 +7205,7 @@ pp_sigma_df<-reactive({
   output$pareto_graf<-renderPlot({
     require(ggplot2)
     df<-pareto_nondom()
+    row.names(df)<-row.names(pareto_nondom())
     nr<-nrow(df)
     nc<-ncol(df)
     if(nc>2)validate(need(length(input$pareto_selvar)==2,'Selezionare 2 risposte!'))
@@ -7231,6 +7232,7 @@ pp_sigma_df<-reactive({
     req(input$pareto_graf_brush)
     brush <- input$pareto_graf_brush
     df<-pareto_nondom()
+    #row.names(df)<-row.names(pareto_nondom())
     nr<-nrow(df)
     nc<-ncol(df)
     var<-colnames(df)
@@ -7240,14 +7242,16 @@ pp_sigma_df<-reactive({
     if(nc>2)col<-which(var%in%input$pareto_selvar==TRUE)
     data[,1]<-df[,col[1]]
     data[,2]<-df[,col[2]]
+    row.names(data)<-row.names(pareto_nondom())
     y<-data[,2]
     x<-data[,1]
     cr<-which(y>brush$ymin & y<brush$ymax & x >brush$xmin & x < brush$xmax)
     validate(need(cr>0,''))
-    df1<-pareto_dis()
-    df1<-df1[cr,]
-    row.names(df1)<-row.names(df)[cr]
+    df1<-cbind.data.frame(pareto_dis(),Prev())
+    #row.names(df1)<-row.names(df)
+    df1<-df1[names(cr),]
     df1
+    
   })
   
   

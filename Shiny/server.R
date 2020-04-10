@@ -7054,10 +7054,8 @@ pp_sigma_df<-reactive({
   
   
   
-  ### Prove Pareto
-  
-  
-  
+  # Pareto -----------------------------------------------------------------
+
   output$pareto_importa_incolla_spazio<-renderUI({
     req(input$pareto_importa==1)
     br()
@@ -7094,23 +7092,13 @@ pp_sigma_df<-reactive({
     df<-as.data.frame(df)
     df
   })
-  
-  
-  
-  
-  
-  
-  
   Prev<-reactiveVal(data.frame())
   nclick<-reactiveVal(0)
-  
-  
   observeEvent(input$pareto_previsione,{
     mod<-pp_mod()
     data<- pareto_dis()
     P<-as.data.frame(predict(mod,newdata=data))
     m<-nclick()
-   
     colnames(P)<-paste0('R',m+1)
     if(m>0){
       P<-cbind.data.frame(Prev(),P)
@@ -7118,25 +7106,16 @@ pp_sigma_df<-reactive({
     Prev(P)
     m<-m+1
     nclick(m)
-    
   })
-  
-  
   observeEvent(input$pareto_delete, {
     P<-data.frame()    
     Prev(P) 
     nclick(0)
   })
-
-  
-  
-  
   output$pareto_pred_ha<-renderUI({
     validate(need(ncol(Prev())>0,''))
     radioButtons("pareto_pred_ha", "Display",choices = c('Head' = 1,"All" =2),selected = 1,inline=TRUE)
   })
-  
-  
   output$pareto_pred<-renderPrint({
     validate(need(ncol(Prev())>0,""))
     df<-Prev()
@@ -7144,9 +7123,11 @@ pp_sigma_df<-reactive({
     if(input$pareto_pred_ha==1)df<-head(df)
     df
   })
-  
-  
-  
+  output$pareto_pred_download <- downloadHandler(
+    filename = "pred.xlsx", 
+    content = function(file) {
+      write.xlsx(Prev(),file,colNames=TRUE)
+    })
   output$pareto_radiobt <- renderUI({
     m <- nclick()
     if (m > 0) {
@@ -7156,8 +7137,6 @@ pp_sigma_df<-reactive({
         })
     }
   })
-  
-
   output$pareto_target <- renderUI({
     m <- nclick()
     if (m > 0) {
@@ -7165,21 +7144,11 @@ pp_sigma_df<-reactive({
         inputname<-paste0("pareto_mmt",i)
         req(input[[inputname]])
         if(input[[inputname]]==3)textInput(paste0("pareto_target",i), label = paste0('Target R',i), value = '')
-        
-
       })
     }
   })
-  
-  
-  
-  
-  
-  
-  
-  output$pareto_dominati<-renderPrint({
+  pareto_nondom<-reactive({
     validate(need(ncol(Prev())>0,""))
-    
     M_<-Prev();M_i<-M_
     frm<-"high(M_[,1])"
     req(input$pareto_mmt1)
@@ -7188,7 +7157,6 @@ pp_sigma_df<-reactive({
       M_[,1]<-abs(M_[,1]-as.numeric(input$pareto_target1))
       frm<-"low(M_[,1])"
     }
-    
     for (i in 2:ncol(M_)){
       inputname<-paste0("pareto_mmt",i)
       req(input[[inputname]])
@@ -7204,24 +7172,83 @@ pp_sigma_df<-reactive({
       #nondom <- psel(M_,frm)
       nondom<-M_i[row.names(psel(M_,frm)),]
     }
-    
     nondom
-   
   })
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
+  output$pareto_dominati<-renderPrint({
+    validate(need(ncol(Prev())>0,""))
+    pareto_nondom()
+  })
+  output$pareto_dominati_download <- downloadHandler(
+    filename = "nondom.xlsx", 
+    content = function(file) {
+      write.xlsx(pareto_nondom(),file,colNames=TRUE,row.names = TRUE)
+    })
+  output$pareto_selvar<-renderUI({
+    validate(need(ncol(Prev())>0,""))
+    var<-colnames(Prev())
+    validate(need(length(var)>2,''))
+    selectInput("pareto_selvar", label = h5("Selezionare 2 risposte"), 
+                choices = var, 
+                multiple = TRUE,selected = var[1:2])
+  })
+  graf<-reactiveValues(xlim=NULL,ylim=NULL,var_gr=NULL,gr=NULL)
+  observeEvent(input$pareto_graf_dblclick, {
+    brush <- input$pareto_graf_brush
+    if (!is.null(brush)) {
+      graf$xlim <- c(brush$xmin, brush$xmax)
+      graf$ylim <- c(brush$ymin, brush$ymax)
+    } else {
+      graf$xlim <- NULL
+      graf$ylim <- NULL
+    }
+  })
+  output$pareto_graf<-renderPlot({
+    require(ggplot2)
+    df<-pareto_nondom()
+    nr<-nrow(df)
+    nc<-ncol(df)
+    if(nc>2)validate(need(length(input$pareto_selvar)==2,'Selezionare 2 risposte!'))
+    var<-colnames(df)
+    data<-matrix(0,nr,2)
+    col<-c(1,2)
+    #req(input$pareto_selvar)
+    if(nc>2)col<-which(var%in%input$pareto_selvar==TRUE)
+    data[,1]<-df[,col[1]]
+    data[,2]<-df[,col[2]]
+    data<-as.data.frame(data)
+    colnames(data)<-c('x','y')
+    gr<-ggplot(data,mapping = aes(x=x,y=y))+labs(x=var[col[1]],y=var[col[2]])+
+      theme_light()+
+      coord_cartesian(xlim = graf$xlim, ylim = graf$ylim, expand = TRUE)
+    if(!input$pareto_graf_labels){
+      gr<-gr+geom_point(cex=2,col="blue")
+    } else {
+      gr<-gr+geom_text(mapping = aes(label=row.names(pareto_nondom())),col="blue")
+    }
+    gr
+  })
+  output$pareto_graf_selez<-renderPrint({
+    req(input$pareto_graf_brush)
+    brush <- input$pareto_graf_brush
+    df<-pareto_nondom()
+    nr<-nrow(df)
+    nc<-ncol(df)
+    var<-colnames(df)
+    data<-matrix(0,nr,2)
+    col<-c(1,2)
+    #req(input$pareto_selvar)
+    if(nc>2)col<-which(var%in%input$pareto_selvar==TRUE)
+    data[,1]<-df[,col[1]]
+    data[,2]<-df[,col[2]]
+    y<-data[,2]
+    x<-data[,1]
+    cr<-which(y>brush$ymin & y<brush$ymax & x >brush$xmin & x < brush$xmax)
+    validate(need(cr>0,''))
+    df1<-pareto_dis()
+    df1<-df1[cr,]
+    row.names(df1)<-row.names(df)[cr]
+    df1
+  })
   
   
   

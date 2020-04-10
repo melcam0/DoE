@@ -1275,13 +1275,10 @@ body<-dashboardBody(
                      )),
              
              
-             
+             # Pareto --------------------------------------------------------------------               
              tabItem(tabName = "pareto",
                      fluidPage(titlePanel(HTML('Fronte di Pareto')),
-
                                fluidPage(                               
-                     
-                                 
                                  column(12,
                                         br()),
                                  column(4,
@@ -1293,19 +1290,17 @@ body<-dashboardBody(
                                         uiOutput('pareto_importa_incolla'),
                                         uiOutput('pareto_importa_incolla_spazio1'),
                                         uiOutput('pareto_importa_excel_brws')),
-                                 
                                  column(12,
                                         h4('Creare un modello in Piano Personalizzato e cliccare su Previsione, dopo aver importato un dataset di punti, per ogni nuovo set di Risposte inserite!')),
                                  column(12),
-                                 
                                  column(6,
                                         br(),
                                         actionButton("pareto_previsione", label = "Previsione"),
                                         actionButton("pareto_delete", label = "Delete"),
-                                       
                                         h4('Previsione sui dati importati'),
                                         uiOutput('pareto_pred_ha'),
-                                        verbatimTextOutput('pareto_pred')),
+                                        verbatimTextOutput('pareto_pred'),
+                                        downloadButton("pareto_pred_download")),
                                  column(12),
                                  column(6,
                                         uiOutput('pareto_radiobt')),
@@ -1313,11 +1308,21 @@ body<-dashboardBody(
                                         uiOutput('pareto_target')),
                                  column(12),
                                  column(6,
-                                        verbatimTextOutput('pareto_dominati'))
+                                        h4('Punti non dominati'),
+                                        verbatimTextOutput('pareto_dominati'),
+                                        downloadButton("pareto_dominati_download")),
                                  
-                                 
-                                 
-                                 
+                                 column(12,
+                                        h4('Grafico punti non dominati'),
+                                        uiOutput('pareto_selvar')),
+                                 column(8,
+                                        plotOutput("pareto_graf",click = "pareto_graf_click",dblclick = "pareto_graf_dblclick",
+                                                   brush = brushOpts(id="pareto_graf_brush",resetOnNew = TRUE))),
+                                 column(2,
+                                        checkboxInput("pareto_graf_labels", label = "Etichette", value = FALSE)),
+                                 column(12,
+                                        br(),
+                                        verbatimTextOutput("pareto_graf_selez"))
                                  ))),
                                              
              

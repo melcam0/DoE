@@ -11,6 +11,7 @@ pacchetti<-c('shiny',
              'openxlsx',
              'AlgDesign',
              'stringr',
+             'mixexp',
              'rPref')
 
 install.packages(pkgs = pacchetti)

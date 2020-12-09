@@ -1,10 +1,10 @@
-Progetto:
+Project:
 Giorgio Marrubini e Camillo Melzi
 
 R scripts:
 Camillo Melzi
 
 
-DoE e' in versione beta. Vi chiediamo di segnalarci eventuali bug od errori
-al seguente indirizzo email:
+DoE is a beta version. We ask you to report any bugs or errors
+to the following email address:
 camillomelzi@gmail.com.

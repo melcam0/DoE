@@ -1,0 +1,12 @@
+name: DofE
+title: DofE
+username:
+account: master
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 731033
+bundleId: 2731196
+url: https://camillo.shinyapps.io/DofE/
+when: 1579109153.12907
+asMultiple: FALSE
+asStatic: FALSE

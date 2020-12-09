@@ -1,5 +1,5 @@
-  #define MyAppName "DoE"
-#define MyAppVersion "1.4"
+#define MyAppName "DoE"
+#define MyAppVersion "3.0"
 #define MyAppExeName "DoE.vbs"
 #define MyAppPublisher ""
 #define MyAppURL ""
@@ -20,13 +20,12 @@ AppUpdatesURL = {#MyAppURL}
 PrivilegesRequired = none
 InfoBeforeFile = infobefore.txt
 InfoAfterFile = infoafter.txt
-Compression = lzma2/ultra64
+Compression=lzma
 SolidCompression = yes
-ArchitecturesInstallIn64BitMode = x64
 LicenseFile = gpl_3.0.txt
 
 [Languages]
-Name: "italian"; MessagesFile: "compiler:Languages\Italian.isl"
+;Name: "italian"; MessagesFile: "compiler:Languages\Italian.isl"
 
 [Tasks]
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"
@@ -39,7 +38,7 @@ Name: "{commondesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: 
 
 [Files]
 
-Source: "C:\Users\Camillo\GitHub\DoE\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "C:\Users\Camillo\GitHub\DoE_en\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 

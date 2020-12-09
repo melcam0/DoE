@@ -1,0 +1,12 @@
+name: Shiny
+title: Shiny
+username:
+account: master
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 1661190
+bundleId: 2731182
+url: https://camillo.shinyapps.io/Shiny/
+when: 1579108721.12569
+asMultiple: FALSE
+asStatic: FALSE

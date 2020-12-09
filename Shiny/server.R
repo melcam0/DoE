@@ -16,7 +16,7 @@ server <- function (input , output, session ){
   
   observeEvent(input$openModal, {
     showModal(
-      modalDialog(title = "Autori:",size = 's',easyClose = TRUE,footer = NULL,
+      modalDialog(title = "Authors:",size = 's',easyClose = TRUE,footer = NULL,
                   
                   tags$img(src = base64enc::dataURI(file = "GC.jpg", mime = "image/jpg")),
                   
@@ -41,7 +41,7 @@ server <- function (input , output, session ){
 # Fattoriale completo -----------------------------------------------------------------
 
   output$fatt_compl_titolo<-renderUI({
-    HTML("Fattoriale completo 2 <sup>",input$fatt_compl_k,"<sup>" )
+    HTML("2 <sup>",input$fatt_compl_k,"</sup> Factorial Design")
   })
   dis_fatt_compl<-reactive({
     req(input$fatt_compl_k)
@@ -66,7 +66,7 @@ server <- function (input , output, session ){
       write.xlsx(dis_fatt_compl(),file,colNames=TRUE)
     })
   output$fatt_compl_dis<-renderTable({
-    validate(need(input$fatt_compl_k>0,'Inserire un numero di fattori > 0'))
+    validate(need(input$fatt_compl_k>0,'Inserire a numero di fattori > 0'))
     req(input$fatt_compl_k)
     dis<-as.list(NULL)
     for(i in 1:input$fatt_compl_k){
@@ -245,7 +245,7 @@ server <- function (input , output, session ){
     for(i in 1:input$fatt_compl_k){
       var[i]<-paste("x",i,sep="")
     }
-    selectInput("fatt_compl_selvar", label = h5("Selezionare 2 variabili"), 
+    selectInput("fatt_compl_selvar", label = h5("Select 2 variables"), 
                 choices = var, 
                 multiple = TRUE,selected = var[1:2])
   })
@@ -255,7 +255,7 @@ server <- function (input , output, session ){
   })
   output$fatt_compl_fixvar<-renderUI({
     validate(need(input$fatt_compl_k>2,''))
-    validate(need(length(input$fatt_compl_selvar)==2,'\n \n Selezionare 2 variabili!'))
+    validate(need(length(input$fatt_compl_selvar)==2,'\n \n Select 2 variables!'))
     req(input$fatt_compl_selvar)
     vl<-'0'
     if(input$fatt_compl_k>3){
@@ -277,9 +277,9 @@ server <- function (input , output, session ){
       var_fix<-paste(var_fix,var[col_fix][i])
     }
     if(length(col_fix)==1){
-      txt<-paste('valore della  variabile',var[col_fix])
+      txt<-paste('value of variable',var[col_fix])
     }else{
-      txt<-paste('valori delle  variabili',var_fix, '(separati da spazio)')
+      txt<-paste('values of variables',var_fix, '(separated by space)')
     }
     textInput(inputId = "fatt_compl_fixvar",label = h5(txt),value = vl)
   })
@@ -337,7 +337,7 @@ server <- function (input , output, session ){
     
     if(nrow(Q)==0){
       plot(c(0, 1), c(0, 1), ann = F, bty = 'n', type = 'n', xaxt = 'n', yaxt = 'n')
-      text(0.5,0.5,'inserire il valore delle variabili costanti',cex = 1.6, col = "red")
+      text(0.5,0.5,'enter the value of constant variables',cex = 1.6, col = "red")
     }else{
     Lev=data.frame(data,"L"=diag(Q))
     colnames(Lev)[col[1]]<-'x'
@@ -400,7 +400,7 @@ server <- function (input , output, session ){
     
     if(nrow(Q)==0){
       plot(c(0, 1), c(0, 1), ann = F, bty = 'n', type = 'n', xaxt = 'n', yaxt = 'n')
-      text(0.5,0.5,'inserire il valore delle variabili costanti',cex = 1.6, col = "red")
+      text(0.5,0.5,'enter the value of constant variables',cex = 1.6, col = "red")
     }else{
       Lev=data.frame(data,"L"=diag(Q))
       colnames(Lev)[col[1]]<-'x'
@@ -408,7 +408,7 @@ server <- function (input , output, session ){
       req(input$fatt_compl_lv_z)
       req(input$fatt_compl_lv_x)
       lattice::wireframe(L~x*y,data=Lev,drape=TRUE,col.regions = colorRampPalette(c("yellow","green","blue"))(256),
-                         at=seq(min(Lev$L),max(Lev$L),(max(Lev$L)-min(Lev$L))/256),
+                         at=seq(min(Lev$L),max(Lev$L),length.out=256),
                          
                          screen=list(z=input$fatt_compl_lv_z,x=-input$fatt_compl_lv_x),
                          
@@ -417,13 +417,13 @@ server <- function (input , output, session ){
     }   
   })
   output$fatt_compl_lv_z<-renderUI({
-    sliderInput('fatt_compl_lv_z',label = 'Rotazione orizzontale',min = 0,max = 360,value = 30,step = 10)
+    sliderInput('fatt_compl_lv_z',label = 'Horizontal rotation',min = 0,max = 360,value = 30,step = 10)
   })
   output$fatt_compl_lv_x<-renderUI({
-    sliderInput('fatt_compl_lv_x',label = 'Rotazione verticale',min = 0,max = 90,value = 60,step = 10)
+    sliderInput('fatt_compl_lv_x',label = 'Vertical rotation',min = 0,max = 90,value = 60,step = 10)
   })
   output$fatt_compl_risptext<-renderUI({
-    h4(paste('Risposte (',2^input$fatt_compl_k,', separate da spazio)',sep=''))
+    h4(paste('Responses (',2^input$fatt_compl_k,', separated by space)',sep=''))
   })
   output$fatt_compl_figura_risp<-renderPlot({
     validate(need(input$fatt_compl_k<=3,''))
@@ -693,10 +693,10 @@ server <- function (input , output, session ){
       nd<-rbind.data.frame(x)
       colnames(nd)<-var
       prev<-predict(object = mod,newdata=nd)
-      attr(prev,'names')<-c('previsione')
+      attr(prev,'names')<-c('prediction')
       prev
     }else{
-      cat(paste('inserire le',input$fatt_compl_k,'coord. del punto'))
+      cat(paste('Enter the',input$fatt_compl_k,'coord. of the point'))
     }
   })
   output$fatt_compl_intprev<-renderPrint({
@@ -770,7 +770,7 @@ server <- function (input , output, session ){
     mod<-lm(x~1,as.data.frame(x))
     sm<-summary(mod)
     media<-predict(mod,interval = 'confidence')[1,]
-    attr(media,'names')<-c('media','2.5%','97.5%')
+    attr(media,'names')<-c('mean','2.5%','97.5%')
     round(media,3)
   })
   output$fatt_compl_misind_sd<-renderPrint({
@@ -793,7 +793,7 @@ server <- function (input , output, session ){
   output$fatt_compl_stimint_txt<-renderUI({
     validate(need(length(as.numeric(unlist(strsplit(input$fatt_compl_misind," "))))>0 &
                     length(as.numeric(unlist(strsplit(input$fatt_compl_risp," "))))==2^input$fatt_compl_k,''))
-    h4('Stima per intervallo')
+    h4('Confidence interval')
   })
   output$fatt_compl_stimint<-renderPrint({
     validate(need(length(as.numeric(unlist(strsplit(input$fatt_compl_misind," "))))>0 &
@@ -859,13 +859,13 @@ server <- function (input , output, session ){
     for(i in 1:input$fatt_compl_k){
       var[i]<-paste("x",i,sep="")
     }
-    selectInput("fatt_compl_mod_selvar", label = h5("Selezionare 2 variabili"), 
+    selectInput("fatt_compl_mod_selvar", label = h5("Select 2 variables"), 
                 choices = var, 
                 multiple = TRUE,selected = var[1:2])
   })
   output$fatt_compl_mod_fixvar<-renderUI({
     validate(need(input$fatt_compl_k>2,''))
-    validate(need(length(input$fatt_compl_mod_selvar)==2,'\n \n Selezionare 2 variabili!'))
+    validate(need(length(input$fatt_compl_mod_selvar)==2,'\n \n Select 2 variables!'))
     req(input$fatt_compl_mod_selvar)
     vl<-'0'
     if(input$fatt_compl_k>3){
@@ -888,9 +888,9 @@ server <- function (input , output, session ){
       var_fix<-paste(var_fix,var[col_fix][i])
     }
     if(length(col_fix)==1){
-      txt<-paste('valore della  variabile',var[col_fix])
+      txt<-paste('value of variable',var[col_fix])
     }else{
-      txt<-paste('valori delle  variabili',var_fix, '(separati da spazio)')
+      txt<-paste('value of variables',var_fix, '(separated by space)')
     }
     textInput(inputId = "fatt_compl_mod_fixvar",label = h5(txt),value = vl)
   })
@@ -952,7 +952,7 @@ server <- function (input , output, session ){
     
     if(is.na(Pred$P[1])==TRUE){
       plot(c(0, 1), c(0, 1), ann = F, bty = 'n', type = 'n', xaxt = 'n', yaxt = 'n')
-      text(0.5,0.5,'inserire il valore delle variabili costanti',cex = 1.6, col = "red")
+      text(0.5,0.5,'enter the value of constant variables',cex = 1.6, col = "red")
     }else{
     lattice::contourplot(P~x*y,data=Pred,cuts=15,main='Response Surface: Contour Plot',cex.main=0.8,
                          xlab=var[col[1]],ylab=var[col[2]],col=colore[cl],
@@ -963,7 +963,7 @@ server <- function (input , output, session ){
   output$fatt_compl_livellorisp_col<-renderUI({
     validate(need(length(as.numeric(unlist(strsplit(input$fatt_compl_risp," "))))==2^input$fatt_compl_k,''))
     selectInput("fatt_compl_livellorisp_col", label = h3(""), 
-                choices = list("blu" = 1, "verde" = 2, "rosso" = 3,"nero" = 4,"viola" = 5), 
+                choices = list("blu" = 1, "green" = 2, "red" = 3,"black" = 4,"purple" = 5), 
                 selected = 1,width="130px")
   })
   output$fatt_compl_suprisp<-renderPlot({
@@ -1023,22 +1023,22 @@ server <- function (input , output, session ){
     
     if(is.na(Pred$P[1])==TRUE){
       plot(c(0, 1), c(0, 1), ann = F, bty = 'n', type = 'n', xaxt = 'n', yaxt = 'n')
-      text(0.5,0.5,'inserire il valore delle variabili costanti',cex = 1.6, col = "red")
+      text(0.5,0.5,'enter the value of constant variables',cex = 1.6, col = "red")
     }else{
       req(input$fatt_compl_rp_z)
       req(input$fatt_compl_rp_x)
     lattice::wireframe(P~x*y,data=Pred,drape=TRUE,col.regions = colorRampPalette(c("yellow","green","blue"))(256),
-                       at=seq(min(Pred$P),max(Pred$P),(max(Pred$P)-min(Pred$P))/256),
+                       at=seq(min(Pred$P),max(Pred$P),length.out=256),
                        screen=list(z=input$fatt_compl_rp_z,x=-input$fatt_compl_rp_x),
                        main='Response Surface',cex.main=0.8,xlab=var[col[1]],
                        ylab=var[col[2]],zlab=paste('Response')) 
     }
   })
   output$fatt_compl_rp_z<-renderUI({
-    sliderInput('fatt_compl_rp_z',label = 'Rotazione orizzontale',min = 0,max = 360,value = 30,step = 10)
+    sliderInput('fatt_compl_rp_z',label = 'Horizontal rotation',min = 0,max = 360,value = 30,step = 10)
   })
   output$fatt_compl_rp_x<-renderUI({
-    sliderInput('fatt_compl_rp_x',label = 'Rotazione verticale',min = 0,max = 90,value = 60,step = 10)
+    sliderInput('fatt_compl_rp_x',label = 'Vertical rotation',min = 0,max = 90,value = 60,step = 10)
   })
   
 # Frazionario -----------------------------------------------------------------  
@@ -1056,7 +1056,7 @@ server <- function (input , output, session ){
     require(FrF2)
     ris<-c("I","II","III","IV","V","VI","VII","VIII","IX","X")
     r<-min(nchar(unlist(generators(dis_frazionario()))))-1
-    HTML("Frazionario 2 <sup>",input$frazion_k,"-",input$frazion_p,"</sup> <sub ><sub>",ris[r],"</sub></sub>" )
+    HTML("2 <sup>",input$frazion_k,"-",input$frazion_p,"</sup> <sub ><sub>",ris[r],"</sub></sub> Fractional Design" )
   })
   output$frazion_generat<-renderPrint({
     require(FrF2)
@@ -1148,7 +1148,7 @@ server <- function (input , output, session ){
     for(i in 1:input$frazion_k){
       var[i]<-paste("x",i,sep="")
     }
-    selectInput("frazion_selvar", label = h5("Selezionare 2 variabili"), 
+    selectInput("frazion_selvar", label = h5("Select 2 variables"), 
                 choices = var, 
                 multiple = TRUE,selected = var[1:2])
   })
@@ -1158,7 +1158,7 @@ server <- function (input , output, session ){
   })
   output$frazion_fixvar<-renderUI({
     validate(need(input$frazion_k>2,''))
-    validate(need(length(input$frazion_selvar)==2,'\n \n Selezionare 2 variabili!'))
+    validate(need(length(input$frazion_selvar)==2,'\n \n Select 2 variables!'))
     req(input$frazion_selvar)
     vl<-'0'
     if(input$frazion_k>3){
@@ -1181,9 +1181,9 @@ server <- function (input , output, session ){
       var_fix<-paste(var_fix,var[col_fix][i])
     }
     if(length(col_fix)==1){
-      txt<-paste('valore della  variabile',var[col_fix])
+      txt<-paste('value of variable',var[col_fix])
     }else{
-      txt<-paste('valori delle  variabili',var_fix, '(separati da spazio)')
+      txt<-paste('values of variables',var_fix, '(separated by space)')
     }
     textInput(inputId = "frazion_fixvar",label = h5(txt),value = vl)
   })
@@ -1246,7 +1246,7 @@ server <- function (input , output, session ){
     
     if(nrow(Q)==0){
       plot(c(0, 1), c(0, 1), ann = F, bty = 'n', type = 'n', xaxt = 'n', yaxt = 'n')
-      text(0.5,0.5,'inserire il valore delle variabili costanti',cex = 1.6, col = "red")
+      text(0.5,0.5,'enter the value of constant variables',cex = 1.6, col = "red")
     }else{
     Lev=data.frame(data,"L"=diag(Q))
     colnames(Lev)[col[1]]<-'x'
@@ -1316,7 +1316,7 @@ server <- function (input , output, session ){
     
     if(nrow(Q)==0){
       plot(c(0, 1), c(0, 1), ann = F, bty = 'n', type = 'n', xaxt = 'n', yaxt = 'n')
-      text(0.5,0.5,'inserire il valore delle variabili costanti',cex = 1.6, col = "red")
+      text(0.5,0.5,'enter the value of constant variables',cex = 1.6, col = "red")
     }else{
     Lev=data.frame(data,"L"=diag(Q))
     colnames(Lev)[col[1]]<-'x'
@@ -1324,19 +1324,19 @@ server <- function (input , output, session ){
     req(input$frazion_lv_z)
     req(input$frazion_lv_x)
     lattice::wireframe(L~x*y,data=Lev,drape=TRUE,col.regions = colorRampPalette(c("yellow","green","blue"))(256),
-                       at=seq(min(Lev$L),max(Lev$L),(max(Lev$L)-min(Lev$L))/256),
+                       at=seq(min(Lev$L),length.out=256),
                        screen=list(z=input$frazion_lv_z,x=-input$frazion_lv_x),
                        main='Plot of Leverage',cex.main=0.8,xlab=var[col[1]],
                        ylab=var[col[2]],zlab=paste('Response')) }
   })
   output$frazion_lv_z<-renderUI({
-    sliderInput('frazion_lv_z',label = 'Rotazione orizzontale',min = 0,max = 360,value = 30,step = 10)
+    sliderInput('frazion_lv_z',label = 'Horizontal rotation',min = 0,max = 360,value = 30,step = 10)
   })
   output$frazion_lv_x<-renderUI({
-    sliderInput('frazion_lv_x',label = 'Rotazione verticale',min = 0,max = 90,value = 60,step = 10)
+    sliderInput('frazion_lv_x',label = 'Vertical rotation',min = 0,max = 90,value = 60,step = 10)
   })
   output$frazion_risptext<-renderUI({
-    h4(paste('Risposte (',2^(input$frazion_k-input$frazion_p),', separate da spazio)',sep=''))
+    h4(paste('Responses (',2^(input$frazion_k-input$frazion_p),', separated by space)',sep=''))
   })
   output$frazion_coeff<-renderPrint({
     validate(need(length(as.numeric(unlist(strsplit(input$frazion_risp," "))))==2^(input$frazion_k-input$frazion_p),''))
@@ -1544,10 +1544,10 @@ server <- function (input , output, session ){
       nd<-rbind.data.frame(x)
       colnames(nd)<-var
       prev<-predict(object = mod,newdata=nd)
-      attr(prev,'names')<-c('previsione')
+      attr(prev,'names')<-c('prediction')
       prev
     }else{
-      cat(paste('inserire le',input$frazion_k,'coord. del punto'))
+      cat(paste('Enter the',input$frazion_k,'coord. of the point'))
     }
   })
   output$frazion_intprev<-renderPrint({
@@ -1624,7 +1624,7 @@ server <- function (input , output, session ){
     mod<-lm(x~1,as.data.frame(x))
     sm<-summary(mod)
     media<-predict(mod,interval = 'confidence')[1,]
-    attr(media,'names')<-c('media','2.5%','97.5%')
+    attr(media,'names')<-c('mean','2.5%','97.5%')
     round(media,3)
   })
   output$frazion_misind_sd<-renderPrint({
@@ -1647,7 +1647,7 @@ server <- function (input , output, session ){
   output$frazion_stimint_txt<-renderUI({
     validate(need(length(as.numeric(unlist(strsplit(input$frazion_misind," "))))>0 &
                     length(as.numeric(unlist(strsplit(input$frazion_risp," "))))==2^(input$frazion_k-input$frazion_p),''))
-    h4('Stima per intervallo')
+    h4('Confidence interval')
   })
   output$frazion_stimint<-renderPrint({
     validate(need(length(as.numeric(unlist(strsplit(input$frazion_misind," "))))>0 &
@@ -1721,13 +1721,13 @@ server <- function (input , output, session ){
     for(i in 1:input$frazion_k){
       var[i]<-paste("x",i,sep="")
     }
-    selectInput("frazion_mod_selvar", label = h5("Selezionare 2 variabili"), 
+    selectInput("frazion_mod_selvar", label = h5("Select 2 variables"), 
                 choices = var, 
                 multiple = TRUE,selected = var[1:2])
   })
   output$frazion_mod_fixvar<-renderUI({
     validate(need(input$frazion_k>2,''))
-    validate(need(length(input$frazion_mod_selvar)==2,'\n \n Selezionare 2 variabili!'))
+    validate(need(length(input$frazion_mod_selvar)==2,'\n \n Select 2 variables!'))
     req(input$frazion_mod_selvar)
     vl<-'0'
     if(input$frazion_k>3){
@@ -1750,9 +1750,9 @@ server <- function (input , output, session ){
       var_fix<-paste(var_fix,var[col_fix][i])
     }
     if(length(col_fix)==1){
-      txt<-paste('valore della  variabile',var[col_fix])
+      txt<-paste('value of variable',var[col_fix])
     }else{
-      txt<-paste('valori delle  variabili',var_fix, '(separati da spazio)')
+      txt<-paste('values of variables',var_fix, '(separated by space)')
     }
     textInput(inputId = "frazion_mod_fixvar",label = h5(txt),value = vl)
   })
@@ -1819,7 +1819,7 @@ server <- function (input , output, session ){
     
     if(is.na(Pred$P[1])==TRUE){
       plot(c(0, 1), c(0, 1), ann = F, bty = 'n', type = 'n', xaxt = 'n', yaxt = 'n')
-      text(0.5,0.5,'inserire il valore delle variabili costanti',cex = 1.6, col = "red")
+      text(0.5,0.5,'enter the value of constant variables',cex = 1.6, col = "red")
     }else{   
     lattice::contourplot(P~x*y,data=Pred,cuts=15,main='Response Surface: Contour Plot',cex.main=0.8,
                          xlab=var[col[1]],ylab=var[col[2]],col=colore[cl],
@@ -1829,7 +1829,7 @@ server <- function (input , output, session ){
   output$frazion_livellorisp_col<-renderUI({
     validate(need(length(as.numeric(unlist(strsplit(input$frazion_risp," "))))==2^(input$frazion_k-input$frazion_p),''))
     selectInput("frazion_livellorisp_col", label = h3(""), 
-                choices = list("blu" = 1, "verde" = 2, "rosso" = 3,"nero" = 4,"viola" = 5), 
+                choices = list("blu" = 1, "green" = 2, "red" = 3,"black" = 4,"purple" = 5), 
                 selected = 1,width="130px")
   })
   output$frazion_suprisp<-renderPlot({
@@ -1893,21 +1893,21 @@ server <- function (input , output, session ){
     
     if(is.na(Pred$P[1])==TRUE){
       plot(c(0, 1), c(0, 1), ann = F, bty = 'n', type = 'n', xaxt = 'n', yaxt = 'n')
-      text(0.5,0.5,'inserire il valore delle variabili costanti',cex = 1.6, col = "red")
+      text(0.5,0.5,'enter the value of constant variables',cex = 1.6, col = "red")
     }else{
       req(input$frazion_rp_z)
       req(input$frazion_rp_x)
     lattice::wireframe(P~x*y,data=Pred,drape=TRUE,col.regions = colorRampPalette(c("yellow","green","blue"))(256),
-                       at=seq(min(Pred$P),max(Pred$P),(max(Pred$P)-min(Pred$P))/256),
+                       at=seq(min(Pred$P),max(Pred$P),length.out=256),
                        screen=list(z=input$frazion_rp_z,x=-input$frazion_rp_x),
                        main='Response Surface',cex.main=0.8,xlab=var[col[1]],
                        ylab=var[col[2]],zlab=paste('Response'))} 
   })
   output$frazion_rp_z<-renderUI({
-    sliderInput('frazion_rp_z',label = 'Rotazione orizzontale',min = 0,max = 360,value = 30,step = 10)
+    sliderInput('frazion_rp_z',label = 'Horizontal rotation',min = 0,max = 360,value = 30,step = 10)
   })
   output$frazion_rp_x<-renderUI({
-    sliderInput('frazion_rp_x',label = 'Rotazione verticale',min = 0,max = 90,value = 60,step = 10)
+    sliderInput('frazion_rp_x',label = 'Vertical rotation',min = 0,max = 90,value = 60,step = 10)
   })
   
   # Plackett-Burman -----------------------------------------------------------------
@@ -1926,7 +1926,7 @@ server <- function (input , output, session ){
     n
   })
   output$pb_n<-renderUI({
-    selectInput("pb_n", label = "n° esperimenti",width = "25%", 
+    selectInput("pb_n", label = "n° experiments",width = "25%", 
                 choices = list(n_pb(),n_pb()+4), 
                 selected = 1)
   })
@@ -2008,20 +2008,20 @@ server <- function (input , output, session ){
     exp<-exp[potenze%in%as.integer(input$pb_n)]
     if(as.integer(input$pb_n)!=16){
       HTML("<hr><hr><hr><hr>
-           <h5>Il disegno di Plackett-Burman con", as.integer(input$pb_n), "esperimenti 
-           coincide con il disegno frazionario 2 <sup>",input$pb_k,"-",input$pb_k-exp,"</sup><sub><sub> III </sub></sub>.<h5>
-           <h5> Potresti prendere in considerazione l'ipotesi di aumentare il numero di esperimenti a",as.integer(input$pb_n)+4,".<h5>
-           <h5> Assicurati di prendere in considerazione la struttura alias per l'interpretazione! <h5>")
+           <h5>Plackett-Burman designs in ", as.integer(input$pb_n), "runs 
+           coincide with regular fractional factorials 2 <sup>",input$pb_k,"-",input$pb_k-exp,"</sup><sub><sub> III </sub></sub>.<h5>
+           <h5> You may want to consider increasing the number of runs ",as.integer(input$pb_n)+4,".<h5>
+           <h5> Make sure to take the alias structure into account for interpretation! <h5>")
     }else{
       req(input$dis16)
       if(input$dis16 ==1){
-        HTML("<h5>Il disegno di Plackett-Burman con", as.integer(input$pb_n), "esperimenti 
-             coincide con il disegno frazionario 2 <sup>",input$pb_k,"-",input$pb_k-exp,"</sup><sub><sub> III </sub></sub>.<h5>
-             <h5> Potresti prendere in considerazione l'ipotesi di aumentare il numero di esperimenti a",as.integer(input$pb_n)+4,".<h5>
-             <h5> Assicurati di prendere in considerazione la struttura alias per l'interpretazione! <h5>")
+        HTML("<h5>Plackett-Burman designs in", as.integer(input$pb_n), "runs 
+             coincide with regular fractional factorials 2 <sup>",input$pb_k,"-",input$pb_k-exp,"</sup><sub><sub> III </sub></sub>.<h5>
+             <h5> You may want to consider increasing the number of runs",as.integer(input$pb_n)+4,".<h5>
+             <h5> Make sure to take the alias structure into account for interpretation! <h5>")
       }else{
-        HTML("Disegno di Box e Tyssedal, che ha il vantaggio di creare alias di ogni interazione con diversi 
-             effetti principali, come per i Plackett-Burmann non frazionari.")
+        HTML("Box and Tyssedal Design, which has the advantage of creating aliases for each interaction 
+        with different ones main effects, such as for non-fractional Plackett-Burmanns.")
       }
     }
   })
@@ -2053,7 +2053,7 @@ server <- function (input , output, session ){
     if(!as.integer(input$pb_n)%in%potenze)round(A,2)
   })
   output$pb_risptext<-renderUI({
-    h4(paste('Risposte (',input$pb_n,', separate da spazio)',sep=''))
+    h4(paste('Responses (',input$pb_n,', separated by space)',sep=''))
   })
   output$pb_coeff<-renderPrint({
     validate(need(length(as.numeric(unlist(strsplit(input$pb_risp," "))))==input$pb_n,''))
@@ -2427,7 +2427,7 @@ server <- function (input , output, session ){
     for(i in 1:input$ccd_k){
       var[i]<-paste("x",i,sep="")
     }
-    selectInput("ccd_selvar", label = h5("Selezionare 2 variabili"), 
+    selectInput("ccd_selvar", label = h5("Select 2 variables"), 
                 choices = var, 
                 multiple = TRUE,selected = var[1:2])
   })
@@ -2437,7 +2437,7 @@ server <- function (input , output, session ){
   })
   output$ccd_fixvar<-renderUI({
     validate(need(input$ccd_k>2,''))
-    validate(need(length(input$ccd_selvar)==2,'\n \n Selezionare 2 variabili!'))
+    validate(need(length(input$ccd_selvar)==2,'\n \n Select 2 variables!'))
     req(input$ccd_selvar)
     vl<-'0'
     if(input$ccd_k>3){
@@ -2459,9 +2459,9 @@ server <- function (input , output, session ){
       var_fix<-paste(var_fix,var[col_fix][i])
     }
     if(length(col_fix)==1){
-      txt<-paste('valore della  variabile',var[col_fix])
+      txt<-paste('value of variable',var[col_fix])
     }else{
-      txt<-paste('valori delle  variabili',var_fix, '(separati da spazio)')
+      txt<-paste('values of variables',var_fix, '(separated by space)')
     }
     textInput(inputId = "ccd_fixvar",label = h5(txt),value = vl)
   })
@@ -2516,7 +2516,7 @@ server <- function (input , output, session ){
     
     if(nrow(Q)==0){
       plot(c(0, 1), c(0, 1), ann = F, bty = 'n', type = 'n', xaxt = 'n', yaxt = 'n')
-      text(0.5,0.5,'inserire il valore delle variabili costanti',cex = 1.6, col = "red")
+      text(0.5,0.5,'enter the value of the constant variables',cex = 1.6, col = "red")
     }else{
     Lev=data.frame(data,"L"=diag(Q))
     colnames(Lev)[col[1]]<-'x'
@@ -2577,7 +2577,7 @@ server <- function (input , output, session ){
     
     if(nrow(Q)==0){
       plot(c(0, 1), c(0, 1), ann = F, bty = 'n', type = 'n', xaxt = 'n', yaxt = 'n')
-      text(0.5,0.5,'inserire il valore delle variabili costanti',cex = 1.6, col = "red")
+      text(0.5,0.5,'enter the value of the constant variables',cex = 1.6, col = "red")
     }else{
     Lev=data.frame(data,"L"=diag(Q))
     colnames(Lev)[col[1]]<-'x'
@@ -2585,19 +2585,19 @@ server <- function (input , output, session ){
     req(input$ccd_lv_z)
     req(input$ccd_lv_x)
     lattice::wireframe(L~x*y,data=Lev,drape=TRUE,col.regions = colorRampPalette(c("yellow","green","blue"))(256),
-                       at=seq(min(Lev$L),max(Lev$L),(max(Lev$L)-min(Lev$L))/256),
+                       at=seq(min(Lev$L),max(Lev$L),length.out=256),
                        screen=list(z=input$ccd_lv_z,x=-input$ccd_lv_x),
                        main='Plot of Leverage',cex.main=0.8,xlab=var[col[1]],
                        ylab=var[col[2]],zlab=paste('Response'))}
   })
   output$ccd_lv_z<-renderUI({
-    sliderInput('ccd_lv_z',label = 'Rotazione orizzontale',min = 0,max = 360,value = 30,step = 10)
+    sliderInput('ccd_lv_z',label = 'Horizontal rotation',min = 0,max = 360,value = 30,step = 10)
   })
   output$ccd_lv_x<-renderUI({
-    sliderInput('ccd_lv_x',label = 'Rotazione verticale',min = 0,max = 90,value = 60,step = 10)
+    sliderInput('ccd_lv_x',label = 'Vertical rotation',min = 0,max = 90,value = 60,step = 10)
   })
   output$ccd_risptext<-renderUI({
-    h4(paste('Risposte (',nrow(dis_ccd()),', separate da spazio)',sep=''))
+    h4(paste('Responses (',nrow(dis_ccd()),', separated by space)',sep=''))
   })
   output$ccd_coeff<-renderPrint({
     validate(need(length(as.numeric(unlist(strsplit(input$ccd_risp," "))))==nrow(dis_ccd()),''))
@@ -2707,10 +2707,10 @@ server <- function (input , output, session ){
       nd<-rbind.data.frame(x)
       colnames(nd)<-var
       prev<-predict(object = mod,newdata=nd)
-      attr(prev,'names')<-c('previsione')
+      attr(prev,'names')<-c('prediction')
       prev
     }else{
-      cat(paste('inserire le',input$ccd_k,'coord. del punto'))
+      cat(paste('Enter the',input$ccd_k,'coord. of the point'))
     }
   })
   output$ccd_intprev<-renderPrint({
@@ -2762,7 +2762,7 @@ server <- function (input , output, session ){
     mod<-lm(x~1,as.data.frame(x))
     sm<-summary(mod)
     media<-predict(mod,interval = 'confidence')[1,]
-    attr(media,'names')<-c('media','2.5%','97.5%')
+    attr(media,'names')<-c('mean','2.5%','97.5%')
     round(media,3)
   })
   output$ccd_misind_sd<-renderPrint({
@@ -2783,9 +2783,10 @@ server <- function (input , output, session ){
     df
   })
   output$ccd_stimint_txt<-renderUI({
-    validate(need(length(as.numeric(unlist(strsplit(input$ccd_misind," "))))>0 &
-                    length(as.numeric(unlist(strsplit(input$ccd_risp," "))))==nrow(dis_ccd()),''))
-    h4('Stima per intervallo')
+    #validate(need(length(as.numeric(unlist(strsplit(input$ccd_misind," "))))>0 &
+                    #length(as.numeric(unlist(strsplit(input$ccd_risp," "))))==nrow(dis_ccd()),''))
+    validate(need(length(as.numeric(unlist(strsplit(input$ccd_risp," "))))==nrow(dis_ccd()),''))
+    h4('Confidence interval')
   })
   output$ccd_stimint<-renderPrint({
     validate(need(length(as.numeric(unlist(strsplit(input$ccd_risp," "))))==nrow(dis_ccd()),''))
@@ -2838,13 +2839,13 @@ server <- function (input , output, session ){
     for(i in 1:input$ccd_k){
       var[i]<-paste("x",i,sep="")
     }
-    selectInput("ccd_mod_selvar", label = h5("Selezionare 2 variabili"), 
+    selectInput("ccd_mod_selvar", label = h5("Select 2 variables"), 
                 choices = var, 
                 multiple = TRUE,selected = var[1:2])
   })
   output$ccd_mod_fixvar<-renderUI({
     validate(need(input$ccd_k>2,''))
-    validate(need(length(input$ccd_mod_selvar)==2,'\n \n Selezionare 2 variabili!'))
+    validate(need(length(input$ccd_mod_selvar)==2,'\n \n Select 2 variables!'))
     req(input$ccd_mod_selvar)
     vl<-'0'
     if(input$ccd_k>3){
@@ -2866,9 +2867,9 @@ server <- function (input , output, session ){
       var_fix<-paste(var_fix,var[col_fix][i])
     }
     if(length(col_fix)==1){
-      txt<-paste('valore della  variabile',var[col_fix])
+      txt<-paste('value of variable',var[col_fix])
     }else{
-      txt<-paste('valori delle  variabili',var_fix, '(separati da spazio)')
+      txt<-paste('values of variables',var_fix, '(separated by space)')
     }
     textInput(inputId = "ccd_mod_fixvar",label = h5(txt),value = vl)
   })
@@ -2930,7 +2931,7 @@ server <- function (input , output, session ){
     
     if(is.na(Pred$P[1])==TRUE){
       plot(c(0, 1), c(0, 1), ann = F, bty = 'n', type = 'n', xaxt = 'n', yaxt = 'n')
-      text(0.5,0.5,'inserire il valore delle variabili costanti',cex = 1.6, col = "red")
+      text(0.5,0.5,'enter the value of constant variables',cex = 1.6, col = "red")
     }else{
     lattice::contourplot(P~x*y,data=Pred,cuts=15,main='Response Surface: Contour Plot',cex.main=0.8,
                          xlab=var[col[1]],ylab=var[col[2]],col=colore[cl],
@@ -2940,7 +2941,7 @@ server <- function (input , output, session ){
   output$ccd_livellorisp_col<-renderUI({
     validate(need(length(as.numeric(unlist(strsplit(input$ccd_risp," "))))==nrow(dis_ccd()),''))
     selectInput("ccd_livellorisp_col", label = h3(""), 
-                choices = list("blu" = 1, "verde" = 2, "rosso" = 3,"nero" = 4,"viola" = 5), 
+                choices = list("blu" = 1, "green" = 2, "red" = 3,"black" = 4,"purple" = 5), 
                 selected = 1,width="130px")
   })
   output$ccd_suprisp<-renderPlot({
@@ -2996,32 +2997,32 @@ server <- function (input , output, session ){
     
     if(is.na(Pred$P[1])==TRUE){
       plot(c(0, 1), c(0, 1), ann = F, bty = 'n', type = 'n', xaxt = 'n', yaxt = 'n')
-      text(0.5,0.5,'inserire il valore delle variabili costanti',cex = 1.6, col = "red")
+      text(0.5,0.5,'enter the value of constant variables',cex = 1.6, col = "red")
     }else{
       req(input$ccd_rp_z)
       req(input$ccd_rp_x)
     lattice::wireframe(P~x*y,data=Pred,drape=TRUE,col.regions = colorRampPalette(c("yellow","green","blue"))(256),
-                       at=seq(min(Pred$P),max(Pred$P),(max(Pred$P)-min(Pred$P))/256),
+                       at=seq(min(Pred$P),max(Pred$P),length.out=256),
                        screen=list(z=input$ccd_rp_z,x=-input$ccd_rp_x),
                        main='Response Surface',cex.main=0.8,xlab=var[col[1]],
                        ylab=var[col[2]],zlab=paste('Response'))
     }
   })
   output$ccd_rp_z<-renderUI({
-    sliderInput('ccd_rp_z',label = 'Rotazione orizzontale',min = 0,max = 360,value = 30,step = 10)
+    sliderInput('ccd_rp_z',label = 'Horizontal rotation',min = 0,max = 360,value = 30,step = 10)
   })
   output$ccd_rp_x<-renderUI({
-    sliderInput('ccd_rp_x',label = 'Rotazione verticale',min = 0,max = 90,value = 60,step = 10)
+    sliderInput('ccd_rp_x',label = 'Vertical rotation',min = 0,max = 90,value = 60,step = 10)
   })
   
   # D-ottimale -----------------------------------------------------------------  
   output$d_opt_titolo<-renderUI({
-    HTML("D-ottimale" )
+    HTML("D-optimal Design" )
   })
   output$d_opt_importa<-renderUI({
     validate(need(input$d_opt_pti_cand==2, ' '))
-    radioButtons("d_opt_importa", label = "Importa matrice punti candidati:",
-                 choices = list("Incolla" = 1, "Excel" = 2), selected = 1,inline = TRUE)
+    radioButtons("d_opt_importa", label = "Upload candidate points matrix:",
+                 choices = list("Paste" = 1, "Excel" = 2), selected = 1,inline = TRUE)
   })
   output$d_opt_importa_incolla_spazio<-renderUI({
     validate(need(input$d_opt_pti_cand==2, ' '))
@@ -3031,7 +3032,7 @@ server <- function (input , output, session ){
   output$d_opt_importa_incolla<-renderUI({
     validate(need(input$d_opt_pti_cand==2, ' '))
     req(input$d_opt_importa==1)
-    actionButton("d_opt_incolla", label = "Incolla")
+    actionButton("d_opt_incolla", label = "Paste")
   })
   output$d_opt_importa_incolla_spazio1<-renderUI({
     validate(need(input$d_opt_pti_cand==2, ' '))
@@ -3047,220 +3048,220 @@ server <- function (input , output, session ){
   })
   output$d_opt_costruisci<-renderUI({
     validate(need(input$d_opt_pti_cand==1, ' '))
-    radioButtons("d_opt_costruisci", label = "Costruisci matrice assegnando:",
-                 choices = list("Livelli variabili " = 1, "Passo griglia" = 2), selected = 1,inline = TRUE)
+    radioButtons("d_opt_costruisci", label = "Build matrix by assigning:",
+                 choices = list("Levels of variables " = 1, "Grid step" = 2), selected = 1,inline = TRUE)
   })
   output$d_opt_nvar<-renderUI({
     validate(need(input$d_opt_pti_cand==1, ' '))
-    numericInput("d_opt_nvar", label = "n° fattori", value = 2,min = 2,max=50,width = "30%")
+    numericInput("d_opt_nvar", label = "n° factors", value = 2,min = 2,max=50,width = "30%")
   })
   output$d_opt_passo<-renderUI({
     validate(need(input$d_opt_pti_cand==1&input$d_opt_costruisci==2, ' '))
-    textInput(inputId = "d_opt_passo",label = "passo griglia",value = "0.1",width = "50%")
+    textInput(inputId = "d_opt_passo",label = "grid step",value = "0.1",width = "50%")
   })
   output$d_opt_lev_var1<-renderUI({
     validate(need(input$d_opt_nvar>=2& input$d_opt_costruisci==1&input$d_opt_pti_cand==1&input$d_opt_pti_cand==1,""))
-    textInput("d_opt_lev_var1", label = 'Livello delle variabili (separati da spazio)', value = "Livelli della variabile 1? (e.g. '-1 0 1')")
+    textInput("d_opt_lev_var1", label = 'Levels of variables (separated by space)', value = "Levels of variable 1? (e.g. '-1 0 1')")
   })
   output$d_opt_lev_var2<-renderUI({
     validate(need(input$d_opt_nvar>=2& input$d_opt_costruisci==1&input$d_opt_pti_cand==1&input$d_opt_pti_cand==1,""))
-    textInput("d_opt_lev_var2", label = ' ', value = "Livelli della variabile 2? (e.g. '-1 0 1')")
+    textInput("d_opt_lev_var2", label = ' ', value = "Levels of variable 2? (e.g. '-1 0 1')")
   })
   output$d_opt_lev_var3<-renderUI({
     validate(need(input$d_opt_nvar>=3& input$d_opt_costruisci==1&input$d_opt_pti_cand==1,""))
-    textInput("d_opt_lev_var3", label = ' ', value = "Livelli della variabile 3? (e.g. '-1 0 1')")
+    textInput("d_opt_lev_var3", label = ' ', value = "Levels of variable 3? (e.g. '-1 0 1')")
   })
   output$d_opt_lev_var4<-renderUI({
     validate(need(input$d_opt_nvar>=4& input$d_opt_costruisci==1&input$d_opt_pti_cand==1,""))
-    textInput("d_opt_lev_var4", label = ' ', value = "Livelli della variabile 4? (e.g. '-1 0 1')")
+    textInput("d_opt_lev_var4", label = ' ', value = "Levels of variable 4? (e.g. '-1 0 1')")
   })
   output$d_opt_lev_var5<-renderUI({
     validate(need(input$d_opt_nvar>=5& input$d_opt_costruisci==1&input$d_opt_pti_cand==1,""))
-    textInput("d_opt_lev_var5", label = ' ', value = "Livelli della variabile 5? (e.g. '-1 0 1')")
+    textInput("d_opt_lev_var5", label = ' ', value = "Levels of variable 5? (e.g. '-1 0 1')")
   })
   output$d_opt_lev_var6<-renderUI({
     validate(need(input$d_opt_nvar>=6& input$d_opt_costruisci==1&input$d_opt_pti_cand==1,""))
-    textInput("d_opt_lev_var6", label = ' ', value = "Livelli della variabile 6? (e.g. '-1 0 1')")
+    textInput("d_opt_lev_var6", label = ' ', value = "Levels of variable 6? (e.g. '-1 0 1')")
   })
   output$d_opt_lev_var7<-renderUI({
     validate(need(input$d_opt_nvar>=7& input$d_opt_costruisci==1&input$d_opt_pti_cand==1,""))
-    textInput("d_opt_lev_var7", label = ' ', value = "Livelli della variabile 7? (e.g. '-1 0 1')")
+    textInput("d_opt_lev_var7", label = ' ', value = "Levels of variable 7? (e.g. '-1 0 1')")
   })
   output$d_opt_lev_var8<-renderUI({
     validate(need(input$d_opt_nvar>=8& input$d_opt_costruisci==1&input$d_opt_pti_cand==1,""))
-    textInput("d_opt_lev_var8", label = ' ', value = "Livelli della variabile 8? (e.g. '-1 0 1')")
+    textInput("d_opt_lev_var8", label = ' ', value = "Levels of variable 8? (e.g. '-1 0 1')")
   })
   output$d_opt_lev_var9<-renderUI({
     validate(need(input$d_opt_nvar>=9& input$d_opt_costruisci==1&input$d_opt_pti_cand==1,""))
-    textInput("d_opt_lev_var9", label = ' ', value = "Livelli della variabile 9? (e.g. '-1 0 1')")
+    textInput("d_opt_lev_var9", label = ' ', value = "Levels of variable 9? (e.g. '-1 0 1')")
   })
   output$d_opt_lev_var10<-renderUI({
     validate(need(input$d_opt_nvar>=10& input$d_opt_costruisci==1&input$d_opt_pti_cand==1,""))
-    textInput("d_opt_lev_var10", label = ' ', value = "Livelli della variabile 10? (e.g. 10,15,20')")
+    textInput("d_opt_lev_var10", label = ' ', value = "Levels of variable 10? (e.g. 10,15,20')")
   })
   output$d_opt_lev_var11<-renderUI({
     validate(need(input$d_opt_nvar>=11& input$d_opt_costruisci==1&input$d_opt_pti_cand==1,""))
-    textInput("d_opt_lev_var11", label = ' ', value = "Livelli della variabile 11? (e.g. '-1 0 1')")
+    textInput("d_opt_lev_var11", label = ' ', value = "Levels of variable 11? (e.g. '-1 0 1')")
   })
   output$d_opt_lev_var12<-renderUI({
     validate(need(input$d_opt_nvar>=12& input$d_opt_costruisci==1&input$d_opt_pti_cand==1,""))
-    textInput("d_opt_lev_var12", label = ' ', value = "Livelli della variabile 12? (e.g. '-1 0 1')")
+    textInput("d_opt_lev_var12", label = ' ', value = "Levels of variable 12? (e.g. '-1 0 1')")
   })
   output$d_opt_lev_var13<-renderUI({
     validate(need(input$d_opt_nvar>=13& input$d_opt_costruisci==1&input$d_opt_pti_cand==1,""))
-    textInput("d_opt_lev_var13", label = ' ', value = "Livelli della variabile 13? (e.g. '-1 0 1')")
+    textInput("d_opt_lev_var13", label = ' ', value = "Levels of variable 13? (e.g. '-1 0 1')")
   })
   output$d_opt_lev_var14<-renderUI({
     validate(need(input$d_opt_nvar>=14& input$d_opt_costruisci==1&input$d_opt_pti_cand==1,""))
-    textInput("d_opt_lev_var14", label = ' ', value = "Livelli della variabile 14? (e.g. '-1 0 1')")
+    textInput("d_opt_lev_var14", label = ' ', value = "Levels of variable 14? (e.g. '-1 0 1')")
   })
   output$d_opt_lev_var15<-renderUI({
     validate(need(input$d_opt_nvar>=15& input$d_opt_costruisci==1&input$d_opt_pti_cand==1,""))
-    textInput("d_opt_lev_var15", label = ' ', value = "Livelli della variabile 15? (e.g. '-1 0 1')")
+    textInput("d_opt_lev_var15", label = ' ', value = "Levels of variable 15? (e.g. '-1 0 1')")
   })
   output$d_opt_lev_var16<-renderUI({
     validate(need(input$d_opt_nvar>=16& input$d_opt_costruisci==1&input$d_opt_pti_cand==1,""))
-    textInput("d_opt_lev_var16", label = ' ', value = "Livelli della variabile 16? (e.g. '-1 0 1')")
+    textInput("d_opt_lev_var16", label = ' ', value = "Levels of variable 16? (e.g. '-1 0 1')")
   })
   output$d_opt_lev_var17<-renderUI({
     validate(need(input$d_opt_nvar>=17& input$d_opt_costruisci==1&input$d_opt_pti_cand==1,""))
-    textInput("d_opt_lev_var17", label = ' ', value = "Livelli della variabile 17? (e.g. '-1 0 1')")
+    textInput("d_opt_lev_var17", label = ' ', value = "Levels of variable 17? (e.g. '-1 0 1')")
   })
   output$d_opt_lev_var18<-renderUI({
     validate(need(input$d_opt_nvar>=18& input$d_opt_costruisci==1&input$d_opt_pti_cand==1,""))
-    textInput("d_opt_lev_var18", label = ' ', value = "Livelli della variabile 18? (e.g. '-1 0 1')")
+    textInput("d_opt_lev_var18", label = ' ', value = "Levels of variable 18? (e.g. '-1 0 1')")
   })
   output$d_opt_lev_var19<-renderUI({
     validate(need(input$d_opt_nvar>=19& input$d_opt_costruisci==1&input$d_opt_pti_cand==1,""))
-    textInput("d_opt_lev_var19", label = ' ', value = "Livelli della variabile 19? (e.g. '-1 0 1')")
+    textInput("d_opt_lev_var19", label = ' ', value = "Levels of variable 19? (e.g. '-1 0 1')")
   })
   output$d_opt_lev_var10<-renderUI({
     validate(need(input$d_opt_nvar>=20& input$d_opt_costruisci==1&input$d_opt_pti_cand==1,""))
-    textInput("d_opt_lev_var20", label = ' ', value = "Livelli della variabile 20? (e.g. '-1 0 1')")
+    textInput("d_opt_lev_var20", label = ' ', value = "Levels of variable 20? (e.g. '-1 0 1')")
   })
   output$d_opt_lev_var11<-renderUI({
     validate(need(input$d_opt_nvar>=21& input$d_opt_costruisci==1&input$d_opt_pti_cand==1,""))
-    textInput("d_opt_lev_var21", label = ' ', value = "Livelli della variabile 21? (e.g. '-1 0 1')")
+    textInput("d_opt_lev_var21", label = ' ', value = "Levels of variable 21? (e.g. '-1 0 1')")
   })
   output$d_opt_lev_var12<-renderUI({
     validate(need(input$d_opt_nvar>=22& input$d_opt_costruisci==1&input$d_opt_pti_cand==1,""))
-    textInput("d_opt_lev_var22", label = ' ', value = "Livelli della variabile 22? (e.g. '-1 0 1')")
+    textInput("d_opt_lev_var22", label = ' ', value = "Levels of variable 22? (e.g. '-1 0 1')")
   })
   output$d_opt_lev_var13<-renderUI({
     validate(need(input$d_opt_nvar>=23& input$d_opt_costruisci==1&input$d_opt_pti_cand==1,""))
-    textInput("d_opt_lev_var23", label = ' ', value = "Livelli della variabile 23? (e.g. '-1 0 1')")
+    textInput("d_opt_lev_var23", label = ' ', value = "Levels of variable 23? (e.g. '-1 0 1')")
   })
   output$d_opt_lev_var14<-renderUI({
     validate(need(input$d_opt_nvar>=24& input$d_opt_costruisci==1&input$d_opt_pti_cand==1,""))
-    textInput("d_opt_lev_var24", label = ' ', value = "Livelli della variabile 24? (e.g. '-1 0 1')")
+    textInput("d_opt_lev_var24", label = ' ', value = "Levels of variable 24? (e.g. '-1 0 1')")
   })
   output$d_opt_lev_var15<-renderUI({
     validate(need(input$d_opt_nvar>=25& input$d_opt_costruisci==1&input$d_opt_pti_cand==1,""))
-    textInput("d_opt_lev_var25", label = ' ', value = "Livelli della variabile 25? (e.g. '-1 0 1')")
+    textInput("d_opt_lev_var25", label = ' ', value = "Levels of variable 25? (e.g. '-1 0 1')")
   })
   output$d_opt_lev_var16<-renderUI({
     validate(need(input$d_opt_nvar>=26& input$d_opt_costruisci==1&input$d_opt_pti_cand==1,""))
-    textInput("d_opt_lev_var26", label = ' ', value = "Livelli della variabile 26? (e.g. '-1 0 1')")
+    textInput("d_opt_lev_var26", label = ' ', value = "Levels of variable 26? (e.g. '-1 0 1')")
   })
   output$d_opt_lev_var17<-renderUI({
     validate(need(input$d_opt_nvar>=27& input$d_opt_costruisci==1&input$d_opt_pti_cand==1,""))
-    textInput("d_opt_lev_var27", label = ' ', value = "Livelli della variabile 27? (e.g. '-1 0 1')")
+    textInput("d_opt_lev_var27", label = ' ', value = "Levels of variable 27? (e.g. '-1 0 1')")
   })
   output$d_opt_lev_var18<-renderUI({
     validate(need(input$d_opt_nvar>=28& input$d_opt_costruisci==1&input$d_opt_pti_cand==1,""))
-    textInput("d_opt_lev_var28", label = ' ', value = "Livelli della variabile 28? (e.g. '-1 0 1')")
+    textInput("d_opt_lev_var28", label = ' ', value = "Levels of variable 28? (e.g. '-1 0 1')")
   })
   output$d_opt_lev_var19<-renderUI({
     validate(need(input$d_opt_nvar>=29& input$d_opt_costruisci==1&input$d_opt_pti_cand==1,""))
-    textInput("d_opt_lev_var29", label = ' ', value = "Livelli della variabile 29? (e.g. '-1 0 1')")
+    textInput("d_opt_lev_var29", label = ' ', value = "Levels of variable 29? (e.g. '-1 0 1')")
   })
   output$d_opt_lev_var10<-renderUI({
     validate(need(input$d_opt_nvar>=30& input$d_opt_costruisci==1&input$d_opt_pti_cand==1,""))
-    textInput("d_opt_lev_var10", label = ' ', value = "Livelli della variabile 30? (e.g. '-1 0 1')")
+    textInput("d_opt_lev_var10", label = ' ', value = "Levels of variable 30? (e.g. '-1 0 1')")
   })
   output$d_opt_lev_var11<-renderUI({
     validate(need(input$d_opt_nvar>=31& input$d_opt_costruisci==1&input$d_opt_pti_cand==1,""))
-    textInput("d_opt_lev_var11", label = ' ', value = "Livelli della variabile 31? (e.g. '-1 0 1')")
+    textInput("d_opt_lev_var11", label = ' ', value = "Levels of variable 31? (e.g. '-1 0 1')")
   })
   output$d_opt_lev_var12<-renderUI({
     validate(need(input$d_opt_nvar>=32& input$d_opt_costruisci==1&input$d_opt_pti_cand==1,""))
-    textInput("d_opt_lev_var12", label = ' ', value = "Livelli della variabile 32? (e.g. '-1 0 1')")
+    textInput("d_opt_lev_var12", label = ' ', value = "Levels of variable 32? (e.g. '-1 0 1')")
   })
   output$d_opt_lev_var13<-renderUI({
     validate(need(input$d_opt_nvar>=33& input$d_opt_costruisci==1&input$d_opt_pti_cand==1,""))
-    textInput("d_opt_lev_var13", label = ' ', value = "Livelli della variabile 33? (e.g. '-1 0 1')")
+    textInput("d_opt_lev_var13", label = ' ', value = "Levels of variable 33? (e.g. '-1 0 1')")
   })
   output$d_opt_lev_var14<-renderUI({
     validate(need(input$d_opt_nvar>=34& input$d_opt_costruisci==1&input$d_opt_pti_cand==1,""))
-    textInput("d_opt_lev_var14", label = ' ', value = "Livelli della variabile 34? (e.g. '-1 0 1')")
+    textInput("d_opt_lev_var14", label = ' ', value = "Levels of variable 34? (e.g. '-1 0 1')")
   })
   output$d_opt_lev_var15<-renderUI({
     validate(need(input$d_opt_nvar>=35& input$d_opt_costruisci==1&input$d_opt_pti_cand==1,""))
-    textInput("d_opt_lev_var15", label = ' ', value = "Livelli della variabile 35? (e.g. '-1 0 1')")
+    textInput("d_opt_lev_var15", label = ' ', value = "Levels of variable 35? (e.g. '-1 0 1')")
   })
   output$d_opt_lev_var16<-renderUI({
     validate(need(input$d_opt_nvar>=36& input$d_opt_costruisci==1&input$d_opt_pti_cand==1,""))
-    textInput("d_opt_lev_var16", label = ' ', value = "Livelli della variabile 36? (e.g. '-1 0 1')")
+    textInput("d_opt_lev_var16", label = ' ', value = "Levels of variable 36? (e.g. '-1 0 1')")
   })
   output$d_opt_lev_var17<-renderUI({
     validate(need(input$d_opt_nvar>=37& input$d_opt_costruisci==1&input$d_opt_pti_cand==1,""))
-    textInput("d_opt_lev_var17", label = ' ', value = "Livelli della variabile 37? (e.g. '-1 0 1')")
+    textInput("d_opt_lev_var17", label = ' ', value = "Levels of variable 37? (e.g. '-1 0 1')")
   })
   output$d_opt_lev_var18<-renderUI({
     validate(need(input$d_opt_nvar>=38& input$d_opt_costruisci==1&input$d_opt_pti_cand==1,""))
-    textInput("d_opt_lev_var18", label = ' ', value = "Livelli della variabile 38? (e.g. '-1 0 1')")
+    textInput("d_opt_lev_var18", label = ' ', value = "Levels of variable 38? (e.g. '-1 0 1')")
   })
   output$d_opt_lev_var19<-renderUI({
     validate(need(input$d_opt_nvar>=39& input$d_opt_costruisci==1&input$d_opt_pti_cand==1,""))
-    textInput("d_opt_lev_var19", label = ' ', value = "Livelli della variabile 39? (e.g. '-1 0 1')")
+    textInput("d_opt_lev_var19", label = ' ', value = "Levels of variable 39? (e.g. '-1 0 1')")
   })
   output$d_opt_lev_var10<-renderUI({
     validate(need(input$d_opt_nvar>=40& input$d_opt_costruisci==1&input$d_opt_pti_cand==1,""))
-    textInput("d_opt_lev_var40", label = ' ', value = "Livelli della variabile 40? (e.g. '-1 0 1')")
+    textInput("d_opt_lev_var40", label = ' ', value = "Levels of variable 40? (e.g. '-1 0 1')")
   })
   output$d_opt_lev_var11<-renderUI({
     validate(need(input$d_opt_nvar>=41& input$d_opt_costruisci==1&input$d_opt_pti_cand==1,""))
-    textInput("d_opt_lev_var41", label = ' ', value = "Livelli della variabile 41? (e.g. '-1 0 1')")
+    textInput("d_opt_lev_var41", label = ' ', value = "Levels of variable 41? (e.g. '-1 0 1')")
   })
   output$d_opt_lev_var12<-renderUI({
     validate(need(input$d_opt_nvar>=42& input$d_opt_costruisci==1&input$d_opt_pti_cand==1,""))
-    textInput("d_opt_lev_var42", label = ' ', value = "Livelli della variabile 42? (e.g. '-1 0 1')")
+    textInput("d_opt_lev_var42", label = ' ', value = "Levels of variable 42? (e.g. '-1 0 1')")
   })
   output$d_opt_lev_var13<-renderUI({
     validate(need(input$d_opt_nvar>=43& input$d_opt_costruisci==1&input$d_opt_pti_cand==1,""))
-    textInput("d_opt_lev_var43", label = ' ', value = "Livelli della variabile 43? (e.g. '-1 0 1')")
+    textInput("d_opt_lev_var43", label = ' ', value = "Levels of variable 43? (e.g. '-1 0 1')")
   })
   output$d_opt_lev_var14<-renderUI({
     validate(need(input$d_opt_nvar>=44& input$d_opt_costruisci==1&input$d_opt_pti_cand==1,""))
-    textInput("d_opt_lev_var44", label = ' ', value = "Livelli della variabile 44? (e.g. '-1 0 1')")
+    textInput("d_opt_lev_var44", label = ' ', value = "Levels of variable 44? (e.g. '-1 0 1')")
   })
   output$d_opt_lev_var15<-renderUI({
     validate(need(input$d_opt_nvar>=45& input$d_opt_costruisci==1&input$d_opt_pti_cand==1,""))
-    textInput("d_opt_lev_var45", label = ' ', value = "Livelli della variabile 45? (e.g. '-1 0 1')")
+    textInput("d_opt_lev_var45", label = ' ', value = "Levels of variable 45? (e.g. '-1 0 1')")
   })
   output$d_opt_lev_var16<-renderUI({
     validate(need(input$d_opt_nvar>=46& input$d_opt_costruisci==1&input$d_opt_pti_cand==1,""))
-    textInput("d_opt_lev_var46", label = ' ', value = "Livelli della variabile 46? (e.g. '-1 0 1')")
+    textInput("d_opt_lev_var46", label = ' ', value = "Levels of variable 46? (e.g. '-1 0 1')")
   })
   output$d_opt_lev_var17<-renderUI({
     validate(need(input$d_opt_nvar>=47& input$d_opt_costruisci==1&input$d_opt_pti_cand==1,""))
-    textInput("d_opt_lev_var47", label = ' ', value = "Livelli della variabile 47? (e.g. '-1 0 1')")
+    textInput("d_opt_lev_var47", label = ' ', value = "Levels of variable 47? (e.g. '-1 0 1')")
   })
   output$d_opt_lev_var18<-renderUI({
     validate(need(input$d_opt_nvar>=48& input$d_opt_costruisci==1&input$d_opt_pti_cand==1,""))
-    textInput("d_opt_lev_var48", label = ' ', value = "Livelli della variabile 48? (e.g. '-1 0 1')")
+    textInput("d_opt_lev_var48", label = ' ', value = "Levels of variable 48? (e.g. '-1 0 1')")
   })
   output$d_opt_lev_var19<-renderUI({
     validate(need(input$d_opt_nvar>=49& input$d_opt_costruisci==1&input$d_opt_pti_cand==1,""))
-    textInput("d_opt_lev_var49", label = ' ', value = "Livelli della variabile 49? (e.g. '-1 0 1')")
+    textInput("d_opt_lev_var49", label = ' ', value = "Levels of variable 49? (e.g. '-1 0 1')")
   })
   output$d_opt_lev_var50<-renderUI({
     validate(need(input$d_opt_nvar>=50& input$d_opt_costruisci==1&input$d_opt_pti_cand==1&input$d_opt_pti_cand==1,""))
-    textInput("d_opt_lev_var50", label = ' ', value = "Livelli della variabile 50? (e.g. '-1 0 1')")
+    textInput("d_opt_lev_var50", label = ' ', value = "Levels of variable 50? (e.g. '-1 0 1')")
   })
   d_opt_cp_paste<-eventReactive(input$d_opt_incolla,{
     df<-tryCatch(read.DIF(file = "clipboard",header = TRUE,transpose = TRUE),
-                 error = function(e) "Selezionare un dataset!")
+                 error = function(e) "Select a dataset!")
     df
   })
   d_opt_cp_xls<-reactive({
@@ -3272,24 +3273,25 @@ server <- function (input , output, session ){
   })
   output$d_opt_vincoli<-renderUI({
     validate(need(input$d_opt_pti_cand==1,' '))
-    checkboxInput("d_opt_vincoli", label = "Vincoli", value = FALSE)
+    checkboxInput("d_opt_vincoli", label = "Constraints", value = FALSE)
   })
   output$d_opt_vincoliinf_txt<-renderUI({
     validate(need(input$d_opt_vincoli==TRUE,' '))
-    textInput(inputId = "d_opt_vincoliinf_txt",label = h5("Inserire i vincoli inferiori separati da '&'"))
+    textInput(inputId = "d_opt_vincoliinf_txt",label = h5("Enter the lower constraints separated by '&'"))
   })
   output$d_opt_vincolisup_txt<-renderUI({
     validate(need(input$d_opt_vincoli==TRUE,' '))
-    textInput(inputId = "d_opt_vincolisup_txt",label = h5("Inserire i vincoli superiori separati da '&'"))
+    textInput(inputId = "d_opt_vincolisup_txt",label = h5("Enter the upper constraints separated by '&'"))
   })
   d_opt_cp_griglia<-reactive({
     req(input$d_opt_nvar)
     req(input$d_opt_passo)
     n<-input$d_opt_nvar
     delta<-as.numeric(unlist(strsplit(input$d_opt_passo," ")))
+    n_dec<-nchar(strsplit(as.character(delta), "\\.")[[1]][2])
     s = seq(-1, 1, delta)
     l<-length(s)
-    validate(need(l^n<=10000,"Aumentare il passo della griglia!\n "),
+    validate(need(l^n<=10000,"Increase the grid step!\n "),
              errorClass = "myClass") 
     x = data.frame(x1 = s)
     df = data.frame((NULL))
@@ -3306,10 +3308,10 @@ server <- function (input , output, session ){
         if(input$d_opt_vincoliinf_txt!=""){
           txt_inf<-input$d_opt_vincoliinf_txt
           for ( i in 1:n){
-            txt_inf<-gsub(var[i],paste0('df$',var[i]),txt_inf)
+            txt_inf<-gsub(var[i],paste0('round(df$',var[i],',',n_dec,')'),txt_inf)
           }
           cond_i<-tryCatch(eval(parse(text = txt_inf)),
-                           error = function(e) "Scrivere correttamente le condizioni!")
+                           error = function(e) "Write the conditions correctly!")
           if(is.character(cond_i)|is.function(cond_i)){
             df<-matrix(c('','',''),nrow = 1,ncol = n)
             #colnames(cp)<-c('x1','x2','x3')
@@ -3322,10 +3324,10 @@ server <- function (input , output, session ){
         if(input$d_opt_vincolisup_txt!=""){
           txt_sup<-input$d_opt_vincolisup_txt
           for ( i in 1:n){
-            txt_sup<-gsub(var[i],paste0('df$',var[i]),txt_sup)
+            txt_sup<-gsub(var[i],paste0('round(df$',var[i],',',n_dec,')'),txt_sup)
           }
           cond_s<-tryCatch(eval(parse(text = txt_sup)),
-                           error = function(e) "Scrivere correttamente le condizioni!")
+                           error = function(e) "Write the conditions correctly!")
           
           if(is.character(cond_s)|is.function(cond_s)){
             df<-matrix(c('','',''),nrow = 1,ncol = n)
@@ -3344,7 +3346,7 @@ server <- function (input , output, session ){
     nl<-rep(1,n)
     for(i in 1:n){
       lev<-paste0("input$d_opt_lev_var",i)
-      req(!eval(parse(text=lev))==paste0('Livelli della variabile ',i,"? (e.g. '-1 0 1')"))
+      req(!eval(parse(text=lev))==paste0('Levels of variable ',i,"? (e.g. '-1 0 1')"))
       if(eval(parse(text=lev))!='')lv[[i]]<-as.numeric(unlist(strsplit(eval(parse(text=lev))," ")))
       if(length(unlist(strsplit(eval(parse(text=lev))," ")))==0)nl[i]<-0
     }
@@ -3366,7 +3368,7 @@ server <- function (input , output, session ){
             txt_inf<-gsub(var[i],paste0('cp$',var[i]),txt_inf)
           }
           cond_i<-tryCatch(eval(parse(text = txt_inf)),
-                           error = function(e) "Scrivere correttamente le condizioni!")
+                           error = function(e) "Write the conditions correctly!")
           if(is.character(cond_i)|is.function(cond_i)){
             cp<-matrix(c('','',''),nrow = 1,ncol = n)
             #colnames(cp)<-c('x1','x2','x3')
@@ -3382,7 +3384,7 @@ server <- function (input , output, session ){
             txt_sup<-gsub(var[i],paste0('cp$',var[i]),txt_sup)
           }
           cond_s<-tryCatch(eval(parse(text = txt_sup)),
-                           error = function(e) "Scrivere correttamente le condizioni!")
+                           error = function(e) "Write the conditions correctly!")
           if(is.character(cond_s)|is.function(cond_s)){
             cp<-matrix(c('','',''),nrow = 1,ncol = n)
           }else{
@@ -3430,13 +3432,13 @@ server <- function (input , output, session ){
   ##################
   output$d_opt_cod<-renderUI({
     validate(need(input$d_opt_pti_cand==1 & input$d_opt_costruisci==1,''))
-    checkboxInput("d_opt_cod", label = "Codifica variabili", value = FALSE)
+    checkboxInput("d_opt_cod", label = "Variables coding", value = FALSE)
   })
   
   output$d_opt_cp_cod_title<-renderUI({
     validate(need(input$d_opt_pti_cand==1 & input$d_opt_costruisci==1,''))
     validate(need(input$d_opt_cod==TRUE,''))
-    HTML('<h4>Matrice punti candidati codificati<h4>')
+    HTML('<h4>Candidate points matrix<h4>')
   })
   
   d_opt_cp_cod<-reactive({
@@ -3470,7 +3472,7 @@ server <- function (input , output, session ){
     #errorClass = "myClass") 
     req(input$d_opt_cp_cod_ha)
     df<-tryCatch(d_opt_cp_cod(),
-                 error = function(e) "Selezionare un dataset!")
+                 error = function(e) "Select a dataset!")
     validate(need(!is.character(df),''))
     if(input$d_opt_cp_cod_ha==1)df<-head(df)
     df
@@ -3550,7 +3552,7 @@ server <- function (input , output, session ){
   })
   output$d_opt_mod_variabx<-renderUI({
     validate(need(is.data.frame(d_opt_cp()),""))
-    selectizeInput(inputId = "d_opt_mod_variabx",label="Termini modello (x)",
+    selectizeInput(inputId = "d_opt_mod_variabx",label="Model terms (x)",
                    #div("Termini modello (x)",style="font-weight: 400"),
                    choices = d_opt_var_sel(),
                    selected=d_opt_var_sel(),
@@ -3590,7 +3592,7 @@ server <- function (input , output, session ){
     x<-model.matrix(formula(d_opt_formula()),d_opt_cp())
     r<-nrow(x)
     co<-ncol(x)
-    numericInput(inputId = 'd_opt_Lnumexp',label = 'Numero minimo di esperimenti',value = co,min = co,width = "30%")
+    numericInput(inputId = 'd_opt_Lnumexp',label = 'Minimum number of experiments',value = co,min = co,width = "30%")
   })
   output$d_opt_Unumexp<-renderUI({
     req(input$d_opt_Lnumexp)
@@ -3598,7 +3600,7 @@ server <- function (input , output, session ){
     x<-model.matrix(formula(d_opt_formula()),d_opt_cp())
     r<-nrow(x)
     co<-input$d_opt_Lnumexp
-    numericInput(inputId = 'd_opt_Unumexp',label = 'Numero massimo di esperimenti',value = co,max=r,min=co,width = "30%")
+    numericInput(inputId = 'd_opt_Unumexp',label = 'Maximum number of experiments',value = co,max=r,min=co,width = "30%")
   })
   d_opt_federov<-eventReactive(input$d_opt_calc,{
     req(input$d_opt_Unumexp)
@@ -3642,20 +3644,20 @@ server <- function (input , output, session ){
   })
   output$d_opt_table<-renderTable(digits = 4,{
     validate(need(ncol(d_opt_federov()$X)>0 & sum(is.na(d_opt_federov()$X))==0 ,
-                  'Trovata matrice con rango insufficiente \nRiprovare!'))
+                  'Found matrix with insufficient rank \nTry again!'))
     d_opt_federov()$X
   })
   msg1<-eventReactive(input$d_opt_calc,{
     df<-tryCatch(d_opt_cp() ,
                  error = function(e) "1")
-    validate(need(df!='1','Costruire la matrice dei punti candidati!'),errorClass = "myClass")
+    validate(need(df!='1','Build the matrix of candidate points!'),errorClass = "myClass")
   })
   output$d_opt_msg1<-renderTable({
     msg1()
   })
   output$d_opt_graf_D<-renderPlot({
     validate(need(ncol(d_opt_federov()$X)>0 & sum(is.na(d_opt_federov()$X))==0,''))
-    plot(d_opt_federov()$X[,1],d_opt_federov()$X[,2],col='red',type='b',xlab='Numero di esperimenti',
+    plot(d_opt_federov()$X[,1],d_opt_federov()$X[,2],col='red',type='b',xlab='Number of experiments',
          ylab='D',xaxt="n")
     axis(1, at=d_opt_federov()$X[,1])
     grid()
@@ -3663,7 +3665,7 @@ server <- function (input , output, session ){
   output$d_opt_graf_Vif<-renderPlot({
     validate(need(ncol(d_opt_federov()$X)>0 & sum(is.na(d_opt_federov()$X))==0,''))
     maxinfl<-max(d_opt_federov()$X[,3])
-    plot(d_opt_federov()$X[,1],d_opt_federov()$X[,3],col='red',type='b',xlab='Numero di esperimenti',
+    plot(d_opt_federov()$X[,1],d_opt_federov()$X[,3],col='red',type='b',xlab='Number of experiments',
          ylim=c(1,max(maxinfl,8)),
          ylab='Vif.max',xaxt="n");grid();axis(1, at=d_opt_federov()$X[,1])
     abline(h = 4, lty = 2, col = "green4")
@@ -3677,7 +3679,7 @@ server <- function (input , output, session ){
     req(input$d_opt_Lnumexp)
     m<-input$d_opt_Lnumexp
     M<-input$d_opt_Unumexp
-    numericInput(inputId = 'd_opt_numexp',label = 'Numero di esperimenti',value = m,min = m,max=M,width = "30%")
+    numericInput(inputId = 'd_opt_numexp',label = 'Number of experiments',value = m,min = m,max=M,width = "30%")
   })
   output$d_opt_dis_opt<-renderTable({
     req(input$d_opt_numexp)
@@ -3716,7 +3718,7 @@ server <- function (input , output, session ){
   })
   output$d_opt_ag_importa_incolla<-renderUI({
     req(input$d_opt_ag_importa==1)
-    actionButton("d_opt_ag_incolla", label = "Incolla")
+    actionButton("d_opt_ag_incolla", label = "Paste")
   })
   output$d_opt_ag_importa_incolla_spazio1<-renderUI({
     req(input$d_opt_ag_importa==1)
@@ -3730,7 +3732,7 @@ server <- function (input , output, session ){
   })
   d_opt_ag_dis_paste<-eventReactive(input$d_opt_ag_incolla,{
     df<-tryCatch(read.DIF(file = "clipboard",header = TRUE,transpose = TRUE),
-                 error = function(e) "Selezionare un dataset!")
+                 error = function(e) "Select a dataset!")
     df
   })
   d_opt_ag_dis_xls<-reactive({
@@ -3745,7 +3747,7 @@ server <- function (input , output, session ){
     df
   })
   output$d_opt_dis_tbl<-renderTable({
-    validate(need(is.data.frame(d_opt_ag_dis()),"Selezionare un dataset!\n "),
+    validate(need(is.data.frame(d_opt_ag_dis()),"Select a dataset!\n "),
              errorClass = "myClass") 
     d_opt_ag_dis()
   })
@@ -3794,7 +3796,7 @@ server <- function (input , output, session ){
   })
   output$d_opt_ag_mod_variabx<-renderUI({
     validate(need(is.data.frame(d_opt_ag_dis()) & is.data.frame(d_opt_cp()),""))
-    selectizeInput(inputId = "d_opt_ag_mod_variabx",label="Termini modello (x)",
+    selectizeInput(inputId = "d_opt_ag_mod_variabx",label="Model terms (x)",
                    #div("Termini modello (x)",style="font-weight: 400"),
                    choices = d_opt_ag_var_sel(),
                    selected=d_opt_ag_var_sel(),
@@ -3834,16 +3836,17 @@ server <- function (input , output, session ){
     x<-model.matrix(formula(d_opt_ag_formula()),d_opt_ag_dis())
     r<-nrow(x)
     co<-max(ncol(x),r)+1
-    numericInput(inputId = 'd_opt_ag_Lnumexp',label = 'Numero minimo di esperimenti',value = co,min = co,width = "30%")
+    numericInput(inputId = 'd_opt_ag_Lnumexp',label = 'Minimum number of experiments',value = co,min = co,width = "30%")
   })
   output$d_opt_ag_Unumexp<-renderUI({
     req(input$d_opt_ag_Lnumexp)
     x<-model.matrix(formula(d_opt_ag_formula()),d_opt_ag_dis())
     r<-nrow(x)+nrow(d_opt_cp())
     co<-input$d_opt_ag_Lnumexp
-    numericInput(inputId = 'd_opt_ag_Unumexp',label = 'Numero massimo di esperimenti',value = co,max=r,min=co,width = "30%")
+    numericInput(inputId = 'd_opt_ag_Unumexp',label = 'Maximum number of experiments',value = co,max=r,min=co,width = "30%")
   })
   d_opt_ag_federov<-eventReactive(input$d_opt_ag_calc,{
+    set.seed(Sys.time())
     req(input$d_opt_ag_Unumexp)
     req(input$d_opt_ag_Lnumexp)
     fmrl<-formula(d_opt_ag_formula())
@@ -3887,7 +3890,7 @@ server <- function (input , output, session ){
   d_opt_ag_msg1<-eventReactive(input$d_opt_ag_calc,{
     df<-tryCatch(d_opt_ag_dis() ,
                  error = function(e) "errore")
-    validate(need(df!='errore','Importare il disegno degli esperimenti eseguiti!'),errorClass = "myClass")
+    validate(need(df!='errore','Import the design of performed experiments!'),errorClass = "myClass")
   })
   output$d_opt_ag_msg1_tb<-renderTable({
     d_opt_ag_msg1()
@@ -3895,7 +3898,7 @@ server <- function (input , output, session ){
   d_opt_ag_msg2<-eventReactive(input$d_opt_ag_calc,{
     df<-tryCatch(d_opt_cp() ,
                  error = function(e) "aiuto!")
-    validate(need(df!='aiuto!','Importa matrice punti candidati!'),errorClass = "myClass")
+    validate(need(df!='aiuto!','Import the matrix of candidate points!'),errorClass = "myClass")
   })
   output$d_opt_ag_msg2_tb<-renderTable({
     d_opt_ag_msg2()
@@ -3903,21 +3906,21 @@ server <- function (input , output, session ){
   d_opt_ag_msg3<-eventReactive(input$d_opt_ag_calc,{
     df<-tryCatch(d_opt_ag_dis() ,
                  error = function(e) "aiuto!")
-    validate(need(is.data.frame(df)&df!='aiuto!','Selezionare un dataset!'),errorClass = "myClass")
+    validate(need(is.data.frame(df)&df!='aiuto!','Select a dataset!'),errorClass = "myClass")
   })
   output$d_opt_ag_msg3_tb<-renderTable({
     d_opt_ag_msg3()
   })
   output$d_opt_ag_table<-renderTable(digits = 4,{
    validate(need(ncol(d_opt_ag_federov()$X)>0 & sum(is.na(d_opt_ag_federov()$X))==0 ,
-                 'Trovata matrice con rango insufficiente \n Riprovare!'))
+                 'Found matrix with insufficient rank \nTry again!'))
     d_opt_ag_federov()$X
   })
   output$d_opt_ag_graf_D<-renderPlot({
     #validate(need(input$d_opt_ag_Unumexp>=input$d_opt_ag_Lnumexp," "),
              #errorClass = "myClass")
     validate(need(ncol(d_opt_ag_federov()$X)>0 & sum(is.na(d_opt_ag_federov()$X))==0,''))
-    plot(d_opt_ag_federov()$X[,1],d_opt_ag_federov()$X[,2],col='red',type='b',xlab='Numero di esperimenti',
+    plot(d_opt_ag_federov()$X[,1],d_opt_ag_federov()$X[,2],col='red',type='b',xlab='Number of experiments',
          ylab='D');grid()
   })
   output$d_opt_ag_graf_Vif<-renderPlot({
@@ -3925,7 +3928,7 @@ server <- function (input , output, session ){
              #errorClass = "myClass")
     validate(need(ncol(d_opt_ag_federov()$X)>2 & sum(is.na(d_opt_ag_federov()$X))==0,''))
     maxinfl<-max(d_opt_ag_federov()$X[,3])
-    plot(d_opt_ag_federov()$X[,1],d_opt_ag_federov()$X[,3],col='red',type='b',xlab='Numero di esperimenti',
+    plot(d_opt_ag_federov()$X[,1],d_opt_ag_federov()$X[,3],col='red',type='b',xlab='Number of experiments',
          ylim=c(1,max(maxinfl,8)),
          ylab='Vif.max');grid()
     abline(h = 4, lty = 2, col = "green4")
@@ -3940,12 +3943,12 @@ server <- function (input , output, session ){
     req(input$d_opt_ag_Lnumexp)
     m<-input$d_opt_ag_Lnumexp
     M<-input$d_opt_ag_Unumexp
-    numericInput(inputId = 'd_opt_ag_numexp',label = paste('Numero di esperimenti (di cui',nrow(d_opt_ag_dis()),
-                                                           'già eseguiti)'),value = m,min = m,max=M,width = "30%")
+    numericInput(inputId = 'd_opt_ag_numexp',label = paste('Number of experiments (of which',nrow(d_opt_ag_dis()),
+                                                           'already performed)'),value = m,min = m,max=M,width = "30%")
   })
   output$d_opt_ag_expes<-renderUI({
     validate(need(ncol(d_opt_ag_federov()$X)>0 & sum(is.na(d_opt_ag_federov()$X))==0,''))
-    paste('di cui',nrow(d_opt_ag_dis()),'exp. già eseguiti')
+    paste('of which',nrow(d_opt_ag_dis()),'exp. already performed')
   })
   output$d_opt_ag_dis_opt<-renderTable({
     validate(need(ncol(d_opt_ag_federov()$X)>0 & sum(is.na(d_opt_ag_federov()$X))==0,''))
@@ -3982,7 +3985,7 @@ server <- function (input , output, session ){
 
   # Piano personalizzato -----------------------------------------------------------------  
   output$pp_titolo<-renderUI({
-    HTML("Piano personalizzato" )
+    HTML("Customized Design" )
   })
   output$pp_importa_incolla_spazio<-renderUI({
     req(input$pp_importa==1)
@@ -3990,7 +3993,7 @@ server <- function (input , output, session ){
   })
   output$pp_importa_incolla<-renderUI({
     req(input$pp_importa==1)
-    actionButton("pp_incolla", label = "Incolla")
+    actionButton("pp_incolla", label = "Paste")
   })
   output$pp_importa_incolla_spazio1<-renderUI({
     req(input$pp_importa==1)
@@ -4005,7 +4008,7 @@ server <- function (input , output, session ){
   pp_dis_paste<-eventReactive(input$pp_incolla,{
     df<-tryCatch(read.DIF(file = "clipboard",header = TRUE,transpose = TRUE),
                  #warning = function(w) {print('warning')},
-                 error = function(e) "Selezionare un dataset!")
+                 error = function(e) "Select a dataset!")
     df
   })
   pp_dis_xls<-reactive({
@@ -4021,17 +4024,20 @@ server <- function (input , output, session ){
   })
   output$pp_dis<-renderTable({
     df<-tryCatch(pp_dis(),
-                 error = function(e) "Selezionare un dataset!")
-    validate(need(!is.character(df),'Selezionare un dataset!'))
-    pp_dis()
+                 error = function(e) "Select a dataset!")
+    validate(need(!is.character(df),'Select a dataset!'))
+    dis<-pp_dis()
+    exp<-seq(1,nrow(dis))
+    dis<-cbind.data.frame('Exp#'=exp,dis)
+    
   })
   
   output$pp_inter<-renderUI({
     validate(need('2'%in%input$pp_mod_tipo,''))
     df<-tryCatch(pp_dis(),
-                 error = function(e) "Selezionare un dataset!")
+                 error = function(e) "Select a dataset!")
     validate(need(!is.character(df),''))
-    numericInput("pp_inter", label = h5("Ordine interazione"), value = 2,min = 2,width = "70px")
+    numericInput("pp_inter", label = h5("Interaction order"), value = 2,min = 2,width = "70px")
   })
   
   pp_var_sel<-reactive({
@@ -4076,9 +4082,9 @@ server <- function (input , output, session ){
   })
   output$pp_mod_variabx<-renderUI({
     df<-tryCatch(pp_dis(),
-                 error = function(e) "Selezionare un dataset!")
+                 error = function(e) "Select a dataset!")
     validate(need(!is.character(df),''))
-    selectizeInput(inputId = "pp_mod_variabx",label="Termini modello (x)",
+    selectizeInput(inputId = "pp_mod_variabx",label="Model terms (x)",
                    #div("Termini modello (x)",style="font-weight: 400"),
                    choices = pp_var_sel(),
                    selected=pp_var_sel(),
@@ -4099,7 +4105,7 @@ server <- function (input , output, session ){
   })
   output$pp_modello<-renderText({
     df<-tryCatch(pp_dis(),
-                 error = function(e) "Selezionare un dataset!")
+                 error = function(e) "Select a dataset!")
     validate(need(!is.character(df),''))
     req(input$pp_mod_variabx)
     var<-input$pp_mod_variabx
@@ -4118,10 +4124,10 @@ server <- function (input , output, session ){
   })
   output$pp_matrdisp<-renderTable({
     df<-tryCatch(pp_dis(),
-                 error = function(e) "Selezionare un dataset!")
+                 error = function(e) "Select a dataset!")
     validate(need(!is.character(df),''))
     X<-model.matrix(as.formula(pp_formula()),pp_dis())
-    validate(need(qr(X)$rank==ncol(X),"Il programma è stato interrotto perché la matrice del modello ha rango insufficiente"))
+    validate(need(qr(X)$rank==ncol(X),"The program was aborted because the model matrix has insufficient rank"))
     D<-solve(t(X)%*%X)
     D
   })
@@ -4132,7 +4138,7 @@ server <- function (input , output, session ){
     validate(need(length(var)>2,''))
     X<-model.matrix(as.formula(pp_formula()),pp_dis())
     validate(need(qr(X)$rank==ncol(X),""))
-    selectInput("pp_selvar", label = h5("Selezionare 2 variabili"), 
+    selectInput("pp_selvar", label = h5("Select 2 variables"), 
                 choices = var, 
                 multiple = TRUE,selected = var[1:2])
   })
@@ -4162,9 +4168,9 @@ server <- function (input , output, session ){
       var_fix<-paste(var_fix,var[col_fix][i])
     }
     if(length(col_fix)==1){
-      txt<-paste('valore della  variabile',var[col_fix])
+      txt<-paste('value of variable',var[col_fix])
     }else{
-      txt<-paste('valori delle  variabili',var_fix, '(separati da spazio)')
+      txt<-paste('values of variables',var_fix, '(separated by space)')
     }
     textInput(inputId = "pp_fixvar",label = h5(txt),value = vl)
   })
@@ -4172,8 +4178,8 @@ server <- function (input , output, session ){
     req(input$pp_mod_variabx)
     var<-colnames(pp_dis())
     var<-var[var%in%input$pp_mod_variabx]
-    validate(need(length(var)>1,'Modello con meno di due variabili!'))
-    if(length(var)>2)validate(need(length(input$pp_selvar)==2,'Selezionare 2 variabili!'))
+    validate(need(length(var)>1,'Model with less than two variables!'))
+    if(length(var)>2)validate(need(length(input$pp_selvar)==2,'Select 2 variables!'))
     X<-model.matrix(as.formula(pp_formula()),pp_dis())
     #if(qr(X)$rank<ncol(X))stop()
     validate(need(qr(X)$rank==ncol(X),''))
@@ -4202,7 +4208,7 @@ server <- function (input , output, session ){
       txt<-gsub(var[i],paste0('data$',var[i]),txt)
     }
     cond<-tryCatch(eval(parse(text = txt)),
-                   error = function(e) "Scrivere correttamente le condizioni!")
+                   error = function(e) "Write the conditions correctly!")
     if(is.character(cond)){
       plot(c(0, 1), c(0, 1), ann = F, bty = 'n', type = 'n', xaxt = 'n', yaxt = 'n')
       text(0.5,0.5,cond,cex = 1.6, col = "red")
@@ -4213,7 +4219,7 @@ server <- function (input , output, session ){
     Q=X%*%solve(t(P)%*%P)%*%t(X)
     if(nrow(Q)==0){
       plot(c(0, 1), c(0, 1), ann = F, bty = 'n', type = 'n', xaxt = 'n', yaxt = 'n')
-      text(0.5,0.5,'inserire il valore delle variabili costanti',cex = 1.6, col = "red")
+      text(0.5,0.5,'enter the value of constant variables',cex = 1.6, col = "red")
     }else{
       Lev=data.frame(data,"L"=diag(Q))
       if(input$pp_vincoli & !is.null(cond) & is.logical(cond))Lev<-Lev[cond==TRUE,]
@@ -4257,7 +4263,7 @@ server <- function (input , output, session ){
       txt<-gsub(var[i],paste0('data$',var[i]),txt)
     }
     cond<-tryCatch(eval(parse(text = txt)),
-                   error = function(e) "Scrivere correttamente le condizioni!")
+                   error = function(e) "Write the conditions correctly!")
     if(is.character(cond)){
       plot(c(0, 1), c(0, 1), ann = F, bty = 'n', type = 'n', xaxt = 'n', yaxt = 'n')
       text(0.5,0.5,cond,cex = 1.6, col = "red")
@@ -4269,7 +4275,7 @@ server <- function (input , output, session ){
     Q=X%*%solve(t(P)%*%P)%*%t(X)
     if(nrow(Q)==0){
       plot(c(0, 1), c(0, 1), ann = F, bty = 'n', type = 'n', xaxt = 'n', yaxt = 'n')
-      text(0.5,0.5,'inserire il valore delle variabili costanti',cex = 1.6, col = "red")
+      text(0.5,0.5,'enter the value of constant variables',cex = 1.6, col = "red")
     }else{
       Lev=data.frame(data,"L"=diag(Q))
       if(input$pp_vincoli & !is.null(cond) & is.logical(cond))Lev<-Lev[cond==TRUE,]
@@ -4278,7 +4284,7 @@ server <- function (input , output, session ){
       req(input$pp_lv_z)
       req(input$pp_lv_x)
       lattice::wireframe(L~x*y,data=Lev,drape=TRUE,col.regions = colorRampPalette(c("yellow","green","blue"))(256),
-                         at=seq(min(Lev$L),max(Lev$L),(max(Lev$L)-min(Lev$L))/256),
+                         at=seq(min(Lev$L),max(Lev$L),length.out=256),
                          screen=list(z=input$pp_lv_z,x=-input$pp_lv_x),
                          main='Plot of Leverage',cex.main=0.8,xlab=var[col[1]],
                          ylab=var[col[2]],zlab=paste('Response'))}
@@ -4286,20 +4292,20 @@ server <- function (input , output, session ){
   })
   output$pp_vincoli_txt<-renderUI({
     validate(need(input$pp_vincoli==TRUE,' '))
-    textInput(inputId = "pp_vincoli_txt",label = h5("Inserire i vincoli separati da '&'"))
+    textInput(inputId = "pp_vincoli_txt",label = h5("Enter the constraints separated by '&'"))
   })
   output$pp_lv_z<-renderUI({
-    sliderInput('pp_lv_z',label = 'Rotazione orizzontale',min = 0,max = 360,value = 30,step = 10)
+    sliderInput('pp_lv_z',label = 'Horizontal rotation',min = 0,max = 360,value = 30,step = 10)
   })
   output$pp_lv_x<-renderUI({
-    sliderInput('pp_lv_x',label = 'Rotazione verticale',min = 0,max = 90,value = 60,step = 10)
+    sliderInput('pp_lv_x',label = 'Vertical rotation',min = 0,max = 90,value = 60,step = 10)
   })
   output$pp_vf<-renderTable({
     req(input$pp_mod_variabx)
     var<-colnames(pp_dis())
     var<-var[var%in%input$pp_mod_variabx]
     df<-tryCatch(pp_dis(),
-                 error = function(e) "Selezionare un dataset!")
+                 error = function(e) "Select a dataset!")
     validate(need(!is.character(df),''))
     validate(need(length(var)>1,'Modello con meno di due variabili!'))
     frml<-as.formula(pp_formula())
@@ -4315,7 +4321,7 @@ server <- function (input , output, session ){
   output$pp_risptext<-renderUI({
     X<-model.matrix(as.formula(pp_formula()),pp_dis())
     if(qr(X)$rank<ncol(X))stop()
-    h4(paste('Risposte (',nrow(pp_dis()),', separate da spazio)',sep=''))
+    h4(paste('Responses (',nrow(pp_dis()),', separated by space)',sep=''))
   })
   pp_mod<-reactive({
     validate(need(length(as.numeric(unlist(strsplit(input$pp_risp," "))))==nrow(pp_dis()),''))
@@ -4366,7 +4372,8 @@ server <- function (input , output, session ){
             geom_bar(fill="red",stat="identity")+
             scale_x_discrete(limits=names(mod$coefficients[-1]))
         }else{
-          df_coeff<-cbind.data.frame(df_coeff,inf=mod$coefficients[-1]-sm$coefficients[1,2],sup=mod$coefficients[-1]+sm$coefficients[1,2])
+          #df_coeff<-cbind.data.frame(df_coeff,inf=mod$coefficients[-1]-sm$coefficients[-1,2],sup=mod$coefficients[-1]+sm$coefficients[-1,2])
+          df_coeff<-cbind.data.frame(df_coeff,inf=confint(mod)[-1,1],sup=confint(mod)[-1,2])
           ggplot(data = df_coeff,aes(x =nome,y=valore))+
             xlab("")+ylab("")+theme_light()+
             geom_bar(fill="red",stat="identity")+
@@ -4378,7 +4385,7 @@ server <- function (input , output, session ){
   })
   output$pp_R2_txt<-renderUI({
     validate(need(length(as.numeric(unlist(strsplit(input$pp_risp," "))))==nrow(pp_dis()),''))
-    HTML("<h4> R <sup> 2 </sup> e R <sup> 2 </sup> aggiustato <h4>")
+    HTML("<h4> R <sup> 2 </sup> and adjusted R <sup> 2 </sup> <h4>")
   })
   output$pp_R2<-renderPrint({
     validate(need(length(as.numeric(unlist(strsplit(input$pp_risp," "))))==nrow(pp_dis()),''))
@@ -4392,7 +4399,7 @@ server <- function (input , output, session ){
     req(input$pp_mod_variabx)
     var<-colnames(pp_dis())
     var<-var[var%in%input$pp_mod_variabx]
-    validate(need(length(var)>1,'Modello con meno di due variabili!'))
+    validate(need(length(var)>1,'Model with less than two variables!'))
     n<-ncol(pp_dis())
     n_lev<-rep(0,n)
     X<-as.data.frame(pp_dis())
@@ -4403,7 +4410,7 @@ server <- function (input , output, session ){
     frml<-as.formula(pp_formula())
     dis<-pp_dis()
     vf<-vif(model.matrix(frml, dis))
-    validate(need(n_lev==rep(2,n) & max(vf)==1,'Questa routine si applica a disegni fattoriali a 2 livelli e a modelli con termini non confusi!'))
+    validate(need(n_lev==rep(2,n) & max(vf)==1,'This routine applies to 2-level factorial designs and models with non-confusing terms!'))
     mod<-pp_mod()
     FrF2::DanielPlot(mod,alpha = 0.05,main='',pch=19,cex.fac=1,col="blue",datax = FALSE)
     qqline(y = coef(mod)[-1],datax = FALSE,col="blue",lty=2)
@@ -4416,7 +4423,7 @@ server <- function (input , output, session ){
       X[,i]<-as.factor(X[,i])
       n_lev[i]<-length(levels(X[,i]))
     }
-    validate(need(n_lev==rep(2,n),'Questa routine si applica a disegni fattoriali a 2 livelli!'))
+    validate(need(n_lev==rep(2,n),'This routine applies to 2-level factorial designs!'))
     mod<-pp_mod()
     
     
@@ -4434,10 +4441,10 @@ server <- function (input , output, session ){
       nd<-rbind.data.frame(x)
       colnames(nd)<-var
       prev<-predict(object = mod,newdata=nd)
-      attr(prev,'names')<-c('previsione')
+      attr(prev,'names')<-c('prediction')
       prev
     }else{
-      cat(paste('inserire le',length(var),'coord. del punto'))
+      cat(paste('Enter the',length(var),'coord. of the point'))
     }
   })
   output$pp_intprev<-renderPrint({
@@ -4459,13 +4466,13 @@ server <- function (input , output, session ){
       colnames(df)<-c('2.5%','97.5%','0.5%','99.5%','0.05%','99.95%')
       df
       }else{
-        cat('Non ci sono gradi di libertà')
+        cat('There are no degrees of freedom')
       }
     }else{
       req(input$pp_misind)
       x<-as.numeric(unlist(strsplit(input$pp_misind," ")))
       if(length(x)<=1){
-        cat('Almeno 2 misure')
+        cat('At least 2 measures')
       }else{
         gdl<-length(x)-1
         q<-qt(p = 0.975,df = gdl)
@@ -4497,7 +4504,7 @@ server <- function (input , output, session ){
     mod<-lm(x~1,as.data.frame(x))
     sm<-summary(mod)
     media<-predict(mod,interval = 'confidence')[1,]
-    attr(media,'names')<-c('media','2.5%','97.5%')
+    attr(media,'names')<-c('mean','2.5%','97.5%')
     round(media,3)
   })
   output$pp_misind_sd<-renderPrint({
@@ -4520,7 +4527,7 @@ server <- function (input , output, session ){
   output$pp_stimint_txt<-renderUI({
     #validate(need(length(as.numeric(unlist(strsplit(input$fatt_compl_misind," "))))>0 &
      #               length(as.numeric(unlist(strsplit(input$fatt_compl_risp," "))))==2^input$fatt_compl_k,''))
-    h4('Stima per intervallo')
+    h4('Confidence interval')
   })
   output$pp_stimint<-renderPrint({
     X<-model.matrix(as.formula(pp_formula()),pp_dis())
@@ -4544,13 +4551,13 @@ server <- function (input , output, session ){
         colnames(df)<-c('2.5%','97.5%','0.5%','99.5%','0.05%','99.95%','p-value','')
         df
       }else{
-        cat('Non ci sono gradi di libertà')
+        cat('There are no degrees of freedom')
       }
     }else{
       #req(input$pp_misind)
       x<-as.numeric(unlist(strsplit(input$pp_misind," ")))
       if(length(x)<=1){
-        cat('Almeno 2 misure')
+        cat('At least 2 measures')
       }else{
         gdl<-length(x)-1
         q<-qt(p = 0.975,df = gdl)
@@ -4586,7 +4593,7 @@ server <- function (input , output, session ){
     validate(need(length(var)>2,''))
     X<-model.matrix(as.formula(pp_formula()),pp_dis())
     if(qr(X)$rank<ncol(X))stop()
-    selectInput("pp_mod_selvar", label = h5("Selezionare 2 variabili"), 
+    selectInput("pp_mod_selvar", label = h5("Select 2 variables"), 
                 choices = var, 
                 multiple = TRUE,selected = var[1:2])
   })
@@ -4616,9 +4623,9 @@ server <- function (input , output, session ){
       var_fix<-paste(var_fix,var[col_fix][i])
     }
     if(length(col_fix)==1){
-      txt<-paste('valore della  variabile',var[col_fix])
+      txt<-paste('value of variable',var[col_fix])
     }else{
-      txt<-paste('valori delle  variabili',var_fix, '(separati da spazio)')
+      txt<-paste('values of variables',var_fix, '(separated by space)')
     }
     textInput(inputId = "pp_mod_fixvar",label = h5(txt),value = vl)
   })
@@ -4653,7 +4660,7 @@ server <- function (input , output, session ){
       txt<-gsub(var[i],paste0('data$',var[i]),txt)
     }
     cond<-tryCatch(eval(parse(text = txt)),
-                   error = function(e) "Scrivere correttamente le condizioni!")
+                   error = function(e) "Write the conditions correctly!")
     if(is.character(cond)){
       plot(c(0, 1), c(0, 1), ann = F, bty = 'n', type = 'n', xaxt = 'n', yaxt = 'n')
       text(0.5,0.5,cond,cex = 1.6, col = "red")
@@ -4666,7 +4673,7 @@ server <- function (input , output, session ){
     cl<-as.integer(input$pp_livellorisp_col)
     if(is.na(Pred$P[1])==TRUE){
       plot(c(0, 1), c(0, 1), ann = F, bty = 'n', type = 'n', xaxt = 'n', yaxt = 'n')
-      text(0.5,0.5,'inserire il valore delle variabili costanti',cex = 1.6, col = "red")
+      text(0.5,0.5,'enter the value of the constant variables',cex = 1.6, col = "red")
     }else{
       if(input$pp_vincolirisp & !is.null(cond) & is.logical(cond))Pred<-Pred[cond==TRUE,]
       
@@ -4679,7 +4686,7 @@ server <- function (input , output, session ){
   })
   output$pp_livellorisp_col<-renderUI({
     selectInput("pp_livellorisp_col", label = h3(""), 
-                choices = list("blu" = 1, "verde" = 2, "rosso" = 3,"nero" = 4,"viola" = 5), 
+                choices = list("blu" = 1, "green" = 2, "red" = 3,"black" = 4,"purple" = 5), 
                 selected = 1,width="130px")
   })
   output$pp_suprisp<-renderPlot({
@@ -4712,7 +4719,7 @@ server <- function (input , output, session ){
       txt<-gsub(var[i],paste0('data$',var[i]),txt)
     }
     cond<-tryCatch(eval(parse(text = txt)),
-                   error = function(e) "Scrivere correttamente le condizioni!")
+                   error = function(e) "Write the conditions correctly!")
     if(is.character(cond)){
       plot(c(0, 1), c(0, 1), ann = F, bty = 'n', type = 'n', xaxt = 'n', yaxt = 'n')
       text(0.5,0.5,cond,cex = 1.6, col = "red")
@@ -4723,13 +4730,13 @@ server <- function (input , output, session ){
     colnames(Pred)[col[2]]<-'y'
     if(is.na(Pred$P[1])==TRUE){
       plot(c(0, 1), c(0, 1), ann = F, bty = 'n', type = 'n', xaxt = 'n', yaxt = 'n')
-      text(0.5,0.5,'inserire il valore delle variabili costanti',cex = 1.6, col = "red")
+      text(0.5,0.5,'enter the value of constant variables',cex = 1.6, col = "red")
     }else{
       req(input$pp_rp_z)
       req(input$pp_rp_x)
       if(input$pp_vincolirisp & !is.null(cond) & is.logical(cond))Pred<-Pred[cond==TRUE,]
       lattice::wireframe(P~x*y,data=Pred,drape=TRUE,col.regions = colorRampPalette(c("yellow","green","blue"))(256),
-                         at=seq(min(Pred$P),max(Pred$P),(max(Pred$P)-min(Pred$P))/256),
+                         at=seq(min(Pred$P),max(Pred$P),length.out=256),
                          screen=list(z=input$pp_rp_z,x=-input$pp_rp_x),
                          main='Response Surface',cex.main=0.8,xlab=var[col[1]],
                          ylab=var[col[2]],zlab=paste('Response')) 
@@ -4738,13 +4745,13 @@ server <- function (input , output, session ){
   })
   output$pp_vincolirisp_txt<-renderUI({
     validate(need(input$pp_vincolirisp==TRUE,' '))
-    textInput(inputId = "pp_vincolirisp_txt",label = h5("Inserire i vincoli separati da '&'"))
+    textInput(inputId = "pp_vincolirisp_txt",label = h5("Enter the constraints separated by '&'"))
   })
   output$pp_rp_z<-renderUI({
-    sliderInput('pp_rp_z',label = 'Rotazione orizzontale',min = 0,max = 360,value = 30,step = 10)
+    sliderInput('pp_rp_z',label = 'Horizontal rotation',min = 0,max = 360,value = 30,step = 10)
   })
   output$pp_rp_x<-renderUI({
-    sliderInput('pp_rp_x',label = 'Rotazione verticale',min = 0,max = 90,value = 60,step = 10)
+    sliderInput('pp_rp_x',label = 'Vertical rotation',min = 0,max = 90,value = 60,step = 10)
   })
 pp_sigma<-reactive({
     X<-model.matrix(as.formula(pp_formula()),pp_dis())
@@ -4786,7 +4793,7 @@ pp_sigma_df<-reactive({
     validate(need(length(var)>2,''))
     X<-model.matrix(as.formula(pp_formula()),pp_dis())
     validate(need(qr(X)$rank==ncol(X),""))
-    selectInput("pp_selvar_icp", label = h5("Selezionare 2 variabili"), 
+    selectInput("pp_selvar_icp", label = h5("Select 2 variables"), 
                 choices = var, 
                 multiple = TRUE,selected = var[1:2])
   })
@@ -4816,9 +4823,9 @@ pp_sigma_df<-reactive({
       var_fix<-paste(var_fix,var[col_fix][i])
     }
     if(length(col_fix)==1){
-      txt<-paste('valore della  variabile',var[col_fix])
+      txt<-paste('value of variable',var[col_fix])
     }else{
-      txt<-paste('valori delle  variabili',var_fix, '(separati da spazio)')
+      txt<-paste('values of variables',var_fix, '(separated by space)')
     }
     textInput(inputId = "pp_fixvar_icp",label = h5(txt),value = vl)
   })
@@ -4827,8 +4834,8 @@ pp_sigma_df<-reactive({
     var<-colnames(pp_dis())
     var<-var[var%in%input$pp_mod_variabx]
     validate(need(length(var)>1,'Modello con meno di due variabili!'))
-    if(length(var)>2)validate(need(length(input$pp_selvar_icp)==2,'Selezionare 2 variabili!'))
-    validate(need(pp_sigma_df()>0,'Manca una stima della varianza!'))
+    if(length(var)>2)validate(need(length(input$pp_selvar_icp)==2,'Select 2 variables!'))
+    validate(need(pp_sigma_df()>0,'An estimate of the variance is missing!'))
     X<-model.matrix(as.formula(pp_formula()),pp_dis())
     #if(qr(X)$rank<ncol(X))stop()
     validate(need(qr(X)$rank==ncol(X),''))
@@ -4857,7 +4864,7 @@ pp_sigma_df<-reactive({
       txt<-gsub(var[i],paste0('data$',var[i]),txt)
     }
     cond<-tryCatch(eval(parse(text = txt)),
-                   error = function(e) "Scrivere correttamente le condizioni!")
+                   error = function(e) "Write the conditions correctly!")
     if(is.character(cond)){
       plot(c(0, 1), c(0, 1), ann = F, bty = 'n', type = 'n', xaxt = 'n', yaxt = 'n')
       text(0.5,0.5,cond,cex = 1.6, col = "red")
@@ -4868,7 +4875,7 @@ pp_sigma_df<-reactive({
       Q=X%*%solve(t(P)%*%P)%*%t(X)
       if(nrow(Q)==0){
         plot(c(0, 1), c(0, 1), ann = F, bty = 'n', type = 'n', xaxt = 'n', yaxt = 'n')
-        text(0.5,0.5,'inserire il valore delle variabili costanti',cex = 1.6, col = "red")
+        text(0.5,0.5,'enter the value of the constant variables',cex = 1.6, col = "red")
       }else{
         s<-pp_sigma()
         s_df<-pp_sigma_df()
@@ -4917,7 +4924,7 @@ pp_sigma_df<-reactive({
       txt<-gsub(var[i],paste0('data$',var[i]),txt)
     }
     cond<-tryCatch(eval(parse(text = txt)),
-                   error = function(e) "Scrivere correttamente le condizioni!")
+                   error = function(e) "Write the conditions correctly!")
     if(is.character(cond)){
       plot(c(0, 1), c(0, 1), ann = F, bty = 'n', type = 'n', xaxt = 'n', yaxt = 'n')
       text(0.5,0.5,cond,cex = 1.6, col = "red")
@@ -4929,7 +4936,7 @@ pp_sigma_df<-reactive({
       Q=X%*%solve(t(P)%*%P)%*%t(X)
       if(nrow(Q)==0){
         plot(c(0, 1), c(0, 1), ann = F, bty = 'n', type = 'n', xaxt = 'n', yaxt = 'n')
-        text(0.5,0.5,'inserire il valore delle variabili costanti',cex = 1.6, col = "red")
+        text(0.5,0.5,'enter the value of the constant variables',cex = 1.6, col = "red")
       }else{
         s<-pp_sigma()
         s_df<-pp_sigma_df()
@@ -4941,7 +4948,7 @@ pp_sigma_df<-reactive({
         req(input$pp_lv_z)
         req(input$pp_lv_x)
         lattice::wireframe(L~x*y,data=Lev,drape=TRUE,col.regions = colorRampPalette(c("yellow","green","blue"))(256),
-                           at=seq(min(Lev$L),max(Lev$L),(max(Lev$L)-min(Lev$L))/256),
+                           at=seq(min(Lev$L),max(Lev$L),length.out=256),
                            screen=list(z=input$pp_lv_z_icp,x=-input$pp_lv_x_icp),
                            main='Semiamplitude of the confidence interval',cex.main=0.8,xlab=var[col[1]],
                            ylab=var[col[2]],zlab=paste('Response'))}
@@ -4949,32 +4956,32 @@ pp_sigma_df<-reactive({
   })
   output$pp_vincoli_txt_icp<-renderUI({
     validate(need(input$pp_vincoli_icp==TRUE,' '))
-    textInput(inputId = "pp_vincoli_txt_icp",label = h5("Inserire i vincoli separati da '&'"))
+    textInput(inputId = "pp_vincoli_txt_icp",label = h5("Enter the constraints separated by '&'"))
   })
   output$pp_lv_z_icp<-renderUI({
-    sliderInput('pp_lv_z_icp',label = 'Rotazione orizzontale',min = 0,max = 360,value = 30,step = 10)
+    sliderInput('pp_lv_z_icp',label = 'Horizontal rotation',min = 0,max = 360,value = 30,step = 10)
   })
   output$pp_lv_x_icp<-renderUI({
-    sliderInput('pp_lv_x_icp',label = 'Rotazione verticale',min = 0,max = 90,value = 60,step = 10)
+    sliderInput('pp_lv_x_icp',label = 'Vertical rotation',min = 0,max = 90,value = 60,step = 10)
   })
   output$pp_graf_res<-renderPlot({
     df<-cbind.data.frame(pp_mod()$residuals,c(1:length(pp_mod()$residuals)))
     colnames(df)<-c("residui","indice")
-    ggplot(df,mapping=aes(x=indice,y=residui))+labs(x="indice",y="residui")+geom_point(cex=2,col="blue")+
+    ggplot(df,mapping=aes(x=indice,y=residui))+labs(x="sample number",y="residuals")+geom_point(cex=2,col="blue")+
       geom_hline(yintercept =0,col="blue",lty=2)+theme_light()
   })
   output$pp_graf_res_brush<-renderPrint({
     req(input$pp_graf_res_brush)
     brush <- input$pp_graf_res_brush
     df<-cbind.data.frame(pp_mod()$residuals,c(1:length(pp_mod()$residuals)))
-    colnames(df)<-c("residui","indice")
+    colnames(df)<-c("residuals","indice")
     cr<-which(df[,1]>brush$ymin & df[,1]<brush$ymax & df[,2] >brush$xmin & df[,2] < brush$xmax)
     round(df[cr,1,drop=FALSE],3)
   })
   output$pp_graf_yfit<-renderPlot({
     df<-cbind.data.frame(pp_mod()$fitted.value,pp_mod()$model$y)
     colnames(df)<-c("yhat","y")
-    ggplot(df,mapping=aes(x=y,y=yhat))+labs(x="valori sperimentali",y="valori previsti")+
+    ggplot(df,mapping=aes(x=y,y=yhat))+labs(x="experimental values",y="fitted values")+
       geom_point(cex=2,col="blue")+
       geom_abline(intercept = 0,slope = 1,col="blue",lty=2)+theme_light()
   })
@@ -5156,7 +5163,7 @@ pp_sigma_df<-reactive({
   
   output$m_simplex_risptext<-renderUI({
     n<-nrow(m_simplex_dis()[,2:4])
-    h4(paste('Risposte (',n,', separate da spazio)',sep=''))
+    h4(paste('Responses (',n,', separated by space)',sep=''))
   })
   
   output$m_simplex_figura_risp<-renderPlot(width = 550,height = 500,{
@@ -5297,10 +5304,10 @@ pp_sigma_df<-reactive({
       nd<-rbind.data.frame(x)
       colnames(nd)<-c('x1','x2','x3')
       prev<-predict(object = mod,newdata=nd)
-      attr(prev,'names')<-c('previsione')
+      attr(prev,'names')<-c('prediction')
       prev
     }else{
-      cat(paste('inserire le',3,'coord. del punto'))
+      cat(paste('Enter the',3,'coord. of the point'))
     }
   })
   
@@ -5327,13 +5334,13 @@ pp_sigma_df<-reactive({
         colnames(df)<-c('2.5%','97.5%','0.5%','99.5%','0.05%','99.95%')
         df
       }else{
-        cat('Non ci sono gradi di libertà')
+        cat('There are no degrees of freedom')
       }
     }else{
       req(input$m_simplex_misind)
       x<-as.numeric(unlist(strsplit(input$m_simplex_misind," ")))
       if(length(x)<=1){
-        cat('Almeno 2 misure')
+        cat('At least 2 measures')
       }else{
         gdl<-length(x)-1
         q<-qt(p = 0.975,df = gdl)
@@ -5367,7 +5374,7 @@ pp_sigma_df<-reactive({
     mod<-lm(x~1,as.data.frame(x))
     sm<-summary(mod)
     media<-predict(mod,interval = 'confidence')[1,]
-    attr(media,'names')<-c('media','2.5%','97.5%')
+    attr(media,'names')<-c('mean','2.5%','97.5%')
     round(media,3)
   })
   
@@ -5409,11 +5416,11 @@ pp_sigma_df<-reactive({
       B<- length(x)>1
     }
     validate(need(A&B,''))
-    h4('Stima per intervallo')
+    h4('Confidence interval')
   })
   
   output$m_simplex_stimint_txt<-renderUI({
-    h4('Stima per intervallo')
+    h4('Confidence interval')
   })
 
   output$m_simplex_stimint<-renderPrint({
@@ -5445,12 +5452,12 @@ pp_sigma_df<-reactive({
         colnames(df)<-c('2.5%','97.5%','0.5%','99.5%','0.05%','99.95%','p-value','')
         df
       }else{
-        cat('Non ci sono gradi di libertà')
+        cat('There are no degrees of freedom')
       }
     }else{
       x<-as.numeric(unlist(strsplit(input$m_simplex_misind," ")))
       if(length(x)<=1){
-        cat('Almeno 2 misure')
+        cat('At least 2 measures')
       }else{
         gdl<-length(x)-1
         q<-qt(p = 0.975,df = gdl)
@@ -5555,17 +5562,17 @@ pp_sigma_df<-reactive({
   
   output$m_simplex_livellorisp_col<-renderUI({
     selectInput("m_simplex_livellorisp_col", label = h3(""), 
-                choices = list("blu" = 1, "verde" = 2, "rosso" = 3,"nero" = 4,"viola" = 5), 
+                choices = list("blu" = 1, "green" = 2, "red" = 3,"black" = 4,"purple" = 5), 
                 selected = 3,width="130px")
   })
   # D-ottimale -----------------------------------------------------------------  
   output$m_d_opt_titolo<-renderUI({
-    HTML("D-ottimale" )
+    HTML("D-optimal Design" )
   })
   output$m_d_opt_importa<-renderUI({
     validate(need(input$m_d_opt_pti_cand==2, ' '))
-    radioButtons("m_d_opt_importa", label = "Importa matrice punti candidati:",
-                 choices = list("Incolla" = 1, "Excel" = 2), selected = 1,inline = TRUE)
+    radioButtons("m_d_opt_importa", label = "Upload candidate points matrix:",
+                 choices = list("Paste" = 1, "Excel" = 2), selected = 1,inline = TRUE)
   })
   output$m_d_opt_importa_incolla_spazio<-renderUI({
     validate(need(input$m_d_opt_pti_cand==2, ' '))
@@ -5575,7 +5582,7 @@ pp_sigma_df<-reactive({
   output$m_d_opt_importa_incolla<-renderUI({
     validate(need(input$m_d_opt_pti_cand==2, ' '))
     req(input$m_d_opt_importa==1)
-    actionButton("m_d_opt_incolla", label = "Incolla")
+    actionButton("m_d_opt_incolla", label = "Paste")
   })
   output$m_d_opt_importa_incolla_spazio1<-renderUI({
     validate(need(input$m_d_opt_pti_cand==2, ' '))
@@ -5591,29 +5598,29 @@ pp_sigma_df<-reactive({
   })
   output$m_d_opt_vincoli_tle<-renderUI({
     validate(need(input$m_d_opt_pti_cand==1,' '))
-    HTML("<h5><b>Costruisci matrice assegnando:<b><h5>")
+    HTML("<h5><b>Build matrix by assigning:<b><h5>")
   })
   output$m_d_opt_vincoli<-renderUI({
     validate(need(input$m_d_opt_pti_cand==1,' '))
-    checkboxInput("m_d_opt_vincoli", label = "Vincoli", value = FALSE)
+    checkboxInput("m_d_opt_vincoli", label = "Constraints", value = FALSE)
   })
   output$m_d_opt_vincoliinf_txt<-renderUI({
     validate(need(input$m_d_opt_vincoli==TRUE,' '))
-    textInput(inputId = "m_d_opt_vincoliinf_txt",label = h5("Inserire i vincoli inferiori separati da '&'"))
+    textInput(inputId = "m_d_opt_vincoliinf_txt",label = h5("Enter the lower constraints separated by '&'"))
   })
   
   output$m_d_opt_vincolisup_txt<-renderUI({
     validate(need(input$m_d_opt_vincoli==TRUE,' '))
-    textInput(inputId = "m_d_opt_vincolisup_txt",label = h5("Inserire i vincoli superiori separati da '&'"))
+    textInput(inputId = "m_d_opt_vincolisup_txt",label = h5("Enter the upper constraints separated by '&'"))
   })
 
   output$m_d_opt_passo<-renderUI({
     validate(need(input$m_d_opt_pti_cand==1,' '))
-    textInput(inputId = "m_d_opt_passo",label = h5("passo griglia"),value = "0.05 0.05 0.05",width = "50%")
+    textInput(inputId = "m_d_opt_passo",label = h5("grid step"),value = "0.05 0.05 0.05",width = "50%")
   })
   m_d_opt_cp_paste<-eventReactive(input$m_d_opt_incolla,{
     df<-tryCatch(read.DIF(file = "clipboard",header = TRUE,transpose = TRUE),
-                 error = function(e) "Selezionare un dataset!")
+                 error = function(e) "Select a dataset!")
     df
   })
   m_d_opt_cp_xls<-reactive({
@@ -5651,7 +5658,7 @@ pp_sigma_df<-reactive({
             txt_inf<-gsub(var[i],paste0('cp$',var[i]),txt_inf)
           }
           cond_i<-tryCatch(eval(parse(text = txt_inf)),
-                           error = function(e) "Scrivere correttamente le condizioni!")
+                           error = function(e) "Write the conditions correctly!")
           if(is.character(cond_i)|is.function(cond_i)){
             cp<-matrix(c('','',''),nrow = 1,ncol = 3)
             #colnames(cp)<-c('x1','x2','x3')
@@ -5668,7 +5675,7 @@ pp_sigma_df<-reactive({
             txt_sup<-gsub(var[i],paste0('cp$',var[i]),txt_sup)
           }
           cond_s<-tryCatch(eval(parse(text = txt_sup)),
-                           error = function(e) "Scrivere correttamente le condizioni!")
+                           error = function(e) "Write the conditions correctly!")
           
           if(is.character(cond_s)|is.function(cond_s)){
             cp<-matrix(c('','',''),nrow = 1,ncol = 3)
@@ -5790,7 +5797,7 @@ pp_sigma_df<-reactive({
   })
   output$m_d_opt_mod_variabx<-renderUI({
     validate(need(is.data.frame(m_d_opt_cp()),""))
-    selectizeInput(inputId = "m_d_opt_mod_variabx",label="Termini modello (x)",
+    selectizeInput(inputId = "m_d_opt_mod_variabx",label="Model terms (x)",
                    #div("Termini modello (x)",style="font-weight: 400"),
                    choices = m_d_opt_var_sel(),
                    selected=m_d_opt_var_sel(),
@@ -5816,7 +5823,7 @@ pp_sigma_df<-reactive({
     x<-model.matrix(formula(m_d_opt_formula()),m_d_opt_cp())
     r<-nrow(x)
     co<-ncol(x)
-    numericInput(inputId = 'm_d_opt_Lnumexp',label = 'Numero minimo di esperimenti',value = co,min = co,width = "30%")
+    numericInput(inputId = 'm_d_opt_Lnumexp',label = 'Minimum number of experiments',value = co,min = co,width = "30%")
   })
   output$m_d_opt_Unumexp<-renderUI({
     req(input$m_d_opt_Lnumexp)
@@ -5824,7 +5831,7 @@ pp_sigma_df<-reactive({
     x<-model.matrix(formula(m_d_opt_formula()),m_d_opt_cp())
     r<-nrow(x)
     co<-input$m_d_opt_Lnumexp
-    numericInput(inputId = 'm_d_opt_Unumexp',label = 'Numero massimo di esperimenti',value = co,max=r,min=co,width = "30%")
+    numericInput(inputId = 'm_d_opt_Unumexp',label = 'Maximun number of experiments',value = co,max=r,min=co,width = "30%")
   })
   m_d_opt_federov<-eventReactive(input$m_d_opt_calc,{
     req(input$m_d_opt_Unumexp)
@@ -5867,20 +5874,20 @@ pp_sigma_df<-reactive({
   })
   output$m_d_opt_table<-renderTable(digits = 4,{
     validate(need(ncol(m_d_opt_federov()$X)>0 & sum(is.na(m_d_opt_federov()$X))==0 ,
-                  'Trovata matrice con rango insufficiente \nRiprovare!'))
+                  'Found matrix with insufficient rank \nTry again!'))
     m_d_opt_federov()$X
   })
   msg1<-eventReactive(input$m_d_opt_calc,{
     df<-tryCatch(m_d_opt_cp() ,
                  error = function(e) "1")
-    validate(need(df!='1','Costruire la matrice dei punti candidati!'),errorClass = "myClass")
+    validate(need(df!='1','Build the matrix of candidate points!'),errorClass = "myClass")
   })
   output$m_d_opt_msg1<-renderTable({
     msg1()
   })
   output$m_d_opt_graf_D<-renderPlot({
     validate(need(ncol(m_d_opt_federov()$X)>0 & sum(is.na(m_d_opt_federov()$X))==0,''))
-    plot(m_d_opt_federov()$X[,1],m_d_opt_federov()$X[,2],col='red',type='b',xlab='Numero di esperimenti',
+    plot(m_d_opt_federov()$X[,1],m_d_opt_federov()$X[,2],col='red',type='b',xlab='Number of experiments',
          ylab='D');grid()
   })
   output$m_d_opt_numexp<-renderUI({
@@ -5891,7 +5898,7 @@ pp_sigma_df<-reactive({
     req(input$m_d_opt_Lnumexp)
     m<-input$m_d_opt_Lnumexp
     M<-input$m_d_opt_Unumexp
-    numericInput(inputId = 'm_d_opt_numexp',label = 'Numero di esperimenti',value = m,min = m,max=M,width = "30%")
+    numericInput(inputId = 'm_d_opt_numexp',label = 'Number of experiments',value = m,min = m,max=M,width = "30%")
   })
   output$m_d_opt_dis_opt<-renderTable({
     req(input$m_d_opt_numexp)
@@ -5917,7 +5924,7 @@ pp_sigma_df<-reactive({
   })
   output$m_d_opt_ag_importa_incolla<-renderUI({
     req(input$m_d_opt_ag_importa==1)
-    actionButton("m_d_opt_ag_incolla", label = "Incolla")
+    actionButton("m_d_opt_ag_incolla", label = "Paste")
   })
   output$m_d_opt_ag_importa_incolla_spazio1<-renderUI({
     req(input$m_d_opt_ag_importa==1)
@@ -5931,7 +5938,7 @@ pp_sigma_df<-reactive({
   })
   m_d_opt_ag_dis_paste<-eventReactive(input$m_d_opt_ag_incolla,{
     df<-tryCatch(read.DIF(file = "clipboard",header = TRUE,transpose = TRUE),
-                 error = function(e) "Selezionare un dataset!")
+                 error = function(e) "Select a dataset!")
     df
   })
   m_d_opt_ag_dis_xls<-reactive({
@@ -5946,7 +5953,7 @@ pp_sigma_df<-reactive({
     df
   })
   output$m_d_opt_dis_tbl<-renderTable({
-    validate(need(is.data.frame(m_d_opt_ag_dis()),"Selezionare un dataset!\n "),
+    validate(need(is.data.frame(m_d_opt_ag_dis()),"Select a dataset!\n "),
              errorClass = "myClass") 
     m_d_opt_ag_dis()
   })
@@ -5971,7 +5978,7 @@ pp_sigma_df<-reactive({
   })
   output$m_d_opt_ag_mod_variabx<-renderUI({
     validate(need(is.data.frame(m_d_opt_ag_dis()) & is.data.frame(m_d_opt_cp()),""))
-    selectizeInput(inputId = "m_d_opt_ag_mod_variabx",label="Termini modello (x)",
+    selectizeInput(inputId = "m_d_opt_ag_mod_variabx",label="Model terms (x)",
                    #div("Termini modello (x)",style="font-weight: 400"),
                    choices = m_d_opt_ag_var_sel(),
                    selected=m_d_opt_ag_var_sel(),
@@ -5997,14 +6004,14 @@ pp_sigma_df<-reactive({
     x<-model.matrix(formula(m_d_opt_ag_formula()),m_d_opt_ag_dis())
     r<-nrow(x)
     co<-max(ncol(x),r)+1
-    numericInput(inputId = 'm_d_opt_ag_Lnumexp',label = 'Numero minimo di esperimenti',value = co,min = co,width = "30%")
+    numericInput(inputId = 'm_d_opt_ag_Lnumexp',label = 'Minimun number of experiments',value = co,min = co,width = "30%")
   })
   output$m_d_opt_ag_Unumexp<-renderUI({
     req(input$m_d_opt_ag_Lnumexp)
     x<-model.matrix(formula(m_d_opt_ag_formula()),m_d_opt_ag_dis())
     r<-nrow(x)+nrow(m_d_opt_cp())
     co<-input$m_d_opt_ag_Lnumexp
-    numericInput(inputId = 'm_d_opt_ag_Unumexp',label = 'Numero massimo di esperimenti',value = co,max=r,min=co,width = "30%")
+    numericInput(inputId = 'm_d_opt_ag_Unumexp',label = 'Maximum number of experiments',value = co,max=r,min=co,width = "30%")
   })
   m_d_opt_ag_federov<-eventReactive(input$m_d_opt_ag_calc,{
     req(input$m_d_opt_ag_Unumexp)
@@ -6046,7 +6053,7 @@ pp_sigma_df<-reactive({
   m_d_opt_ag_msg1<-eventReactive(input$m_d_opt_ag_calc,{
     df<-tryCatch(m_d_opt_ag_dis() ,
                  error = function(e) "errore")
-    validate(need(df!='errore','Importare il disegno degli esperimenti eseguiti!'),errorClass = "myClass")
+    validate(need(df!='errore','Import the design of the experiments already performed!'),errorClass = "myClass")
   })
   output$m_d_opt_ag_msg1_tb<-renderTable({
     m_d_opt_ag_msg1()
@@ -6054,7 +6061,7 @@ pp_sigma_df<-reactive({
   m_d_opt_ag_msg2<-eventReactive(input$m_d_opt_ag_calc,{
     df<-tryCatch(m_d_opt_cp() ,
                  error = function(e) "aiuto!")
-    validate(need(df!='aiuto!','Importa matrice punti candidati!'),errorClass = "myClass")
+    validate(need(df!='aiuto!','Import the matrix of candidate points!'),errorClass = "myClass")
   })
   output$m_d_opt_ag_msg2_tb<-renderTable({
     m_d_opt_ag_msg2()
@@ -6062,21 +6069,21 @@ pp_sigma_df<-reactive({
   m_d_opt_ag_msg3<-eventReactive(input$m_d_opt_ag_calc,{
     df<-tryCatch(m_d_opt_ag_dis() ,
                  error = function(e) "aiuto!")
-    validate(need(is.data.frame(df)&df!='aiuto!','Selezionare un dataset!'),errorClass = "myClass")
+    validate(need(is.data.frame(df)&df!='aiuto!','Select a dataset!'),errorClass = "myClass")
   })
   output$m_d_opt_ag_msg3_tb<-renderTable({
     m_d_opt_ag_msg3()
   })
   output$m_d_opt_ag_table<-renderTable(digits = 4,{
     validate(need(ncol(m_d_opt_ag_federov()$X)>0 & sum(is.na(m_d_opt_ag_federov()$X))==0 ,
-                  'Trovata matrice con rango insufficiente \n Riprovare!'))
+                  'Found matrix with insufficient rank \nTry again!'))
     m_d_opt_ag_federov()$X
   })
   output$m_d_opt_ag_graf_D<-renderPlot({
     #validate(need(input$m_d_opt_ag_Unumexp>=input$m_d_opt_ag_Lnumexp," "),
     #errorClass = "myClass")
     validate(need(ncol(m_d_opt_ag_federov()$X)>0 & sum(is.na(m_d_opt_ag_federov()$X))==0,''))
-    plot(m_d_opt_ag_federov()$X[,1],m_d_opt_ag_federov()$X[,2],col='red',type='b',xlab='Numero di esperimenti',
+    plot(m_d_opt_ag_federov()$X[,1],m_d_opt_ag_federov()$X[,2],col='red',type='b',xlab='Number of experiments',
          ylab='D');grid()
   })
   output$m_d_opt_ag_numexp<-renderUI({
@@ -6088,12 +6095,12 @@ pp_sigma_df<-reactive({
     req(input$m_d_opt_ag_Lnumexp)
     m<-input$m_d_opt_ag_Lnumexp
     M<-input$m_d_opt_ag_Unumexp
-    numericInput(inputId = 'm_d_opt_ag_numexp',label = paste('Numero di esperimenti (di cui',nrow(m_d_opt_ag_dis()),
-                                                           'già eseguiti)'),value = m,min = m,max=M,width = "30%")
+    numericInput(inputId = 'm_d_opt_ag_numexp',label = paste('Number of experiments (of which',nrow(m_d_opt_ag_dis()),
+                                                           'already performed)'),value = m,min = m,max=M,width = "30%")
   })
   output$m_d_opt_ag_expes<-renderUI({
     validate(need(ncol(m_d_opt_ag_federov()$X)>0 & sum(is.na(m_d_opt_ag_federov()$X))==0,''))
-    paste('di cui',nrow(m_d_opt_ag_dis()),'exp. già eseguiti')
+    paste('of which',nrow(m_d_opt_ag_dis()),'exp. already performed')
   })
   output$m_d_opt_ag_dis_opt<-renderTable({
     validate(need(ncol(m_d_opt_ag_federov()$X)>0 & sum(is.na(m_d_opt_ag_federov()$X))==0,''))
@@ -6115,7 +6122,7 @@ pp_sigma_df<-reactive({
     })
   # Piano personalizzato -----------------------------------------------------------------  
   output$m_pp_titolo<-renderUI({
-    HTML("Piano personalizzato" )
+    HTML("Customized Design" )
   })
   output$m_pp_importa_incolla_spazio<-renderUI({
     req(input$m_pp_importa==1)
@@ -6123,7 +6130,7 @@ pp_sigma_df<-reactive({
   })
   output$m_pp_importa_incolla<-renderUI({
     req(input$m_pp_importa==1)
-    actionButton("m_pp_incolla", label = "Incolla")
+    actionButton("m_pp_incolla", label = "Paste")
   })
   output$m_pp_importa_incolla_spazio1<-renderUI({
     req(input$m_pp_importa==1)
@@ -6138,7 +6145,7 @@ pp_sigma_df<-reactive({
   m_pp_dis_paste<-eventReactive(input$m_pp_incolla,{
     df<-tryCatch(read.DIF(file = "clipboard",header = TRUE,transpose = TRUE),
                  #warning = function(w) {print('warning')},
-                 error = function(e) "Selezionare un dataset!")
+                 error = function(e) "Select a dataset!")
     df
   })
   m_pp_dis_xls<-reactive({
@@ -6154,7 +6161,7 @@ pp_sigma_df<-reactive({
     df
   })
   output$m_pp_dis<-renderTable({
-    validate(need(is.data.frame(m_pp_dis()),"Selezionare un dataset!\n "),
+    validate(need(is.data.frame(m_pp_dis()),"Select a dataset!\n "),
              errorClass = "myClass") 
     m_pp_dis()
   })
@@ -6238,7 +6245,7 @@ pp_sigma_df<-reactive({
   })
   output$m_pp_mod_variabx<-renderUI({
     validate(need(is.data.frame(m_pp_dis()),""))
-    selectizeInput(inputId = "m_pp_mod_variabx",label="Termini modello (x)",
+    selectizeInput(inputId = "m_pp_mod_variabx",label="Model terms (x)",
                    #div("Termini modello (x)",style="font-weight: 400"),
                    choices = m_pp_var_sel(),
                    selected=m_pp_var_sel(),
@@ -6263,17 +6270,17 @@ pp_sigma_df<-reactive({
   output$m_pp_matrdisp<-renderTable({
     validate(need(is.data.frame(m_pp_dis()),""))
     X<-model.matrix(as.formula(m_pp_formula()),m_pp_dis())
-    validate(need(qr(X)$rank==ncol(X),"Il programma è stato interrotto perché la matrice del modello ha rango insufficiente"))
+    validate(need(qr(X)$rank==ncol(X),"The program was aborted because the model matrix has insufficient rank"))
     D<-solve(t(X)%*%X)
     D
   })
   output$m_pp_vincoliinf_txt<-renderUI({
     validate(need(input$m_pp_vincoli==TRUE,' '))
-    textInput(inputId = "m_pp_vincoliinf_txt",label = h5("Inserire i vincoli inferiori separati da '&'"))
+    textInput(inputId = "m_pp_vincoliinf_txt",label = h5("Enter the lower constraints separated by '&'"))
   })
   output$m_pp_vincolisup_txt<-renderUI({
     validate(need(input$m_pp_vincoli==TRUE,' '))
-    textInput(inputId = "m_pp_vincolisup_txt",label = h5("Inserire i vincoli superiori separati da '&'"))
+    textInput(inputId = "m_pp_vincolisup_txt",label = h5("Enter the upper constraints separated by '&'"))
   })
   output$m_pp_livellolev<-renderPlot(width = 550,height = 500,{
 
@@ -6308,16 +6315,16 @@ pp_sigma_df<-reactive({
       if(txt_s=='')txt<-txt_i
       if(txt_i=='')txt<-txt_s
       cond<-tryCatch(eval(parse(text = txt)),
-                   error = function(e) "Scrivere correttamente le condizioni!")
+                   error = function(e) "Write the conditions correctly!")
     }
 
     if(!is.logical(cond)){
       plot(c(0, 1), c(0, 1), ann = F, bty = 'n', type = 'n', xaxt = 'n', yaxt = 'n')
-      text(0.5,0.5,"Scrivere correttamente le condizioni!",cex = 1.6, col = "red")
+      text(0.5,0.5,"Write the conditions correctly!",cex = 1.6, col = "red")
     }else{
       trian.new.cond=cbind(trian,new,cond)
       
-      ## Generates triangle in 2 (base,high), 3 (X1,X2,X3) variables satisfying contraints
+      ## Generates triangle in 2 (base,high), 3 (X1,X2,X3) variables satisfying constraints
       trian.cond=trian.new.cond[trian.new.cond$cond==TRUE,1:2]
       new.cond=trian.new.cond[trian.new.cond$cond==TRUE,3:5]
 
@@ -6404,20 +6411,20 @@ pp_sigma_df<-reactive({
       if(txt_s=='')txt<-txt_i
       if(txt_i=='')txt<-txt_s
       cond<-tryCatch(eval(parse(text = txt)),
-                     error = function(e) "Scrivere correttamente le condizioni!")
+                     error = function(e) "Write the conditions correctly!")
       
     }
 
     if(!is.logical(cond)){
       plot(c(0, 1), c(0, 1), ann = F, bty = 'n', type = 'n', xaxt = 'n', yaxt = 'n')
-      text(0.5,0.5,"Scrivere correttamente le condizioni!",cex = 1.6, col = "red")
+      text(0.5,0.5,"Write the conditions correctly!",cex = 1.6, col = "red")
     }else{
       
       #if(!is.logical(cond))cond<-rep(TRUE,4306)
       ## Generates data.frame triangle in 2 (base,high), 3 (X1,X2,X3) variables and column conditions (cond)
       trian.new.cond=cbind(trian,new,cond)
       
-      ## Generates triangle in 2 (base,high), 3 (X1,X2,X3) variables satisfying contraints
+      ## Generates triangle in 2 (base,high), 3 (X1,X2,X3) variables satisfying constraints
       trian.cond=trian.new.cond[trian.new.cond$cond==TRUE,1:2]
       new.cond=trian.new.cond[trian.new.cond$cond==TRUE,3:5]
 
@@ -6479,7 +6486,7 @@ pp_sigma_df<-reactive({
   output$m_pp_risptext<-renderUI({
     X<-model.matrix(as.formula(m_pp_formula()),m_pp_dis())
     if(qr(X)$rank<ncol(X))stop()
-    h4(paste('Risposte (',nrow(m_pp_dis()),', separate da spazio)',sep=''))
+    h4(paste('Responses (',nrow(m_pp_dis()),', separated by space)',sep=''))
   })
   output$m_pp_figura_risp<-renderPlot(width = 550,height = 500,{
     validate(need(length(as.numeric(unlist(strsplit(input$m_pp_risp," "))))==nrow(m_pp_dis()),''))
@@ -6608,10 +6615,10 @@ pp_sigma_df<-reactive({
       nd<-rbind.data.frame(x)
       colnames(nd)<-var
       prev<-predict(object = mod,newdata=nd)
-      attr(prev,'names')<-c('previsione')
+      attr(prev,'names')<-c('prediction')
       prev
     }else{
-      cat(paste('inserire le',length(var),'coord. del punto'))
+      cat(paste('Enter the',length(var),'coord. of the point'))
     }
   })
   output$m_pp_intprev<-renderPrint({
@@ -6632,13 +6639,13 @@ pp_sigma_df<-reactive({
         colnames(df)<-c('2.5%','97.5%','0.5%','99.5%','0.05%','99.95%')
         df
       }else{
-        cat('Non ci sono gradi di libertà')
+        cat('There are no degrees of freedom')
       }
     }else{
       req(input$m_pp_misind)
       x<-as.numeric(unlist(strsplit(input$m_pp_misind," ")))
       if(length(x)<=1){
-        cat('Almeno 2 misure')
+        cat('At least 2 measures')
       }else{
         gdl<-length(x)-1
         q<-qt(p = 0.975,df = gdl)
@@ -6670,7 +6677,7 @@ pp_sigma_df<-reactive({
     mod<-lm(x~1,as.data.frame(x))
     sm<-summary(mod)
     media<-predict(mod,interval = 'confidence')[1,]
-    attr(media,'names')<-c('media','2.5%','97.5%')
+    attr(media,'names')<-c('mean','2.5%','97.5%')
     round(media,3)
   })
   output$m_pp_misind_sd<-renderPrint({
@@ -6691,7 +6698,7 @@ pp_sigma_df<-reactive({
     df
   })
   output$m_pp_stimint_txt<-renderUI({
-    h4('Stima per intervallo')
+    h4('Confidence interval')
   })
   output$m_pp_stimint<-renderPrint({
     validate(need(length(as.numeric(unlist(strsplit(input$m_pp_risp," "))))==nrow(m_pp_dis()),''))
@@ -6717,14 +6724,14 @@ pp_sigma_df<-reactive({
         df
         
       }else{
-        cat('Non ci sono gradi di libertà')
+        cat('There are no degrees of freedom')
       }
       
     }else{
       #req(input$m_pp_misind)
       x<-as.numeric(unlist(strsplit(input$m_pp_misind," ")))
       if(length(x)<=1){
-        cat('Almeno 2 misure')
+        cat('At least 2 measures')
       }else{
         gdl<-length(x)-1
         q<-qt(p = 0.975,df = gdl)
@@ -6786,16 +6793,16 @@ pp_sigma_df<-reactive({
       if(txt_s=='')txt<-txt_i
       if(txt_i=='')txt<-txt_s
       cond<-tryCatch(eval(parse(text = txt)),
-                     error = function(e) "Scrivere correttamente le condizioni!")
+                     error = function(e) "Write the conditions correctly!")
     }
     
     if(!is.logical(cond)){
       plot(c(0, 1), c(0, 1), ann = F, bty = 'n', type = 'n', xaxt = 'n', yaxt = 'n')
-      text(0.5,0.5,"Scrivere correttamente le condizioni!",cex = 1.6, col = "red")
+      text(0.5,0.5,"Write the conditions correctly!",cex = 1.6, col = "red")
     }else{
       trian.new.cond=cbind(trian,new,cond)
       
-      ## Generates triangle in 2 (base,high), 3 (X1,X2,X3) variables satisfying contraints
+      ## Generates triangle in 2 (base,high), 3 (X1,X2,X3) variables satisfying constraints
       trian.cond=trian.new.cond[trian.new.cond$cond==TRUE,1:2]
       new.cond=trian.new.cond[trian.new.cond$cond==TRUE,3:5]
       
@@ -6889,16 +6896,16 @@ pp_sigma_df<-reactive({
       if(txt_s=='')txt<-txt_i
       if(txt_i=='')txt<-txt_s
       cond<-tryCatch(eval(parse(text = txt)),
-                     error = function(e) "Scrivere correttamente le condizioni!")
+                     error = function(e) "Write the conditions correctly!")
     }
     
     if(!is.logical(cond)){
       plot(c(0, 1), c(0, 1), ann = F, bty = 'n', type = 'n', xaxt = 'n', yaxt = 'n')
-      text(0.5,0.5,"Scrivere correttamente le condizioni!",cex = 1.6, col = "red")
+      text(0.5,0.5,"Write the conditions correctly!",cex = 1.6, col = "red")
     }else{
       trian.new.cond=cbind(trian,new,cond)
       
-      ## Generates triangle in 2 (base,high), 3 (X1,X2,X3) variables satisfying contraints
+      ## Generates triangle in 2 (base,high), 3 (X1,X2,X3) variables satisfying constraints
       trian.cond=trian.new.cond[trian.new.cond$cond==TRUE,1:2]
       new.cond=trian.new.cond[trian.new.cond$cond==TRUE,3:5]
       
@@ -6966,12 +6973,12 @@ pp_sigma_df<-reactive({
   })
   output$m_pp_livellorisp_col<-renderUI({
     selectInput("m_pp_livellorisp_col", label = h3(""), 
-                choices = list("blu" = 1, "verde" = 2, "rosso" = 3,"nero" = 4,"viola" = 5), 
+                choices = list("blu" = 1, "green" = 2, "red" = 3,"black" = 4,"purple" = 5), 
                 selected = 1,width="130px")
   })
   output$m_pp_livellorisp_zoom_txt<-renderUI({
     validate(need(input$m_pp_vincoli==TRUE & length(as.numeric(unlist(strsplit(input$m_pp_risp," "))))==nrow(m_pp_dis()),' '))
-    h3("Grafico superficie risposta 'zoommato'")
+    h3("'Zoomed' response surface plot")
   })
 
   # Codifica variabili -----------------------------------------------------------------  
@@ -6981,7 +6988,7 @@ pp_sigma_df<-reactive({
   })
   output$cd_var_importa_incolla<-renderUI({
     req(input$cd_var_importa==1)
-    actionButton("cd_var_incolla", label = "Incolla")
+    actionButton("cd_var_incolla", label = "Paste")
   })
   output$cd_var_importa_incolla_spazio1<-renderUI({
     req(input$cd_var_importa==1)
@@ -6996,7 +7003,7 @@ pp_sigma_df<-reactive({
   cd_var_dis_paste<-eventReactive(input$cd_var_incolla,{
     df<-tryCatch(read.DIF(file = "clipboard",header = TRUE,transpose = TRUE),
                  #warning = function(w) {print('warning')},
-                 error = function(e) "Selezionare un dataset!")
+                 error = function(e) "Select a dataset!")
     df
   })
   cd_var_dis_xls<-reactive({
@@ -7012,11 +7019,11 @@ pp_sigma_df<-reactive({
     df
   })
   output$cd_var_dis<-renderTable({
-    #validate(need(is.data.frame(cd_var_dis()),"Selezionare un dataset!\n "),
+    #validate(need(is.data.frame(cd_var_dis()),"Select un dataset!\n "),
              #errorClass = "myClass") 
     df<-tryCatch(cd_var_dis(),
-                 error = function(e) "Selezionare un dataset!")
-    validate(need(!is.character(df),'Selezionare un dataset!'))
+                 error = function(e) "Select a dataset!")
+    validate(need(!is.character(df),'Select a dataset!'))
     if(input$cd_var_dis_ha==1)df<-head(df)
     df
   })
@@ -7033,10 +7040,10 @@ pp_sigma_df<-reactive({
     var.trans
   })
   output$cd_var_dis_cod<-renderTable({
-    #validate(need(is.data.frame(cd_var_dis()),"Selezionare un dataset!\n "),
+    #validate(need(is.data.frame(cd_var_dis()),"Select un dataset!\n "),
     #errorClass = "myClass") 
     df<-tryCatch(cd_var_dis_cod(),
-                 error = function(e) "Selezionare un dataset!")
+                 error = function(e) "Select a dataset!")
     validate(need(!is.character(df),''))
     if(input$cd_var_dis_cod_ha==1)df<-head(df)
     df
@@ -7062,7 +7069,7 @@ pp_sigma_df<-reactive({
   })
   output$pareto_importa_incolla<-renderUI({
     req(input$pareto_importa==1)
-    actionButton("pareto_incolla", label = "Incolla")
+    actionButton("pareto_incolla", label = "Paste")
   })
   output$pareto_importa_incolla_spazio1<-renderUI({
     req(input$pareto_importa==1)
@@ -7077,7 +7084,7 @@ pp_sigma_df<-reactive({
   pareto_dis_paste<-eventReactive(input$pareto_incolla,{
     df<-tryCatch(read.DIF(file = "clipboard",header = TRUE,transpose = TRUE),
                  #warning = function(w) {print('warning')},
-                 error = function(e) "Selezionare un dataset!")
+                 error = function(e) "Select a dataset!")
     df
   })
   pareto_dis_xls<-reactive({
@@ -7187,7 +7194,7 @@ pp_sigma_df<-reactive({
     validate(need(ncol(Prev())>0,""))
     var<-colnames(Prev())
     validate(need(length(var)>2,''))
-    selectInput("pareto_selvar", label = h5("Selezionare 2 risposte"), 
+    selectInput("pareto_selvar", label = h5("Select 2 Responses"), 
                 choices = var, 
                 multiple = TRUE,selected = var[1:2])
   })
@@ -7208,7 +7215,7 @@ pp_sigma_df<-reactive({
     row.names(df)<-row.names(pareto_nondom())
     nr<-nrow(df)
     nc<-ncol(df)
-    if(nc>2)validate(need(length(input$pareto_selvar)==2,'Selezionare 2 risposte!'))
+    if(nc>2)validate(need(length(input$pareto_selvar)==2,'Select 2 Responses!'))
     var<-colnames(df)
     data<-matrix(0,nr,2)
     col<-c(1,2)

@@ -1380,6 +1380,6 @@ body<-dashboardBody(
 
 
 
-ui <- dashboardPage(skin="purple",header, sidebar, body)
+ui <- dashboardPage(header, sidebar, body,tags$head(tags$link(rel = "stylesheet", type = "text/css", href = "tema.css")))
 
 

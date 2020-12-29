@@ -631,6 +631,69 @@ server <- function (input , output, session ){
     FrF2::DanielPlot(mod,alpha = 0.05,main='',pch=19,cex.fac=1,col="blue",datax = FALSE)
     qqline(y = coef(mod)[-1],datax = FALSE,col="blue",lty=2)
     })
+  
+  
+  ####################
+  
+  
+  
+  output$fatt_compl_inter<-renderPlot({
+    validate(need(length(as.numeric(unlist(strsplit(input$fatt_compl_risp," "))))==2^input$fatt_compl_k,''))
+    req(input$fatt_compl_k)
+    validate(need(input$fatt_compl_k>1,''))
+    dis<-as.list(NULL)
+    for(i in 1:input$fatt_compl_k){
+      dis[[i]]=c(-1,1)
+    }
+    df<-expand.grid(dis)
+    var<-c(NULL)
+    for(i in 1:input$fatt_compl_k){
+      var[i]<-paste("x",i,sep="")
+      df[,i]<-as.integer(df[,i])
+    }
+    colnames(df)<-var
+    y<- as.numeric(unlist(strsplit(input$fatt_compl_risp," ")))
+    df<-cbind.data.frame(df,y=y)
+    m<-input$fatt_compl_k
+    lin<-NULL
+    if(m>1){
+      for(i in 2:m){
+        x<-paste("*x",i,sep="")
+        lin<-paste(lin,x)
+      }
+    }
+    frm<-formula(paste('y~x1',lin))
+    mod<-lm(frm,df)
+    
+    FrF2::IAPlot(mod)
+    
+  })
+  
+  
+  
+  
+  
+  ######################
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
   output$fatt_compl_grPareto<-renderPlot({
     validate(need(length(as.numeric(unlist(strsplit(input$fatt_compl_risp," "))))==2^input$fatt_compl_k,''))
     req(input$fatt_compl_k)

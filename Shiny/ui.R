@@ -5,6 +5,8 @@ header<-dashboardHeader(title = "DoE",
                         )
 
 sidebar<- dashboardSidebar(
+  #HTML('<p><center><font color="#CBA727" size=5px> E.C.A.I.F. </font></center>'),
+  #hr(color="#CBA727"),
     sidebarMenu(
                 menuItem(text = "Independent variables",icon = shiny::icon("codepen"),
                          menuSubItem(text = "Factorial Design",tabName = "fatt_compl"),
@@ -21,18 +23,28 @@ sidebar<- dashboardSidebar(
                 
                 hr(),
                 menuItem(text = "File",icon = icon("briefcase", lib = "font-awesome"),
-                        
                          menuSubItem(text = "Variables Coding",tabName = "cd_var"),
                          menuSubItem(text = "Pareto Front",tabName = "pareto"),
                          hr(),
-                         menuSubItem("Notes",tabName = "dispensa"),
-                         menuSubItem("Slides",tabName = "diapositive"),
-                         hr(),
+                         #menuSubItem("Notes",tabName = "dispensa"),
+                         #menuSubItem("Slides",tabName = "diapositive"),
+                         #hr(),
                          actionButton("quit", "Quit",onclick = "setTimeout(function(){window.close();},200);",
                                       style='padding:4px; font-size:80%'))
-                        ))
+                        )
+    
+    
+    #HTML('<br><br><br><br><br><br><br><br><br><br><br>')
+    #,
+    #div( 
+     #tags$img(src = base64enc::dataURI(file = "logo.jpg", mime = "image/jpg"), height="50%", width="50%"),
+     #style="text-align: center;")
+    #,
+   # HTML('<p><center><font color="#CBA727" size=5px> <br> MASTER <br> E.C.A.I.F. </font></center>')
+  )
 
 body<-dashboardBody(
+  tags$head(tags$link(rel = "stylesheet", type = "text/css", href = "custom.css")), 
   fluidRow(useShinyjs(),
            # Indipendenti --------------------------------------------------------------------
            tabItems(
@@ -78,9 +90,7 @@ body<-dashboardBody(
                                                     column(3,
                                                            br(),
                                                            div(style='font-size: 80%; width: 90%;',
-                                                               uiOutput('fatt_compl_lv_x')))
-                                           ),
-                                           
+                                                               uiOutput('fatt_compl_lv_x')))),
                                            tabPanel("Model",
                                                     column(4,
                                                            br(),
@@ -139,7 +149,26 @@ body<-dashboardBody(
                                                            textInput(inputId = "fatt_compl_misind",label = "Independent measures",value = ""),
                                                            verbatimTextOutput('fatt_compl_misind_media'),
                                                            verbatimTextOutput('fatt_compl_misind_sd'),
-                                                           verbatimTextOutput('fatt_compl_misind_gdl')))))),
+                                                           verbatimTextOutput('fatt_compl_misind_gdl')),
+                                                    
+                                                    
+                                                    
+                                                    ########################################
+                                                    column(12,
+                                                           plotOutput('fatt_compl_inter')
+                                                    )
+                                                    
+                                                    ###################################
+                                                    
+                                                    
+                                                    
+                                                    
+                                                    
+                                                    
+                                                    
+                                                    
+                                                    
+                                                    )))),
              
              tabItem(tabName = "frazion",
                      fluidPage(titlePanel(uiOutput("frazion_titolo")),
@@ -1316,56 +1345,59 @@ body<-dashboardBody(
                                  column(12,
                                         br(),
                                         verbatimTextOutput("pareto_graf_selez"))
-                                 ))),
+                                 )))
+             #,
                                              
              
              # File --------------------------------------------------------------------
              
-             tabItem(tabName = "dispensa",
-                     fluidPage(
-                       tabsetPanel(type = "tabs",
-                                   tabPanel("Glossario",
-                                            tags$iframe(style="height:600px; width:100%; scrolling=yes", 
-                                                        src="00_Glossario.pdf")),
-                                   tabPanel("Fattoriale completo",
-                                            tags$iframe(style="height:600px; width:100%; scrolling=yes", 
-                                                        src="01_Fattoriale_completo.pdf")),
-                                   tabPanel("Frazionario",
-                                            tags$iframe(style="height:600px; width:100%; scrolling=yes", 
-                                                        src="02_Disegni_frazionari.pdf")),
-                                   tabPanel("Plackett-Burmann",
-                                            tags$iframe(style="height:600px; width:100%; scrolling=yes", 
-                                                        src="03_Plackett_Burman.pdf")),
-                                   tabPanel("CCD",
-                                            tags$iframe(style="height:600px; width:100%; scrolling=yes", 
-                                                        src="04_CCD.pdf")),
-                                   tabPanel("D-ottimale",
-                                            tags$iframe(style="height:600px; width:100%; scrolling=yes", 
-                                                        src="05_D_ottimale.pdf")),
-                                   tabPanel("Miscele",
-                                            tags$iframe(style="height:600px; width:100%; scrolling=yes", 
-                                                        src="06_Miscele.pdf"))
+             #tabItem(tabName = "dispensa",
+                     #fluidPage(
+                       #tabsetPanel(type = "tabs",
+                                   #tabPanel("Glossario",
+                                            #tags$iframe(style="height:600px; width:100%; scrolling=yes", 
+                                                        #src="00_Glossario.pdf")),
+                                   #tabPanel("Fattoriale completo",
+                                            #tags$iframe(style="height:600px; width:100%; scrolling=yes", 
+                                                        #src="01_Fattoriale_completo.pdf")),
+                                   #tabPanel("Frazionario",
+                                            #tags$iframe(style="height:600px; width:100%; scrolling=yes", 
+                                                        #src="02_Disegni_frazionari.pdf")),
+                                   #tabPanel("Plackett-Burmann",
+                                            #tags$iframe(style="height:600px; width:100%; scrolling=yes", 
+                                                        #src="03_Plackett_Burman.pdf")),
+                                   #tabPanel("CCD",
+                                            #tags$iframe(style="height:600px; width:100%; scrolling=yes", 
+                                                        #src="04_CCD.pdf")),
+                                   #tabPanel("D-ottimale",
+                                            #tags$iframe(style="height:600px; width:100%; scrolling=yes", 
+                                                        #src="05_D_ottimale.pdf")),
+                                   #tabPanel("Miscele",
+                                            #tags$iframe(style="height:600px; width:100%; scrolling=yes", 
+                                                        #src="06_Miscele.pdf"))
                                    
-                       ))),
+                       #))),
              
-             tabItem(tabName = "diapositive",
-                     fluidPage(
-                       tabsetPanel(type = "tabs",
-                                   tabPanel("",
-                                            tags$iframe(style="height:600px; width:100%; scrolling=yes", 
-                                                        src="")),
-                                   tabPanel("",
-                                            tags$iframe(style="height:600px; width:100%; scrolling=yes", 
-                                                        src="")),
-                                   tabPanel("",
-                                            tags$iframe(style="height:600px; width:100%; scrolling=yes", 
-                                                        src="")),
-                                   tabPanel("",
-                                            tags$iframe(style="height:600px; width:100%; scrolling=yes", 
-                                                        src=""))
+             #tabItem(tabName = "diapositive",
+                     #fluidPage(
+                       #tabsetPanel(type = "tabs",
+                                   #tabPanel("",
+                                            #tags$iframe(style="height:600px; width:100%; scrolling=yes", 
+                                                        #src="")),
+                                   #tabPanel("",
+                                            #tags$iframe(style="height:600px; width:100%; scrolling=yes", 
+                                                        #src="")),
+                                   #tabPanel("",
+                                            #tags$iframe(style="height:600px; width:100%; scrolling=yes", 
+                                                        #src="")),
+                                   #tabPanel("",
+                                            #tags$iframe(style="height:600px; width:100%; scrolling=yes", 
+                                                        #src=""))
                                    
                                    
-                       )))
+                       #)
+          # )
+           #)
              
              
              
@@ -1380,6 +1412,7 @@ body<-dashboardBody(
 
 
 
-ui <- dashboardPage(header, sidebar, body,tags$head(tags$link(rel = "stylesheet", type = "text/css", href = "tema.css")))
+ui <- dashboardPage(skin="purple",header, sidebar, body,
+                    tags$head(tags$link(rel = "stylesheet", type = "text/css", href = "tema.css")))
 
 

@@ -636,8 +636,22 @@ server <- function (input , output, session ){
   ####################
   
   
+  output$fatt_compl_grinter_selvar<-renderUI({
+    validate(need(input$fatt_compl_k>2,''))
+    var<-c(NULL)
+    for(i in 1:input$fatt_compl_k){
+      var[i]<-paste("x",i,sep="")
+    }
+    selectInput("fatt_compl_grinter_selvar", label = h5("Select variables"), 
+                choices = var, 
+                multiple = TRUE,selected = var)
+  })
   
-  output$fatt_compl_inter<-renderPlot({
+
+  
+
+  
+  output$fatt_compl_grinter<-renderPlot({
     validate(need(length(as.numeric(unlist(strsplit(input$fatt_compl_risp," "))))==2^input$fatt_compl_k,''))
     req(input$fatt_compl_k)
     validate(need(input$fatt_compl_k>1,''))
@@ -665,7 +679,10 @@ server <- function (input , output, session ){
     frm<-formula(paste('y~x1',lin))
     mod<-lm(frm,df)
     
-    FrF2::IAPlot(mod)
+    eff <- c(1,2)
+    if(input$fatt_compl_k>2)eff <- which(var%in%input$fatt_compl_grinter_selvar)
+    
+    FrF2::IAPlot(mod, main='',cex=1.5,cex.lab=2,cex.xax=1.5,cex.yax=1.5, select = eff)
     
   })
   

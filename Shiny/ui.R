@@ -5,8 +5,8 @@ header<-dashboardHeader(title = "DoE",
                         )
 
 sidebar<- dashboardSidebar(
-  #HTML('<p><center><font color="#CBA727" size=5px> E.C.A.I.F. </font></center>'),
-  #hr(color="#CBA727"),
+  # HTML('<p><center><font color="#CBA727" size=5px> E.C.A.I.F. </font></center>'),
+  # hr(color="#CBA727"),
     sidebarMenu(
                 menuItem(text = "Independent variables",icon = shiny::icon("codepen"),
                          menuSubItem(text = "Factorial Design",tabName = "fatt_compl"),
@@ -26,20 +26,20 @@ sidebar<- dashboardSidebar(
                          menuSubItem(text = "Variables Coding",tabName = "cd_var"),
                          menuSubItem(text = "Pareto Front",tabName = "pareto"),
                          hr(),
-                         #menuSubItem("Notes",tabName = "dispensa"),
-                         #menuSubItem("Slides",tabName = "diapositive"),
-                         #hr(),
+                         # menuSubItem("Notes",tabName = "dispensa"),
+                         # menuSubItem("Slides",tabName = "diapositive"),
+                         # hr(),
                          actionButton("quit", "Quit",onclick = "setTimeout(function(){window.close();},200);",
                                       style='padding:4px; font-size:80%'))
                         )
     
     
-    #HTML('<br><br><br><br><br><br><br><br><br><br><br>')
-    #,
-    #div( 
-     #tags$img(src = base64enc::dataURI(file = "logo.jpg", mime = "image/jpg"), height="50%", width="50%"),
-     #style="text-align: center;")
-    #,
+   # HTML('<br><br><br><br><br><br><br><br><br><br><br>')
+   # ,
+   # div(
+   # tags$img(src = base64enc::dataURI(file = "logo.jpg", mime = "image/jpg"), height="50%", width="50%"),
+   # style="text-align: center;")
+   # ,
    # HTML('<p><center><font color="#CBA727" size=5px> <br> MASTER <br> E.C.A.I.F. </font></center>')
   )
 
@@ -155,7 +155,11 @@ body<-dashboardBody(
                                                     
                                                     ########################################
                                                     column(12,
-                                                           plotOutput('fatt_compl_inter')
+                                                           hr(),
+                                                           h3("Interaction plot"),
+                                                           uiOutput('fatt_compl_grinter_selvar')),
+                                                    column(12,
+                                                           plotOutput('fatt_compl_grinter')
                                                     )
                                                     
                                                     ###################################

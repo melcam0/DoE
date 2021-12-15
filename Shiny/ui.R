@@ -29,6 +29,12 @@ sidebar<- dashboardSidebar(
                          # menuSubItem("Notes",tabName = "dispensa"),
                          # menuSubItem("Slides",tabName = "diapositive"),
                          # hr(),
+                         tags$header(
+                           em(  
+                             a(href="https://dispensedoe.netlify.app/",  "   Dispense" ,target="_blank",style="white-space: pre-wrap")
+                           )
+                         ),
+                         br(),
                          actionButton("quit", "Quit",onclick = "setTimeout(function(){window.close();},200);",
                                       style='padding:4px; font-size:80%'))
                         )
@@ -150,29 +156,13 @@ body<-dashboardBody(
                                                            verbatimTextOutput('fatt_compl_misind_media'),
                                                            verbatimTextOutput('fatt_compl_misind_sd'),
                                                            verbatimTextOutput('fatt_compl_misind_gdl')),
-                                                    
-                                                    
-                                                    
-                                                    ########################################
                                                     column(12,
                                                            hr(),
                                                            h3("Interaction plot"),
                                                            uiOutput('fatt_compl_grinter_selvar')),
                                                     column(12,
                                                            plotOutput('fatt_compl_grinter')
-                                                    )
-                                                    
-                                                    ###################################
-                                                    
-                                                    
-                                                    
-                                                    
-                                                    
-                                                    
-                                                    
-                                                    
-                                                    
-                                                    )))),
+                                                    ))))),
              
              tabItem(tabName = "frazion",
                      fluidPage(titlePanel(uiOutput("frazion_titolo")),
@@ -285,7 +275,14 @@ body<-dashboardBody(
                                                            textInput(inputId = "frazion_misind",label = "Independent measures",value = ""),
                                                            verbatimTextOutput('frazion_misind_media'),
                                                            verbatimTextOutput('frazion_misind_sd'),
-                                                           verbatimTextOutput('frazion_misind_gdl')))))),
+                                                           verbatimTextOutput('frazion_misind_gdl')),
+                                                    column(12,
+                                                           hr(),
+                                                           h3("Interaction plot"),
+                                                           uiOutput('frazion_grinter_selvar')),
+                                                    column(12,
+                                                           plotOutput('frazion_grinter')
+                                                    ))))),
              
              tabItem(tabName = "pb",
                      fluidPage(titlePanel(uiOutput("pb_titolo")),
@@ -808,12 +805,15 @@ body<-dashboardBody(
                                                            br(),
                                                            div(style='font-size: 80%; width: 90%;',
                                                                uiOutput('pp_lv_x_icp'))),
-                                                    
-                                                    
-                                                    
-                                                    
-                                                    
-                                                    column(12),
+                                                    column(12,
+                                                           hr(),
+                                                           h3("Interaction plot"),
+                                                           uiOutput('pp_grinter_selvar')),
+                                                    column(12,
+                                                           plotOutput('pp_grinter')),
+                                                    column(12,
+                                                           hr(),
+                                                           hr()),
                                                     column(6,
                                                            hr(),
                                                            h3("Residuals plot"),
@@ -826,14 +826,8 @@ body<-dashboardBody(
                                                            plotOutput('pp_graf_yfit',brush = brushOpts(id="pp_graf_yfit_brush",resetOnNew = TRUE)),
                                                            hr(),
                                                            verbatimTextOutput('pp_graf_yfit_brush'))
-                                                    
-                                                    
-                                                    
-                                                    
-                                                    
-                                                    
-                                                    
-                                                    
+
+              
                                            )
                                            
                                            
@@ -1417,6 +1411,6 @@ body<-dashboardBody(
 
 
 ui <- dashboardPage(skin="purple",header, sidebar, body,
-                    tags$head(tags$link(rel = "stylesheet", type = "text/css", href = "tema.css")))
+                    tags$head(HTML("<title>DoE</title>"),tags$link(rel = "stylesheet", type = "text/css", href = "tema.css")))
 
 

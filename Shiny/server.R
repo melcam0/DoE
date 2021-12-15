@@ -1,5 +1,6 @@
 rm(list = ls())
 
+
 vif<-function (M){
   M = as.data.frame(M)
   if (colnames(M)[1] == "(Intercept)") 
@@ -13,6 +14,7 @@ vif<-function (M){
 }
 
 server <- function (input , output, session ){
+  
   
   observeEvent(input$openModal, {
     showModal(
@@ -546,7 +548,7 @@ server <- function (input , output, session ){
     }
     frm<-formula(paste('y~x1',lin))
     mod<-lm(frm,df)
-    round(mod$coefficients,2)
+    round(mod$coefficients,4)
   })
   output$fatt_compl_grcoeff<-renderPlot({
     validate(need(length(as.numeric(unlist(strsplit(input$fatt_compl_risp," "))))==2^input$fatt_compl_k,''))
@@ -631,11 +633,7 @@ server <- function (input , output, session ){
     FrF2::DanielPlot(mod,alpha = 0.05,main='',pch=19,cex.fac=1,col="blue",datax = FALSE)
     qqline(y = coef(mod)[-1],datax = FALSE,col="blue",lty=2)
     })
-  
-  
-  ####################
-  
-  
+
   output$fatt_compl_grinter_selvar<-renderUI({
     validate(need(input$fatt_compl_k>2,''))
     var<-c(NULL)
@@ -646,11 +644,7 @@ server <- function (input , output, session ){
                 choices = var, 
                 multiple = TRUE,selected = var)
   })
-  
 
-  
-
-  
   output$fatt_compl_grinter<-renderPlot({
     validate(need(length(as.numeric(unlist(strsplit(input$fatt_compl_risp," "))))==2^input$fatt_compl_k,''))
     req(input$fatt_compl_k)
@@ -685,31 +679,6 @@ server <- function (input , output, session ){
     FrF2::IAPlot(mod, main='',cex=1.5,cex.lab=2,cex.xax=1.5,cex.yax=1.5, select = eff)
     
   })
-  
-  
-  
-  
-  
-  ######################
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
   
   output$fatt_compl_grPareto<-renderPlot({
     validate(need(length(as.numeric(unlist(strsplit(input$fatt_compl_risp," "))))==2^input$fatt_compl_k,''))
@@ -839,7 +808,7 @@ server <- function (input , output, session ){
                      prev-q1*s*sqrt(d),prev+q1*s*sqrt(d),
                      prev-q2*s*sqrt(d),prev+q2*s*sqrt(d))
       
-      df<-cbind.data.frame(round(df,3))
+      df<-cbind.data.frame(round(df,4))
       colnames(df)<-c('2.5%','97.5%','0.5%','99.5%','0.05%','99.95%')
       df
     }
@@ -851,14 +820,14 @@ server <- function (input , output, session ){
     sm<-summary(mod)
     media<-predict(mod,interval = 'confidence')[1,]
     attr(media,'names')<-c('mean','2.5%','97.5%')
-    round(media,3)
+    round(media,4)
   })
   output$fatt_compl_misind_sd<-renderPrint({
     validate(need(length(as.numeric(unlist(strsplit(input$fatt_compl_misind," "))))>1,''))
     x<-as.numeric(unlist(strsplit(input$fatt_compl_misind," ")))
     mod<-lm(x~1,as.data.frame(x))
     sm<-summary(mod)
-    df<-c(round(sm$sigma,3))
+    df<-c(round(sm$sigma,4))
     attr(df,'names')<-c('dev.st.')
     df
   })
@@ -867,7 +836,7 @@ server <- function (input , output, session ){
     x<-as.numeric(unlist(strsplit(input$fatt_compl_misind," ")))
     gdf<-(length(as.numeric(unlist(strsplit(input$fatt_compl_misind," "))))-1)
     df<-c(gdf)
-    attr(df,'names')<-c( 'gdl')
+    attr(df,'names')<-c( 'dof')
     df
   })
   output$fatt_compl_stimint_txt<-renderUI({
@@ -928,7 +897,7 @@ server <- function (input , output, session ){
         if(pval[i]<0.001)lab[i]<-'***'
       }
       
-      df<-cbind.data.frame(round(df[,1:7],3),round(df[,8],4),lab)
+      df<-cbind.data.frame(round(df[,1:7],4),round(df[,8],4),lab)
       colnames(df)<-c('val','2.5%','97.5%','0.5%','99.5%','0.05%','99.95%','p-value','')
       df[,-1]
     }
@@ -1452,7 +1421,7 @@ server <- function (input , output, session ){
     }
     frm<-as.formula(frm)
     mod<-lm(frm,df)
-    round(mod$coefficients,2)
+    round(mod$coefficients,4)
   })
   output$frazion_grcoeff<-renderPlot({
     validate(need(length(as.numeric(unlist(strsplit(input$frazion_risp," "))))==2^(input$frazion_k-input$frazion_p),''))
@@ -1693,7 +1662,7 @@ server <- function (input , output, session ){
                      prev-q1*s*sqrt(d),prev+q1*s*sqrt(d),
                      prev-q2*s*sqrt(d),prev+q2*s*sqrt(d))
       
-      df<-cbind.data.frame(round(df,3))
+      df<-cbind.data.frame(round(df,4))
       colnames(df)<-c('2.5%','97.5%','0.5%','99.5%','0.05%','99.95%')
       df
     }
@@ -1705,14 +1674,14 @@ server <- function (input , output, session ){
     sm<-summary(mod)
     media<-predict(mod,interval = 'confidence')[1,]
     attr(media,'names')<-c('mean','2.5%','97.5%')
-    round(media,3)
+    round(media,4)
   })
   output$frazion_misind_sd<-renderPrint({
     validate(need(length(as.numeric(unlist(strsplit(input$frazion_misind," "))))>1,''))
     x<-as.numeric(unlist(strsplit(input$frazion_misind," ")))
     mod<-lm(x~1,as.data.frame(x))
     sm<-summary(mod)
-    df<-c(round(sm$sigma,3))
+    df<-c(round(sm$sigma,4))
     attr(df,'names')<-c('dev.st.')
     df
   })
@@ -1721,7 +1690,7 @@ server <- function (input , output, session ){
     x<-as.numeric(unlist(strsplit(input$frazion_misind," ")))
     gdf<-(length(as.numeric(unlist(strsplit(input$frazion_misind," "))))-1)
     df<-c(gdf)
-    attr(df,'names')<-c( 'gdl')
+    attr(df,'names')<-c( 'dof')
     df
   })
   output$frazion_stimint_txt<-renderUI({
@@ -1790,7 +1759,7 @@ server <- function (input , output, session ){
         if(pval[i]<0.001)lab[i]<-'***'
       }
       
-      df<-cbind.data.frame(round(df[,1:7],3),round(df[,8],4),lab)
+      df<-cbind.data.frame(round(df[,1:7],4),round(df[,8],4),lab)
       colnames(df)<-c('val','2.5%','97.5%','0.5%','99.5%','0.05%','99.95%','p-value','')
       df[,-1]
     }
@@ -1990,6 +1959,52 @@ server <- function (input , output, session ){
     sliderInput('frazion_rp_x',label = 'Vertical rotation',min = 0,max = 90,value = 60,step = 10)
   })
   
+  output$frazion_grinter_selvar<-renderUI({
+    validate(need(input$frazion_k>2,''))
+    var<-c(NULL)
+    for(i in 1:input$frazion_k){
+      var[i]<-paste("x",i,sep="")
+    }
+    selectInput("frazion_grinter_selvar", label = h5("Select variables"), 
+                choices = var, 
+                multiple = TRUE,selected = var)
+  })
+
+  output$frazion_grinter<-renderPlot({
+    validate(need(length(as.numeric(unlist(strsplit(input$frazion_risp," "))))==2^(input$frazion_k-input$frazion_p),''))
+    validate(need(length(input$frazion_mod_selvar)==2,''))
+    req(input$frazion_k)
+    validate(need(input$frazion_k>1,''))
+    var<-c(NULL)
+    for(i in 1:input$frazion_k){
+      var[i]<-paste("x",i,sep="")
+    }
+    dis<-attr(dis_frazionario(),"desnum")
+    dsg<-cbind.data.frame(dis)
+    y<- as.numeric(unlist(strsplit(input$frazion_risp," ")))
+    df<-cbind.data.frame(dsg,y=y)
+    m<-input$frazion_k
+    lin<-NULL
+    if(m>1){
+      for(i in 2:m){
+        x<-paste("*x",i,sep="")
+        lin<-paste(lin,x)
+      }
+    }
+    frm<-formula(paste('y~x1',lin))
+    df<-cbind.data.frame(dis,y=y)
+    mod<-lm(frm,df)
+    coeff<-names(mod$effects)
+    n<-sum(!is.na(mod$coefficients))
+    frm<-'y ~ 1'
+    for (i in 2:n){
+      frm<-paste(frm,'+', coeff[i])
+    }
+    eff <- c(1,2)
+    if(input$frazion_k>2)eff <- which(var%in%input$frazion_grinter_selvar)
+    FrF2::IAPlot(mod, main='',cex=1.5,cex.lab=2,cex.xax=1.5,cex.yax=1.5, select = eff)
+  })
+
   # Plackett-Burman -----------------------------------------------------------------
   
   output$pb_titolo<-renderUI({
@@ -2157,7 +2172,7 @@ server <- function (input , output, session ){
     lin<-paste('y~x1',lin,sep="")
     frm<-formula(lin)
     mod<-lm(frm,df)
-    round(mod$coefficients,2)
+    round(mod$coefficients,4)
   })
   output$pb_grcoeff<-renderPlot({
     validate(need(length(as.numeric(unlist(strsplit(input$pb_risp," "))))==input$pb_n,''))
@@ -2708,7 +2723,7 @@ server <- function (input , output, session ){
     frm<-paste(lin,"+",quad,sep="")
     frm<-as.formula(frm)
     mod<-lm(frm,df)
-    round(mod$coefficients,2)
+    round(mod$coefficients,4)
   })
   output$ccd_grcoeff<-renderPlot({
     validate(need(length(as.numeric(unlist(strsplit(input$ccd_risp," "))))==nrow(dis_ccd()),''))
@@ -2832,7 +2847,7 @@ server <- function (input , output, session ){
     prev2<-predict(object = mod,newdata=nd,interval='confidence',level = 0.999)
 
     df<-cbind.data.frame(prev,prev1,prev2)
-    df<-cbind.data.frame(round(df[,-c(1,4,7)],3))
+    df<-cbind.data.frame(round(df[,-c(1,4,7)],4))
     colnames(df)<-c('2.5%','97.5%','0.5%','99.5%','0.05%','99.95%')
     df
   })
@@ -2843,14 +2858,14 @@ server <- function (input , output, session ){
     sm<-summary(mod)
     media<-predict(mod,interval = 'confidence')[1,]
     attr(media,'names')<-c('mean','2.5%','97.5%')
-    round(media,3)
+    round(media,4)
   })
   output$ccd_misind_sd<-renderPrint({
     validate(need(length(as.numeric(unlist(strsplit(input$ccd_misind," "))))>1,''))
     x<-as.numeric(unlist(strsplit(input$ccd_misind," ")))
     mod<-lm(x~1,as.data.frame(x))
     sm<-summary(mod)
-    df<-c(round(sm$sigma,3))
+    df<-c(round(sm$sigma,4))
     attr(df,'names')<-c('dev.st.')
     df
   })
@@ -2859,7 +2874,7 @@ server <- function (input , output, session ){
     x<-as.numeric(unlist(strsplit(input$ccd_misind," ")))
     gdf<-(length(as.numeric(unlist(strsplit(input$ccd_misind," "))))-1)
     df<-c(gdf)
-    attr(df,'names')<-c( 'gdl')
+    attr(df,'names')<-c( 'dof')
     df
   })
   output$ccd_stimint_txt<-renderUI({
@@ -2909,7 +2924,7 @@ server <- function (input , output, session ){
         if(pval[i]<0.01)lab[i]<-'**'
         if(pval[i]<0.001)lab[i]<-'***'
       }
-      df<-cbind.data.frame(round(df[,1:6],3),round(df[,7],4),lab)
+      df<-cbind.data.frame(round(df[,1:6],4),round(df[,7],4),lab)
       colnames(df)<-c('2.5%','97.5%','0.5%','99.5%','0.05%','99.95%','p-value','')
       df
   })
@@ -3342,6 +3357,7 @@ server <- function (input , output, session ){
   d_opt_cp_paste<-eventReactive(input$d_opt_incolla,{
     df<-tryCatch(read.DIF(file = "clipboard",header = TRUE,transpose = TRUE),
                  error = function(e) "Select a dataset!")
+    df <- type.convert(df)
     df
   })
   d_opt_cp_xls<-reactive({
@@ -3813,6 +3829,7 @@ server <- function (input , output, session ){
   d_opt_ag_dis_paste<-eventReactive(input$d_opt_ag_incolla,{
     df<-tryCatch(read.DIF(file = "clipboard",header = TRUE,transpose = TRUE),
                  error = function(e) "Select a dataset!")
+    df <- type.convert(df)
     df
   })
   d_opt_ag_dis_xls<-reactive({
@@ -4089,6 +4106,7 @@ server <- function (input , output, session ){
     df<-tryCatch(read.DIF(file = "clipboard",header = TRUE,transpose = TRUE),
                  #warning = function(w) {print('warning')},
                  error = function(e) "Select a dataset!")
+    df <- type.convert(df)
     df
   })
   pp_dis_xls<-reactive({
@@ -4414,7 +4432,7 @@ server <- function (input , output, session ){
   output$pp_coeff<-renderPrint({
     X<-model.matrix(as.formula(pp_formula()),pp_dis())
     if(qr(X)$rank<ncol(X))stop()
-    round(pp_mod()$coefficients,2)
+    round(pp_mod()$coefficients,4)
   })
   output$pp_grcoeff<-renderPlot({
     X<-model.matrix(as.formula(pp_formula()),pp_dis())
@@ -4505,8 +4523,6 @@ server <- function (input , output, session ){
     }
     validate(need(n_lev==rep(2,n),'This routine applies to 2-level factorial designs!'))
     mod<-pp_mod()
-    
-    
     df_coeff<-mod$coefficients[-1]
     df_coeff<-df_coeff[order(abs(df_coeff),decreasing = TRUE)]
     par_coeff<-(df_coeff^2/sum(df_coeff^2))*100
@@ -4542,7 +4558,7 @@ server <- function (input , output, session ){
       prev1<-predict(object = mod,newdata=nd,interval='confidence',level = 0.99)
       prev2<-predict(object = mod,newdata=nd,interval='confidence',level = 0.999)
       df<-cbind.data.frame(prev,prev1,prev2)
-      df<-cbind.data.frame(round(df[,-c(1,4,7)],3))
+      df<-cbind.data.frame(round(df[,-c(1,4,7)],4))
       colnames(df)<-c('2.5%','97.5%','0.5%','99.5%','0.05%','99.95%')
       df
       }else{
@@ -4572,7 +4588,7 @@ server <- function (input , output, session ){
         df<-data.frame(prev-q*s*sqrt(d),prev+q*s*sqrt(d),
                        prev-q1*s*sqrt(d),prev+q1*s*sqrt(d),
                        prev-q2*s*sqrt(d),prev+q2*s*sqrt(d))
-        df<-cbind.data.frame(round(df,3))
+        df<-cbind.data.frame(round(df,4))
         colnames(df)<-c('2.5%','97.5%','0.5%','99.5%','0.05%','99.95%')
         df
       }
@@ -4585,14 +4601,14 @@ server <- function (input , output, session ){
     sm<-summary(mod)
     media<-predict(mod,interval = 'confidence')[1,]
     attr(media,'names')<-c('mean','2.5%','97.5%')
-    round(media,3)
+    round(media,4)
   })
   output$pp_misind_sd<-renderPrint({
     validate(need(length(as.numeric(unlist(strsplit(input$pp_misind," "))))>1,''))
     x<-as.numeric(unlist(strsplit(input$pp_misind," ")))
     mod<-lm(x~1,as.data.frame(x))
     sm<-summary(mod)
-    df<-c(round(sm$sigma,3))
+    df<-c(round(sm$sigma,4))
     attr(df,'names')<-c('dev.st.')
     df
   })
@@ -4601,7 +4617,7 @@ server <- function (input , output, session ){
     x<-as.numeric(unlist(strsplit(input$pp_misind," ")))
     gdf<-(length(as.numeric(unlist(strsplit(input$pp_misind," "))))-1)
     df<-c(gdf)
-    attr(df,'names')<-c( 'gdl')
+    attr(df,'names')<-c( 'dof')
     df
   })
   output$pp_stimint_txt<-renderUI({
@@ -4627,7 +4643,7 @@ server <- function (input , output, session ){
           if(pval[i]<0.01)lab[i]<-'**'
           if(pval[i]<0.001)lab[i]<-'***'
         }
-        df<-cbind.data.frame(round(df[,1:6],3),round(df[,7],4),lab)
+        df<-cbind.data.frame(round(df[,1:6],4),round(df[,7],4),lab)
         colnames(df)<-c('2.5%','97.5%','0.5%','99.5%','0.05%','99.95%','p-value','')
         df
       }else{
@@ -4660,7 +4676,7 @@ server <- function (input , output, session ){
           if(pval[i]<0.01)lab[i]<-'**'
           if(pval[i]<0.001)lab[i]<-'***'
         }
-        df<-cbind.data.frame(round(df[,1:7],3),round(df[,8],4),lab)
+        df<-cbind.data.frame(round(df[,1:7],4),round(df[,8],4),lab)
         colnames(df)<-c('val','2.5%','97.5%','0.5%','99.5%','0.05%','99.95%','p-value','')
         df[,-1]
       }
@@ -5054,9 +5070,9 @@ pp_sigma_df<-reactive({
     req(input$pp_graf_res_brush)
     brush <- input$pp_graf_res_brush
     df<-cbind.data.frame(pp_mod()$residuals,c(1:length(pp_mod()$residuals)))
-    colnames(df)<-c("residuals","indice")
+    colnames(df)<-c("residuals","sample number")
     cr<-which(df[,1]>brush$ymin & df[,1]<brush$ymax & df[,2] >brush$xmin & df[,2] < brush$xmax)
-    round(df[cr,1,drop=FALSE],3)
+    round(df[cr,1,drop=FALSE],4)
   })
   output$pp_graf_yfit<-renderPlot({
     df<-cbind.data.frame(pp_mod()$fitted.value,pp_mod()$model$y)
@@ -5071,8 +5087,27 @@ pp_sigma_df<-reactive({
     df<-cbind.data.frame(pp_mod()$fitted.value,pp_mod()$model$y)
     colnames(df)<-c("yhat","y")
     cr<-which(df[,1]>brush$ymin & df[,1]<brush$ymax & df[,2] >brush$xmin & df[,2] < brush$xmax)
-    round(df[cr,],3)
+    round(df[cr,],4)
   })
+  output$pp_grinter_selvar<-renderUI({
+    var<-colnames(pp_dis())
+    var<-var[var%in%input$pp_mod_variabx]
+    validate(need(length(var)>2,''))
+    selectInput("pp_grinter_selvar", label = h5("Select variables"), 
+                choices = var, 
+                multiple = TRUE,selected = var)
+  })
+  output$pp_grinter<-renderPlot({
+    req(input$pp_mod_variabx)
+    var<-colnames(pp_dis())
+    var<-var[var%in%input$pp_mod_variabx]
+    validate(need(length(var)>1,'Model with less than two variables!'))
+    mod<-pp_mod()
+    eff <- c(1,2)
+    if(length(var)>2)eff <- which(var%in%input$pp_grinter_selvar)
+    FrF2::IAPlot(mod, main='',cex=1.5,cex.lab=2,cex.xax=1.5,cex.yax=1.5, select = eff)
+  })
+
 
 ## Miscele -----------------------------------------------------------------
 # Simplex Design -----------------------------------------------------------------
@@ -5315,7 +5350,7 @@ pp_sigma_df<-reactive({
     y<- as.numeric(unlist(strsplit(input$m_simplex_risp," ")))
     df<-cbind.data.frame(m_simplex_dis()[,2:4],y=y)
     mod<-lm(frm,df)
-    round(mod$coefficients,2)
+    round(mod$coefficients,4)
   })
 
   output$m_simplex_grcoeff<-renderPlot({
@@ -5410,7 +5445,7 @@ pp_sigma_df<-reactive({
         prev1<-predict(object = mod,newdata=nd,interval='confidence',level = 0.99)
         prev2<-predict(object = mod,newdata=nd,interval='confidence',level = 0.999)
         df<-cbind.data.frame(prev,prev1,prev2)
-        df<-cbind.data.frame(round(df[,-c(1,4,7)],3))
+        df<-cbind.data.frame(round(df[,-c(1,4,7)],4))
         colnames(df)<-c('2.5%','97.5%','0.5%','99.5%','0.05%','99.95%')
         df
       }else{
@@ -5441,7 +5476,7 @@ pp_sigma_df<-reactive({
         df<-data.frame(prev-q*s*sqrt(d),prev+q*s*sqrt(d),
                        prev-q1*s*sqrt(d),prev+q1*s*sqrt(d),
                        prev-q2*s*sqrt(d),prev+q2*s*sqrt(d))
-        df<-cbind.data.frame(round(df,3))
+        df<-cbind.data.frame(round(df,4))
         colnames(df)<-c('2.5%','97.5%','0.5%','99.5%','0.05%','99.95%')
         df
       }
@@ -5455,7 +5490,7 @@ pp_sigma_df<-reactive({
     sm<-summary(mod)
     media<-predict(mod,interval = 'confidence')[1,]
     attr(media,'names')<-c('mean','2.5%','97.5%')
-    round(media,3)
+    round(media,4)
   })
   
   output$m_simplex_misind_sd<-renderPrint({
@@ -5463,7 +5498,7 @@ pp_sigma_df<-reactive({
     x<-as.numeric(unlist(strsplit(input$m_simplex_misind," ")))
     mod<-lm(x~1,as.data.frame(x))
     sm<-summary(mod)
-    df<-c(round(sm$sigma,3))
+    df<-c(round(sm$sigma,4))
     attr(df,'names')<-c('dev.st.')
     df
   })
@@ -5473,7 +5508,7 @@ pp_sigma_df<-reactive({
     x<-as.numeric(unlist(strsplit(input$m_simplex_misind," ")))
     gdf<-(length(as.numeric(unlist(strsplit(input$m_simplex_misind," "))))-1)
     df<-c(gdf)
-    attr(df,'names')<-c( 'gdl')
+    attr(df,'names')<-c( 'dof')
     df
   })
 
@@ -5528,7 +5563,7 @@ pp_sigma_df<-reactive({
           if(pval[i]<0.01)lab[i]<-'**'
           if(pval[i]<0.001)lab[i]<-'***'
         }
-        df<-cbind.data.frame(round(df[,1:6],3),round(df[,7],4),lab)
+        df<-cbind.data.frame(round(df[,1:6],4),round(df[,7],4),lab)
         colnames(df)<-c('2.5%','97.5%','0.5%','99.5%','0.05%','99.95%','p-value','')
         df
       }else{
@@ -5558,7 +5593,7 @@ pp_sigma_df<-reactive({
           if(pval[i]<0.01)lab[i]<-'**'
           if(pval[i]<0.001)lab[i]<-'***'
         }
-        df<-cbind.data.frame(round(df[,1:7],3),round(df[,8],4),lab)
+        df<-cbind.data.frame(round(df[,1:7],4),round(df[,8],4),lab)
         colnames(df)<-c('val','2.5%','97.5%','0.5%','99.5%','0.05%','99.95%','p-value','')
         df[,-1]
       }
@@ -5701,6 +5736,7 @@ pp_sigma_df<-reactive({
   m_d_opt_cp_paste<-eventReactive(input$m_d_opt_incolla,{
     df<-tryCatch(read.DIF(file = "clipboard",header = TRUE,transpose = TRUE),
                  error = function(e) "Select a dataset!")
+    df <- type.convert(df)
     df
   })
   m_d_opt_cp_xls<-reactive({
@@ -6019,6 +6055,7 @@ pp_sigma_df<-reactive({
   m_d_opt_ag_dis_paste<-eventReactive(input$m_d_opt_ag_incolla,{
     df<-tryCatch(read.DIF(file = "clipboard",header = TRUE,transpose = TRUE),
                  error = function(e) "Select a dataset!")
+    df <- type.convert(df)
     df
   })
   m_d_opt_ag_dis_xls<-reactive({
@@ -6226,6 +6263,7 @@ pp_sigma_df<-reactive({
     df<-tryCatch(read.DIF(file = "clipboard",header = TRUE,transpose = TRUE),
                  #warning = function(w) {print('warning')},
                  error = function(e) "Select a dataset!")
+    df <- type.convert(df)
     df
   })
   m_pp_dis_xls<-reactive({
@@ -6639,7 +6677,7 @@ pp_sigma_df<-reactive({
   output$m_pp_coeff<-renderPrint({
     X<-model.matrix(as.formula(m_pp_formula()),m_pp_dis())
     if(qr(X)$rank<ncol(X))stop()
-    round(m_pp_mod()$coefficients,2)
+    round(m_pp_mod()$coefficients,4)
   })
   output$m_pp_grcoeff<-renderPlot({
     X<-model.matrix(as.formula(m_pp_formula()),m_pp_dis())
@@ -6715,7 +6753,7 @@ pp_sigma_df<-reactive({
         prev1<-predict(object = mod,newdata=nd,interval='confidence',level = 0.99)
         prev2<-predict(object = mod,newdata=nd,interval='confidence',level = 0.999)
         df<-cbind.data.frame(prev,prev1,prev2)
-        df<-cbind.data.frame(round(df[,-c(1,4,7)],3))
+        df<-cbind.data.frame(round(df[,-c(1,4,7)],4))
         colnames(df)<-c('2.5%','97.5%','0.5%','99.5%','0.05%','99.95%')
         df
       }else{
@@ -6745,7 +6783,7 @@ pp_sigma_df<-reactive({
         df<-data.frame(prev-q*s*sqrt(d),prev+q*s*sqrt(d),
                        prev-q1*s*sqrt(d),prev+q1*s*sqrt(d),
                        prev-q2*s*sqrt(d),prev+q2*s*sqrt(d))
-        df<-cbind.data.frame(round(df,3))
+        df<-cbind.data.frame(round(df,4))
         colnames(df)<-c('2.5%','97.5%','0.5%','99.5%','0.05%','99.95%')
         df
       }
@@ -6758,14 +6796,14 @@ pp_sigma_df<-reactive({
     sm<-summary(mod)
     media<-predict(mod,interval = 'confidence')[1,]
     attr(media,'names')<-c('mean','2.5%','97.5%')
-    round(media,3)
+    round(media,4)
   })
   output$m_pp_misind_sd<-renderPrint({
     validate(need(length(as.numeric(unlist(strsplit(input$m_pp_misind," "))))>1,''))
     x<-as.numeric(unlist(strsplit(input$m_pp_misind," ")))
     mod<-lm(x~1,as.data.frame(x))
     sm<-summary(mod)
-    df<-c(round(sm$sigma,3))
+    df<-c(round(sm$sigma,4))
     attr(df,'names')<-c('dev.st.')
     df
   })
@@ -6774,7 +6812,7 @@ pp_sigma_df<-reactive({
     x<-as.numeric(unlist(strsplit(input$m_pp_misind," ")))
     gdf<-(length(as.numeric(unlist(strsplit(input$m_pp_misind," "))))-1)
     df<-c(gdf)
-    attr(df,'names')<-c( 'gdl')
+    attr(df,'names')<-c( 'dof')
     df
   })
   output$m_pp_stimint_txt<-renderUI({
@@ -6799,7 +6837,7 @@ pp_sigma_df<-reactive({
           if(pval[i]<0.01)lab[i]<-'**'
           if(pval[i]<0.001)lab[i]<-'***'
         }
-        df<-cbind.data.frame(round(df[,1:6],3),round(df[,7],4),lab)
+        df<-cbind.data.frame(round(df[,1:6],4),round(df[,7],4),lab)
         colnames(df)<-c('2.5%','97.5%','0.5%','99.5%','0.05%','99.95%','p-value','')
         df
         
@@ -6834,7 +6872,7 @@ pp_sigma_df<-reactive({
           if(pval[i]<0.01)lab[i]<-'**'
           if(pval[i]<0.001)lab[i]<-'***'
         }
-        df<-cbind.data.frame(round(df[,1:7],3),round(df[,8],4),lab)
+        df<-cbind.data.frame(round(df[,1:7],4),round(df[,8],4),lab)
         colnames(df)<-c('val','2.5%','97.5%','0.5%','99.5%','0.05%','99.95%','p-value','')
         df[,-1]
       }
@@ -7084,6 +7122,7 @@ pp_sigma_df<-reactive({
     df<-tryCatch(read.DIF(file = "clipboard",header = TRUE,transpose = TRUE),
                  #warning = function(w) {print('warning')},
                  error = function(e) "Select a dataset!")
+    df <- type.convert(df)
     df
   })
   cd_var_dis_xls<-reactive({
@@ -7134,13 +7173,6 @@ pp_sigma_df<-reactive({
       write.xlsx(cd_var_dis_cod(),file,colNames=TRUE)
     })
 
-  
-  
-  
-  
-  
-  
-  
   # Pareto -----------------------------------------------------------------
 
   output$pareto_importa_incolla_spazio<-renderUI({
@@ -7165,6 +7197,7 @@ pp_sigma_df<-reactive({
     df<-tryCatch(read.DIF(file = "clipboard",header = TRUE,transpose = TRUE),
                  #warning = function(w) {print('warning')},
                  error = function(e) "Select a dataset!")
+    df <- type.convert(df)
     df
   })
   pareto_dis_xls<-reactive({

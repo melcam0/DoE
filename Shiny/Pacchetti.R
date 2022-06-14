@@ -12,7 +12,8 @@ pacchetti<-c('shiny',
              'AlgDesign',
              'stringr',
              'mixexp',
-             'rPref')
+             'rPref',
+             'excelR')
 
 install.packages(pkgs = pacchetti)
 

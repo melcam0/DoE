@@ -29,6 +29,8 @@ sidebar<- dashboardSidebar(
                          # menuSubItem("Notes",tabName = "dispensa"),
                          # menuSubItem("Slides",tabName = "diapositive"),
                          # hr(),
+                         menuSubItem(text = "Examples",tabName = "esempi"),
+                         br(),
                          tags$header(
                            em(  
                              a(href="https://dispensedoe.netlify.app/",  "   Dispense" ,target="_blank",style="white-space: pre-wrap")
@@ -36,7 +38,9 @@ sidebar<- dashboardSidebar(
                          ),
                          br(),
                          actionButton("quit", "Quit",onclick = "setTimeout(function(){window.close();},200);",
-                                      style='padding:4px; font-size:80%'))
+                                      style='padding:4px; font-size:80%'),
+                         HTML('<p><center><font color="cyan"><br> Version 6.0 </font></center>'))
+                         
                         )
     
     
@@ -1343,12 +1347,31 @@ body<-dashboardBody(
                                  column(12,
                                         br(),
                                         verbatimTextOutput("pareto_graf_selez"))
-                                 )))
-             #,
+                                 ))),
+             
                                              
              
              # File --------------------------------------------------------------------
              
+             tabItem(tabName = "esempi",
+                     fluidPage(titlePanel(HTML('Examples')),
+                               column(8,
+                                      uiOutput('lista_esempi')),
+                               column(4,
+                                      br(),
+                                      actionButton("openxlsx", label = "Open xlsx")),
+                               
+
+                               column(12,
+                                      hr(),
+                                      uiOutput("esempio"))
+                               
+                               
+                               
+                               
+                               
+                               ))
+ 
              #tabItem(tabName = "dispensa",
                      #fluidPage(
                        #tabsetPanel(type = "tabs",

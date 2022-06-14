@@ -13,6 +13,7 @@ library(AlgDesign)
 library(stringr)
 library(mixexp)
 library(rPref)
+library(excelR)
 options(warn = -1)
 options(shiny.maxRequestSize = 30 * 1024 ^ 2)
 

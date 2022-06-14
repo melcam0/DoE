@@ -7374,6 +7374,39 @@ pp_sigma_df<-reactive({
     
   })
   
+  # Esempi -----------------------------------------------------------------  
+  
+  output$lista_esempi<-renderUI({
+    fnames<-list.files(path = 'Dati')
+    fext<-tools::file_ext(fnames)
+    fnames<-fnames[fext %in% c("xlsx")]
+    fnames<-tools::file_path_sans_ext(fnames)
+    selectInput('lista_esempi',"",choices = c('',fnames),selected = 1)
+  })
+  
+  observeEvent(input$openxlsx,{
+    if(input$lista_esempi!=""){
+      path<-paste("Dati/",input$lista_esempi,".xlsx",sep="")
+      system(paste('open', path))
+      }
+    })
+  
+  output$esempio <-renderUI({
+    validate(need(!is.null(input$lista_esempi),''))
+    validate(need(input$lista_esempi!="",''))
+
+      tryCatch({
+        require(readxl)
+        path<-paste("Dati/",input$lista_esempi,".xlsx",sep="")
+        df=read_excel(path = path,sheet = 1,col_names = TRUE)},
+        error = function(e) {
+          stop(safeError(e))
+        })
+      excelTable(data = df,editable = FALSE,autoFill = TRUE,autoWidth=FALSE)
+  })
+  
+
+  
   
   
 }

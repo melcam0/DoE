@@ -1,8 +1,8 @@
+
 header<-dashboardHeader(title = "DoE",
-                        tags$li(actionLink("openModal", label = "", 
+                        tags$li(actionLink("openModal", label = "",
                                            icon = icon("address-card")),
-                                class = "dropdown")
-                        )
+                                class = "dropdown"))
 
 sidebar<- dashboardSidebar(
   # HTML('<p><center><font color="#CBA727" size=5px> E.C.A.I.F. </font></center>'),
@@ -39,7 +39,7 @@ sidebar<- dashboardSidebar(
                          br(),
                          actionButton("quit", "Quit",onclick = "setTimeout(function(){window.close();},200);",
                                       style='padding:4px; font-size:80%'),
-                         HTML('<p><center><font color="cyan"><br> Version 6.0 </font></center>'))
+                         HTML('<p><center><font color="cyan"><br> Version 6.2 </font></center>'))
                          
                         )
     
@@ -828,14 +828,12 @@ body<-dashboardBody(
                                                            hr(),
                                                            h3("Fitted vs. experimental values plot"),
                                                            plotOutput('pp_graf_yfit',brush = brushOpts(id="pp_graf_yfit_brush",resetOnNew = TRUE)),
+                                                           br(),
+                                                           uiOutput('pp_midind_chk'),
                                                            hr(),
                                                            verbatimTextOutput('pp_graf_yfit_brush'))
 
-              
                                            )
-                                           
-                                           
-                                           
                                ))),
              
              
@@ -1360,16 +1358,10 @@ body<-dashboardBody(
                                column(4,
                                       br(),
                                       actionButton("openxlsx", label = "Open xlsx")),
-                               
-
                                column(12,
                                       hr(),
-                                      uiOutput("esempio"))
-                               
-                               
-                               
-                               
-                               
+                                      uiOutput("esempio")),
+                               div(style = "height:1000px")
                                ))
  
              #tabItem(tabName = "dispensa",
@@ -1434,6 +1426,8 @@ body<-dashboardBody(
 
 
 ui <- dashboardPage(skin="purple",header, sidebar, body,
-                    tags$head(HTML("<title>DoE</title>"),tags$link(rel = "stylesheet", type = "text/css", href = "tema.css")))
+                    tags$head(HTML("<title>DoE</title>"),
+                              tags$link(rel = "stylesheet", type = "text/css", href = "tema.css"),
+                              tags$link(rel = "shortcut icon", href = "doe.ico")))
 
 

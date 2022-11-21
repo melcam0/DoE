@@ -5077,9 +5077,38 @@ pp_sigma_df<-reactive({
   output$pp_graf_yfit<-renderPlot({
     df<-cbind.data.frame(pp_mod()$fitted.value,pp_mod()$model$y)
     colnames(df)<-c("yhat","y")
-    ggplot(df,mapping=aes(x=y,y=yhat))+labs(x="experimental values",y="fitted values")+
+    gr <- ggplot(df,mapping=aes(x=y,y=yhat))+labs(x="experimental values",y="fitted values")+
       geom_point(cex=2,col="blue")+
       geom_abline(intercept = 0,slope = 1,col="blue",lty=2)+theme_light()
+    if(input$pp_midind_chk==TRUE){
+      var<-attr(pp_mod()$model,"names")[-1]
+      var<-var[substr(var,1,2)!='I(']
+      x<-as.numeric(unlist(strsplit(input$pp_misind," ")))
+      
+      if(input$pp_midind_chk==TRUE){
+        if(input$pp_misind!=""){
+          x<-as.numeric(unlist(strsplit(input$pp_misind," ")))
+          var<-attr(pp_mod()$model,"names")[-1]
+          var<-var[substr(var,1,2)!='I(']
+        }
+        if(length(as.numeric(unlist(strsplit(input$pp_prev," "))))==length(var)){
+          mod<-pp_mod()
+          t<- as.numeric(unlist(strsplit(input$pp_prev," ")))
+          nd<-rbind.data.frame(t)
+          colnames(nd)<-var
+          prev<-predict(object = mod,newdata=nd)
+          attr(prev,'names')<-c('prediction')
+          y <- rep(prev,length(x))
+          D <- cbind.data.frame(x=x,y=y)
+          gr <- gr+geom_point(D, mapping=aes(x=x,y=y),cex=2,col="red")}
+      }
+    }
+    gr
+  })
+  output$pp_midind_chk <- renderUI({
+    # req(input$pp_prev!="")
+    # req(input$pp_misind!="")
+    checkboxInput("pp_midind_chk", label = "Plot ind. meas.", value = FALSE)
   })
   output$pp_graf_yfit_brush<-renderPrint({
     req(input$pp_graf_yfit_brush)
@@ -7402,7 +7431,8 @@ pp_sigma_df<-reactive({
         error = function(e) {
           stop(safeError(e))
         })
-      excelTable(data = df,editable = FALSE,autoFill = TRUE,autoWidth=FALSE)
+
+    excelTable(data = df,editable = FALSE,autoFill = TRUE,autoWidth=FALSE)
   })
   
 

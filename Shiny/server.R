@@ -1,6 +1,5 @@
 rm(list = ls())
 
-
 vif<-function (M){
   M = as.data.frame(M)
   if (colnames(M)[1] == "(Intercept)") 
@@ -15,14 +14,10 @@ vif<-function (M){
 
 server <- function (input , output, session ){
   
-  
   observeEvent(input$openModal, {
     showModal(
       modalDialog(title = "Authors:",size = 's',easyClose = TRUE,footer = NULL,
-                  
                   tags$img(src = base64enc::dataURI(file = "GC.jpg", mime = "image/jpg")),
-                  
-                  
                   HTML((paste(" "," ","Giorgio Marrubini","email: giorgio.marrubini@unipv.it"," ",
                               'Camillo Melzi','email: camillomelzi@gmail.com',sep="<br/>"))))
     )
@@ -3364,6 +3359,8 @@ server <- function (input , output, session ){
     validate(need(input$d_opt_importa,''))
     req(input$d_opt_file_xlsx$datapath)
     df=read_excel(path = input$d_opt_file_xlsx$datapath,sheet = 1,col_names = TRUE)
+    suppressWarnings(colnames(df)[!is.na(as.numeric(colnames(df)))]
+                     <-as.numeric(colnames(df)[!is.na(as.numeric(colnames(df)))]))
     df<-as.data.frame(df)
     df
   })
@@ -3835,6 +3832,8 @@ server <- function (input , output, session ){
   d_opt_ag_dis_xls<-reactive({
     req(input$d_opt_ag_file_xlsx$datapath)
     df=read_excel(path = input$d_opt_ag_file_xlsx$datapath,sheet = 1,col_names = TRUE)
+    suppressWarnings(colnames(df)[!is.na(as.numeric(colnames(df)))]
+                     <-as.numeric(colnames(df)[!is.na(as.numeric(colnames(df)))]))
     if(sum(df[,1]==c(1:nrow(df)))==nrow(df))df<-df[,-1]
     df
   })
@@ -4112,6 +4111,8 @@ server <- function (input , output, session ){
   pp_dis_xls<-reactive({
     req(input$pp_file_xlsx$datapath)
     df=read_excel(path = input$pp_file_xlsx$datapath,sheet = 1,col_names = TRUE)
+    suppressWarnings(colnames(df)[!is.na(as.numeric(colnames(df)))]
+                     <-as.numeric(colnames(df)[!is.na(as.numeric(colnames(df)))]))
     df
   })
   pp_dis<-reactive({
@@ -5063,7 +5064,7 @@ pp_sigma_df<-reactive({
   output$pp_graf_res<-renderPlot({
     df<-cbind.data.frame(pp_mod()$residuals,c(1:length(pp_mod()$residuals)))
     colnames(df)<-c("residui","indice")
-    ggplot(df,mapping=aes(x=indice,y=residui))+labs(x="sample number",y="residuals")+geom_point(cex=2,col="blue")+
+    ggplot(df,mapping=aes(x=as.integer(indice),y=residui))+labs(x="sample number",y="residuals")+geom_point(cex=2,col="blue")+
       geom_hline(yintercept =0,col="blue",lty=2)+theme_light()
   })
   output$pp_graf_res_brush<-renderPrint({
@@ -5772,6 +5773,8 @@ pp_sigma_df<-reactive({
     validate(need(input$m_d_opt_importa,''))
     req(input$m_d_opt_file_xlsx$datapath)
     df=read_excel(path = input$m_d_opt_file_xlsx$datapath,sheet = 1,col_names = TRUE)
+    suppressWarnings(colnames(df)[!is.na(as.numeric(colnames(df)))]
+                     <-as.numeric(colnames(df)[!is.na(as.numeric(colnames(df)))]))
     df<-as.data.frame(df)
     df
   })
@@ -6090,6 +6093,8 @@ pp_sigma_df<-reactive({
   m_d_opt_ag_dis_xls<-reactive({
     req(input$m_d_opt_ag_file_xlsx$datapath)
     df=read_excel(path = input$m_d_opt_ag_file_xlsx$datapath,sheet = 1,col_names = TRUE)
+    suppressWarnings(colnames(df)[!is.na(as.numeric(colnames(df)))]
+                     <-as.numeric(colnames(df)[!is.na(as.numeric(colnames(df)))]))
     if(sum(df[,1]==c(1:nrow(df)))==nrow(df))df<-df[,-1]
     df
   })
@@ -6298,6 +6303,8 @@ pp_sigma_df<-reactive({
   m_pp_dis_xls<-reactive({
     req(input$m_pp_file_xlsx$datapath)
     df=read_excel(path = input$m_pp_file_xlsx$datapath,sheet = 1,col_names = TRUE)
+    suppressWarnings(colnames(df)[!is.na(as.numeric(colnames(df)))]
+                     <-as.numeric(colnames(df)[!is.na(as.numeric(colnames(df)))]))
     df<-as.data.frame(df)
     df
   })
@@ -7157,6 +7164,8 @@ pp_sigma_df<-reactive({
   cd_var_dis_xls<-reactive({
     req(input$cd_var_file_xlsx$datapath)
     df=read_excel(path = input$cd_var_file_xlsx$datapath,sheet = 1,col_names = TRUE)
+    suppressWarnings(colnames(df)[!is.na(as.numeric(colnames(df)))]
+                     <-as.numeric(colnames(df)[!is.na(as.numeric(colnames(df)))]))
     df
   })
   cd_var_dis<-reactive({
@@ -7232,6 +7241,8 @@ pp_sigma_df<-reactive({
   pareto_dis_xls<-reactive({
     req(input$pareto_file_xlsx$datapath)
     df=read_excel(path = input$pareto_file_xlsx$datapath,sheet = 1,col_names = TRUE)
+    suppressWarnings(colnames(df)[!is.na(as.numeric(colnames(df)))]
+                     <-as.numeric(colnames(df)[!is.na(as.numeric(colnames(df)))]))
     df
   })
   pareto_dis<-reactive({

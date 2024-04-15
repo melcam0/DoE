@@ -3350,7 +3350,7 @@ server <- function (input , output, session ){
     textInput("d_opt_lev_var50", label = ' ', value = "Levels of variable 50? (e.g. '-1 0 1')")
   })
   d_opt_cp_paste<-eventReactive(input$d_opt_incolla,{
-    df<-tryCatch(read.DIF(file = "clipboard",header = TRUE,transpose = TRUE),
+    df<-tryCatch(read.DIF(file = "clipboard",header = TRUE,transpose = TRUE,check.names = TRUE),
                  error = function(e) "Select a dataset!")
     df <- type.convert(df)
     df
@@ -3359,9 +3359,9 @@ server <- function (input , output, session ){
     validate(need(input$d_opt_importa,''))
     req(input$d_opt_file_xlsx$datapath)
     df=read_excel(path = input$d_opt_file_xlsx$datapath,sheet = 1,col_names = TRUE)
-    suppressWarnings(colnames(df)[!is.na(as.numeric(colnames(df)))]
-                     <-as.numeric(colnames(df)[!is.na(as.numeric(colnames(df)))]))
-    df<-as.data.frame(df)
+    # suppressWarnings(colnames(df)[!is.na(as.numeric(colnames(df)))]
+    #                  <-as.numeric(colnames(df)[!is.na(as.numeric(colnames(df)))]))
+    df<-data.frame(df)
     df
   })
   output$d_opt_vincoli<-renderUI({
@@ -3370,11 +3370,15 @@ server <- function (input , output, session ){
   })
   output$d_opt_vincoliinf_txt<-renderUI({
     validate(need(input$d_opt_vincoli==TRUE,' '))
-    textInput(inputId = "d_opt_vincoliinf_txt",label = h5("Enter the lower constraints separated by '&'"))
+    textInput(inputId = "d_opt_vincoliinf_txt",label = h5("Enter the lower constraints separated by '&'",
+                                                          tags$br(),
+                                                          "(e.g. x1+x2>=-1.5 & x3>=-0.8)"))
   })
   output$d_opt_vincolisup_txt<-renderUI({
     validate(need(input$d_opt_vincoli==TRUE,' '))
-    textInput(inputId = "d_opt_vincolisup_txt",label = h5("Enter the upper constraints separated by '&'"))
+    textInput(inputId = "d_opt_vincolisup_txt",label = h5("Enter the upper constraints separated by '&'",
+                                                          tags$br(),
+                                                          "(e.g. x1+x2<=1.5 & x3<=0.8)"))
   })
   d_opt_cp_griglia<-reactive({
     req(input$d_opt_nvar)
@@ -3715,14 +3719,14 @@ server <- function (input , output, session ){
       if (vif) 
         v = as.vector(NULL)
       n<-nTrials-p+1
-      withProgress(message = 'D-ottimale:',value = 0, {
+      withProgress(message = 'D-optimal:',value = 0, {
         for (i in p:nTrials) {
           incProgress(detail = paste("NumExp", i),amount = 1/n)
           Dis.opt<-tryCatch(AlgDesign::optFederov(fmrl, nRepeats = nRepeats, 
                                                   data = data, nTrials = i, criterion = "D"),
                             error = function(e) "errore")
 
-          if(Dis.opt=="errore")next()
+          if(sum(Dis.opt=="errore"))next()
           s[i - (p - 1)] = i
           t[i - (p - 1)] = Dis.opt$D
           if (logD) 
@@ -3824,7 +3828,7 @@ server <- function (input , output, session ){
               accept = c(".xlx",".xlsx"))
   })
   d_opt_ag_dis_paste<-eventReactive(input$d_opt_ag_incolla,{
-    df<-tryCatch(read.DIF(file = "clipboard",header = TRUE,transpose = TRUE),
+    df<-tryCatch(read.DIF(file = "clipboard",header = TRUE,transpose = TRUE,check.names = TRUE),
                  error = function(e) "Select a dataset!")
     df <- type.convert(df)
     df
@@ -3832,9 +3836,10 @@ server <- function (input , output, session ){
   d_opt_ag_dis_xls<-reactive({
     req(input$d_opt_ag_file_xlsx$datapath)
     df=read_excel(path = input$d_opt_ag_file_xlsx$datapath,sheet = 1,col_names = TRUE)
-    suppressWarnings(colnames(df)[!is.na(as.numeric(colnames(df)))]
-                     <-as.numeric(colnames(df)[!is.na(as.numeric(colnames(df)))]))
+    # suppressWarnings(colnames(df)[!is.na(as.numeric(colnames(df)))]
+    #                  <-as.numeric(colnames(df)[!is.na(as.numeric(colnames(df)))]))
     if(sum(df[,1]==c(1:nrow(df)))==nrow(df))df<-df[,-1]
+    df <- data.frame(df)
     df
   })
   d_opt_ag_dis<-reactive({
@@ -3964,13 +3969,13 @@ server <- function (input , output, session ){
     if (vif) 
       v = as.vector(NULL)
     n<-nTrials-p+1
-    withProgress(message = 'D-ottimale:',value = 0, {
+    withProgress(message = 'D-optimal:',value = 0, {
       for (i in p:nTrials) {
         incProgress(detail = paste("NumExp", i),amount = 1/n)
         Dis.opt<-tryCatch(AlgDesign::optFederov(fmrl, nRepeats = nRepeats,augment = TRUE,rows = 1:nr,
                                            data = data, nTrials = i, criterion = "D"),
                      error = function(e) "errore")
-        if(Dis.opt=="errore")next()
+        if(sum(Dis.opt=="errore"))next()
         s[i - (p - 1)] = i
         t[i - (p - 1)] = Dis.opt$D
         if (logD) 
@@ -4102,7 +4107,7 @@ server <- function (input , output, session ){
               accept = c(".xlx",".xlsx"))
   })
   pp_dis_paste<-eventReactive(input$pp_incolla,{
-    df<-tryCatch(read.DIF(file = "clipboard",header = TRUE,transpose = TRUE),
+    df<-tryCatch(read.DIF(file = "clipboard",header = TRUE,transpose = TRUE,check.names = TRUE),
                  #warning = function(w) {print('warning')},
                  error = function(e) "Select a dataset!")
     df <- type.convert(df)
@@ -4111,8 +4116,9 @@ server <- function (input , output, session ){
   pp_dis_xls<-reactive({
     req(input$pp_file_xlsx$datapath)
     df=read_excel(path = input$pp_file_xlsx$datapath,sheet = 1,col_names = TRUE)
-    suppressWarnings(colnames(df)[!is.na(as.numeric(colnames(df)))]
-                     <-as.numeric(colnames(df)[!is.na(as.numeric(colnames(df)))]))
+    # suppressWarnings(colnames(df)[!is.na(as.numeric(colnames(df)))]
+    #                  <-as.numeric(colnames(df)[!is.na(as.numeric(colnames(df)))]))
+    df <- data.frame(df)
     df
   })
   pp_dis<-reactive({
@@ -5751,12 +5757,18 @@ pp_sigma_df<-reactive({
   })
   output$m_d_opt_vincoliinf_txt<-renderUI({
     validate(need(input$m_d_opt_vincoli==TRUE,' '))
-    textInput(inputId = "m_d_opt_vincoliinf_txt",label = h5("Enter the lower constraints separated by '&'"))
+    textInput(inputId = "m_d_opt_vincoliinf_txt",label = h5("Enter the lower constraints separated by '&'",
+                                                            tags$br(),
+                                                            "(e.g. x1>=0 & x2>=0.1 & x3>=0.05)"
+                                                            ))
   })
   
   output$m_d_opt_vincolisup_txt<-renderUI({
     validate(need(input$m_d_opt_vincoli==TRUE,' '))
-    textInput(inputId = "m_d_opt_vincolisup_txt",label = h5("Enter the upper constraints separated by '&'"))
+    textInput(inputId = "m_d_opt_vincolisup_txt",label = h5("Enter the upper constraints separated by '&'",
+                                                            tags$br(),
+                                                            "(e.g. x1<=0.8 & x2<=0.95 & x3<=0.5)"
+                                                            ))
   })
 
   output$m_d_opt_passo<-renderUI({
@@ -5764,7 +5776,7 @@ pp_sigma_df<-reactive({
     textInput(inputId = "m_d_opt_passo",label = h5("grid step"),value = "0.05 0.05 0.05",width = "50%")
   })
   m_d_opt_cp_paste<-eventReactive(input$m_d_opt_incolla,{
-    df<-tryCatch(read.DIF(file = "clipboard",header = TRUE,transpose = TRUE),
+    df<-tryCatch(read.DIF(file = "clipboard",header = TRUE,transpose = TRUE,check.names = TRUE),
                  error = function(e) "Select a dataset!")
     df <- type.convert(df)
     df
@@ -5773,9 +5785,9 @@ pp_sigma_df<-reactive({
     validate(need(input$m_d_opt_importa,''))
     req(input$m_d_opt_file_xlsx$datapath)
     df=read_excel(path = input$m_d_opt_file_xlsx$datapath,sheet = 1,col_names = TRUE)
-    suppressWarnings(colnames(df)[!is.na(as.numeric(colnames(df)))]
-                     <-as.numeric(colnames(df)[!is.na(as.numeric(colnames(df)))]))
-    df<-as.data.frame(df)
+    # suppressWarnings(colnames(df)[!is.na(as.numeric(colnames(df)))]
+    #                  <-as.numeric(colnames(df)[!is.na(as.numeric(colnames(df)))]))
+    df<-data.frame(df)
     df
   })
   m_d_opt_cp_griglia<-reactive({
@@ -5999,14 +6011,14 @@ pp_sigma_df<-reactive({
     #if (vif) 
       #v = as.vector(NULL)
     n<-nTrials-p+1
-    withProgress(message = 'D-ottimale:',value = 0, {
+    withProgress(message = 'D-optimal:',value = 0, {
       for (i in p:nTrials) {
         incProgress(detail = paste("NumExp", i),amount = 1/n)
         Dis.opt<-tryCatch(AlgDesign::optFederov(fmrl, nRepeats = nRepeats, 
                                                 data = data, nTrials = i, criterion = "D"),
                           error = function(e) "errore")
         
-        if(Dis.opt=="errore")next()
+        if(sum(Dis.opt=="errore"))next()
         s[i - (p - 1)] = i
         t[i - (p - 1)] = Dis.opt$D
         if (logD) 
@@ -6085,7 +6097,7 @@ pp_sigma_df<-reactive({
               accept = c(".xlx",".xlsx"))
   })
   m_d_opt_ag_dis_paste<-eventReactive(input$m_d_opt_ag_incolla,{
-    df<-tryCatch(read.DIF(file = "clipboard",header = TRUE,transpose = TRUE),
+    df<-tryCatch(read.DIF(file = "clipboard",header = TRUE,transpose = TRUE,check.names = TRUE),
                  error = function(e) "Select a dataset!")
     df <- type.convert(df)
     df
@@ -6093,8 +6105,9 @@ pp_sigma_df<-reactive({
   m_d_opt_ag_dis_xls<-reactive({
     req(input$m_d_opt_ag_file_xlsx$datapath)
     df=read_excel(path = input$m_d_opt_ag_file_xlsx$datapath,sheet = 1,col_names = TRUE)
-    suppressWarnings(colnames(df)[!is.na(as.numeric(colnames(df)))]
-                     <-as.numeric(colnames(df)[!is.na(as.numeric(colnames(df)))]))
+    df <- data.frame(df)
+    # suppressWarnings(colnames(df)[!is.na(as.numeric(colnames(df)))]
+    #                  <-as.numeric(colnames(df)[!is.na(as.numeric(colnames(df)))]))
     if(sum(df[,1]==c(1:nrow(df)))==nrow(df))df<-df[,-1]
     df
   })
@@ -6184,13 +6197,13 @@ pp_sigma_df<-reactive({
     t = as.vector(NULL)
     dis<-as.list(NULL)
     n<-nTrials-p+1
-    withProgress(message = 'D-ottimale:',value = 0, {
+    withProgress(message = 'D-optimal:',value = 0, {
       for (i in p:nTrials) {
         incProgress(detail = paste("NumExp", i),amount = 1/n)
         Dis.opt<-tryCatch(AlgDesign::optFederov(fmrl, nRepeats = nRepeats,augment = TRUE,rows = 1:nr,
                                                 data = data, nTrials = i, criterion = "D"),
                           error = function(e) "errore")
-        if(Dis.opt=="errore")next()
+        if(sum(Dis.opt=="errore"))next()
         s[i - (p - 1)] = i
         t[i - (p - 1)] = Dis.opt$D
         if (logD) 
@@ -6294,7 +6307,7 @@ pp_sigma_df<-reactive({
               accept = c(".xlx",".xlsx"))
   })
   m_pp_dis_paste<-eventReactive(input$m_pp_incolla,{
-    df<-tryCatch(read.DIF(file = "clipboard",header = TRUE,transpose = TRUE),
+    df<-tryCatch(read.DIF(file = "clipboard",header = TRUE,transpose = TRUE,check.names = TRUE),
                  #warning = function(w) {print('warning')},
                  error = function(e) "Select a dataset!")
     df <- type.convert(df)
@@ -6303,9 +6316,9 @@ pp_sigma_df<-reactive({
   m_pp_dis_xls<-reactive({
     req(input$m_pp_file_xlsx$datapath)
     df=read_excel(path = input$m_pp_file_xlsx$datapath,sheet = 1,col_names = TRUE)
-    suppressWarnings(colnames(df)[!is.na(as.numeric(colnames(df)))]
-                     <-as.numeric(colnames(df)[!is.na(as.numeric(colnames(df)))]))
-    df<-as.data.frame(df)
+    # suppressWarnings(colnames(df)[!is.na(as.numeric(colnames(df)))]
+    #                  <-as.numeric(colnames(df)[!is.na(as.numeric(colnames(df)))]))
+    df<-data.frame(df)
     df
   })
   m_pp_dis<-reactive({
@@ -6430,11 +6443,17 @@ pp_sigma_df<-reactive({
   })
   output$m_pp_vincoliinf_txt<-renderUI({
     validate(need(input$m_pp_vincoli==TRUE,' '))
-    textInput(inputId = "m_pp_vincoliinf_txt",label = h5("Enter the lower constraints separated by '&'"))
+    textInput(inputId = "m_pp_vincoliinf_txt",label = h5("Enter the lower constraints separated by '&'",
+                                                         tags$br(),
+                                                         "(e.g. x1>=0 & x2>=0.1 & x3>=0.05)"
+                                                         ))
   })
   output$m_pp_vincolisup_txt<-renderUI({
     validate(need(input$m_pp_vincoli==TRUE,' '))
-    textInput(inputId = "m_pp_vincolisup_txt",label = h5("Enter the upper constraints separated by '&'"))
+    textInput(inputId = "m_pp_vincolisup_txt",label = h5("Enter the upper constraints separated by '&'",
+                                                         tags$br(),
+                                                         "(e.g. x1<=0.8 & x2<=0.95 & x3<=0.5)"
+                                                         ))
   })
   output$m_pp_livellolev<-renderPlot(width = 550,height = 500,{
 
@@ -7155,7 +7174,7 @@ pp_sigma_df<-reactive({
               accept = c(".xlx",".xlsx"))
   })
   cd_var_dis_paste<-eventReactive(input$cd_var_incolla,{
-    df<-tryCatch(read.DIF(file = "clipboard",header = TRUE,transpose = TRUE),
+    df<-tryCatch(read.DIF(file = "clipboard",header = TRUE,transpose = TRUE,check.names = TRUE),
                  #warning = function(w) {print('warning')},
                  error = function(e) "Select a dataset!")
     df <- type.convert(df)
@@ -7164,8 +7183,9 @@ pp_sigma_df<-reactive({
   cd_var_dis_xls<-reactive({
     req(input$cd_var_file_xlsx$datapath)
     df=read_excel(path = input$cd_var_file_xlsx$datapath,sheet = 1,col_names = TRUE)
-    suppressWarnings(colnames(df)[!is.na(as.numeric(colnames(df)))]
-                     <-as.numeric(colnames(df)[!is.na(as.numeric(colnames(df)))]))
+    # suppressWarnings(colnames(df)[!is.na(as.numeric(colnames(df)))]
+    #                  <-as.numeric(colnames(df)[!is.na(as.numeric(colnames(df)))]))
+    df <- data.frame(df)
     df
   })
   cd_var_dis<-reactive({
@@ -7232,7 +7252,7 @@ pp_sigma_df<-reactive({
               accept = c(".xlx",".xlsx"))
   })
   pareto_dis_paste<-eventReactive(input$pareto_incolla,{
-    df<-tryCatch(read.DIF(file = "clipboard",header = TRUE,transpose = TRUE),
+    df<-tryCatch(read.DIF(file = "clipboard",header = TRUE,transpose = TRUE,check.names = TRUE),
                  #warning = function(w) {print('warning')},
                  error = function(e) "Select a dataset!")
     df <- type.convert(df)
@@ -7241,8 +7261,9 @@ pp_sigma_df<-reactive({
   pareto_dis_xls<-reactive({
     req(input$pareto_file_xlsx$datapath)
     df=read_excel(path = input$pareto_file_xlsx$datapath,sheet = 1,col_names = TRUE)
-    suppressWarnings(colnames(df)[!is.na(as.numeric(colnames(df)))]
-                     <-as.numeric(colnames(df)[!is.na(as.numeric(colnames(df)))]))
+    # suppressWarnings(colnames(df)[!is.na(as.numeric(colnames(df)))]
+    #                  <-as.numeric(colnames(df)[!is.na(as.numeric(colnames(df)))]))
+    df <- data.frame(df)
     df
   })
   pareto_dis<-reactive({
@@ -7442,6 +7463,7 @@ pp_sigma_df<-reactive({
         error = function(e) {
           stop(safeError(e))
         })
+    df <- data.frame(df)
 
     excelTable(data = df,editable = FALSE,autoFill = TRUE,autoWidth=FALSE)
   })

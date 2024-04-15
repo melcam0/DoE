@@ -31,15 +31,15 @@ sidebar<- dashboardSidebar(
                          # hr(),
                          menuSubItem(text = "Examples",tabName = "esempi"),
                          br(),
-                         tags$header(
-                           em(  
-                             a(href="https://dispensedoe.netlify.app/",  "   Dispense" ,target="_blank",style="white-space: pre-wrap")
-                           )
-                         ),
+                         # tags$header(
+                         #   em(  
+                         #     a(href="https://dispensedoe.netlify.app/",  "   Dispense" ,target="_blank",style="white-space: pre-wrap")
+                         #   )
+                         # ),
                          br(),
                          actionButton("quit", "Quit",onclick = "setTimeout(function(){window.close();},200);",
                                       style='padding:4px; font-size:80%'),
-                         HTML('<p><center><font color="cyan"><br> Version 6.4 </font></center>'))
+                         HTML('<p><center><font color="cyan"><br> Version 6.8 </font></center>'))
                          
                         )
     
@@ -584,7 +584,7 @@ body<-dashboardBody(
                                                            uiOutput('d_opt_numexp')),
                                                     column(12,
                                                            #uiOutput('d_opt_numexp'),
-                                                           h4('Design D-ottimale'),
+                                                           h4('D-optimal experimental matrix'),
                                                            div(style = 'overflow-x: scroll',tableOutput("d_opt_dis_opt")),
                                                            downloadButton("d_opt_dis_download"),
                                                            hr(),
@@ -641,7 +641,7 @@ body<-dashboardBody(
                                                            uiOutput('d_opt_ag_numexp')),
                                                     column(12,
                                                            # uiOutput('d_opt_ag_numexp'),
-                                                           h4('D-optimal Design'),
+                                                           h4('D-optimal experimental matrix '),
                                                            h6(uiOutput('d_opt_ag_expes')),
                                                            div(style = 'overflow-x: scroll',tableOutput("d_opt_ag_dis_opt")),
                                                            downloadButton("d_opt_ag_dis_download"),
@@ -1092,7 +1092,7 @@ body<-dashboardBody(
                                                            uiOutput('m_d_opt_ag_numexp')),
                                                     column(12,
                                                            # uiOutput('m_d_opt_ag_numexp'),
-                                                           h4('Design D-ottimale'),
+                                                           h4('D-optimal experimental matrix '),
                                                            h6(uiOutput('m_d_opt_ag_expes')),
                                                            div(style = 'overflow-x: scroll',tableOutput("m_d_opt_ag_dis_opt")),
                                                            downloadButton("m_d_opt_ag_dis_download"))

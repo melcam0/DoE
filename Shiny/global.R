@@ -1,3 +1,22 @@
+if(!nzchar(system.file(package = "shiny"))) install.packages("shiny")
+if(!nzchar(system.file(package = "shinydashboard"))) install.packages("shinydashboard")
+if(!nzchar(system.file(package = "shinythemes"))) install.packages("shinythemes")
+if(!nzchar(system.file(package = "shinyjs"))) install.packages("shinyjs")
+if(!nzchar(system.file(package = "readxl"))) install.packages("readxl")
+if(!nzchar(system.file(package = "matrixcalc"))) install.packages("matrixcalc")
+if(!nzchar(system.file(package = "lattice"))) install.packages("lattice")
+if(!nzchar(system.file(package = "ggplot2"))) install.packages("ggplot2")
+if(!nzchar(system.file(package = "FrF2"))) install.packages("FrF2")
+if(!nzchar(system.file(package = "rsm"))) install.packages("rsm")
+if(!nzchar(system.file(package = "openxlsx"))) install.packages("openxlsx")
+if(!nzchar(system.file(package = "AlgDesign"))) install.packages("AlgDesign")
+if(!nzchar(system.file(package = "stringr"))) install.packages("stringr")
+if(!nzchar(system.file(package = "mixexp"))) install.packages("mixexp")
+if(!nzchar(system.file(package = "rPref"))) install.packages("rPref")
+if(!nzchar(system.file(package = "excelR"))) install.packages("excelR")
+
+
+
 library(shiny)
 library(shinydashboard)
 library(shinythemes)

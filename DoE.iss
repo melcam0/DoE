@@ -1,5 +1,5 @@
 #define MyAppName "DoE"
-#define MyAppVersion "6.8"
+#define MyAppVersion "6.9"
 #define MyAppExeName "DoE.vbs"
 #define MyAppPublisher ""
 #define MyAppURL ""

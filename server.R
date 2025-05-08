@@ -12,6 +12,49 @@ vif<-function (M){
   return(z)
 }
 
+
+my_psel <- function(data, preferences) {
+  
+  results <- data
+  is_pareto_optimal <- rep(TRUE, nrow(data))
+  
+  for (i in 1:nrow(data)) {
+    for (j in 1:nrow(data)) {
+      if (i != j) {
+        # Check if row j dominates row i
+        dominates <- TRUE
+        for (pref in preferences) {
+          col_name <- pref$column
+          direction <- pref$direction
+          
+          if (direction == "min") {
+            if (data[i, col_name] < data[j, col_name]) {
+              dominates <- FALSE
+              break
+            }
+          } else { # "max"
+            if (data[i, col_name] > data[j, col_name]) {
+              dominates <- FALSE
+              break
+            }
+          }
+        }
+        
+        if (dominates && any(sapply(preferences, function(p) {
+          data[i, p$column] != data[j, p$column]
+        }))) {
+          is_pareto_optimal[i] <- FALSE
+          break
+        }
+      }
+    }
+  }
+  
+  return(results[is_pareto_optimal, ])
+}
+
+
+
 server <- function (input , output, session ){
   
   observeEvent(input$openModal, {
@@ -7309,6 +7352,7 @@ pp_sigma_df<-reactive({
     content = function(file) {
       write.xlsx(Prev(),file,colNames=TRUE)
     })
+  
   output$pareto_radiobt <- renderUI({
     m <- nclick()
     if (m > 0) {
@@ -7324,35 +7368,39 @@ pp_sigma_df<-reactive({
       lapply(seq(m), function(i) {
         inputname<-paste0("pareto_mmt",i)
         req(input[[inputname]])
-        if(input[[inputname]]==3)textInput(paste0("pareto_target",i), label = paste0('Target R',i), value = '')
+        if(input[[inputname]]==3)textInput(paste0("pareto_target",i), label = paste0('Target R',i), value = '0')
       })
     }
   })
+  output$value <- renderPrint({ input$checkGroup })
   pareto_nondom<-reactive({
     validate(need(ncol(Prev())>0,""))
-    M_<-Prev();M_i<-M_
-    frm<-"high(M_[,1])"
-    req(input$pareto_mmt1)
-    if(input$pareto_mmt1==2)frm<-"low(M_[,1])"
-    if(input$pareto_mmt1==3){
-      M_[,1]<-abs(M_[,1]-as.numeric(input$pareto_target1))
-      frm<-"low(M_[,1])"
-    }
-    for (i in 2:ncol(M_)){
-      inputname<-paste0("pareto_mmt",i)
-      req(input[[inputname]])
-      if(input[[inputname]]==1)frm<-paste(frm,"*high(M_[,",i,"])",sep="")
-      if(input[[inputname]]==2)frm<-paste(frm,"*low(M_[,",i,"])",sep="")
-      if(input[[inputname]]==3){
-        inputname<-paste0("pareto_target",i)
-        req(input[[inputname]])
-        M_[,i]<-abs(M_[,i]-as.numeric(input[[inputname]]))
-        frm<-paste(frm,"*low(M_[,",i,"])",sep="")
+    m <- nclick()
+    if (m > 0){
+      inputname <- list()
+      inputname <- lapply(seq(m), function(i) {
+        paste0("pareto_mmt",i)
+      })
+      inputname <- unlist(inputname)
+      dir <- rep('min',m)
+      for(i in 1:m){
+        req(input[[inputname[i]]])
+        if(input[[inputname[i]]]==1)dir[i]='max'
       }
-      frm<-eval(parse(text=frm))
-      #nondom <- psel(M_,frm)
-      nondom<-M_i[row.names(psel(M_,frm)),]
+      preferences <- list()
+      preferences <- lapply(seq(m), function(i) {
+        list(column = paste0("R",i), direction = dir[i])
+      })
     }
+    M_<-Prev();M_i<-M_
+      for (i in 1:m){
+        if(input[[inputname[i]]]==3){
+          inputname_pt<-paste0("pareto_target",i)
+          M_[,i]<-abs(M_[,i]-as.numeric(input[[inputname_pt]]))
+        }
+      }
+    req(!any(is.na(M_)))
+    nondom <- my_psel(M_,preferences)
     nondom
   })
   output$pareto_dominati<-renderPrint({
@@ -7386,6 +7434,7 @@ pp_sigma_df<-reactive({
   output$pareto_graf<-renderPlot({
     require(ggplot2)
     df<-pareto_nondom()
+    req(ncol(df)>1)
     row.names(df)<-row.names(pareto_nondom())
     nr<-nrow(df)
     nc<-ncol(df)

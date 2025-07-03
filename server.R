@@ -3979,7 +3979,8 @@ server <- function (input , output, session ){
   output$d_opt_ag_Lnumexp<-renderUI({
     x<-model.matrix(formula(d_opt_ag_formula()),d_opt_ag_dis())
     r<-nrow(x)
-    co<-max(ncol(x),r)+1
+    # co<-max(ncol(x),r)+1
+    co<-max(ncol(x),r)
     numericInput(inputId = 'd_opt_ag_Lnumexp',label = 'Minimum number of experiments',value = co,min = co,width = "30%")
   })
   output$d_opt_ag_Unumexp<-renderUI({
